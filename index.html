@@ -234,7 +234,7 @@
         </div>
       </div>
 
-      <!-- لوحة التحكم الخاصة بالمدير العام (إضافة صنف - تعديل تسعير - إزالة صنف) -->
+      <!-- لوحة التحكم الخاصة بالمدير العام -->
       <div id="admin-control-panel" class="hidden space-y-5 rounded-2xl border border-gold/40 bg-black/55 p-4 sm:p-5">
         <div class="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3">
           <div>
@@ -246,7 +246,6 @@
           </button>
         </div>
 
-        <!-- إضافة صنف جديد -->
         <div class="grid gap-3 rounded-2xl border border-white/10 bg-charcoal p-3.5 sm:grid-cols-12">
           <div class="sm:col-span-4">
             <label class="mb-1 block text-[11px] font-bold text-gray-300">اسم الصنف الجديد</label>
@@ -274,7 +273,6 @@
           </div>
         </div>
 
-        <!-- بحث داخل لوحة تعديل الأصناف والتسعير -->
         <div class="flex flex-wrap items-center justify-between gap-2">
           <span class="text-xs font-extrabold text-gray-200">قائمة الأصناف الحالية للتعديل أو الإزالة:</span>
           <input id="admin-menu-search" oninput="renderAdminMenuManager()" type="text" placeholder="ابحث لتعديل سعر أو حذف صنف..." class="w-full rounded-xl border border-white/15 bg-charcoal px-3 py-1.5 text-xs text-white focus:border-gold focus:outline-none sm:w-64" />
@@ -353,40 +351,63 @@
               <input id="customer-name" type="text" placeholder="مثال: أستاذ أحمد - 010..." class="w-full rounded-xl border border-white/15 bg-charcoal px-3 py-2 text-xs text-white focus:border-gold focus:outline-none" />
             </div>
 
-            <!-- 4 خانات للعملاء: 7VIP (الكارت الأسود) - VVIP (الكارت الأزرق) - VIP (الكارت الأبيض) - بدون كارت -->
+            <!-- 4 خانات للعملاء بتصاميم كروت مدمجة فورية -->
             <div>
               <label class="mb-1.5 block text-xs font-bold text-gray-300">فئة العميل وبطاقة العضوية (4 خانات)</label>
               <div class="grid grid-cols-2 gap-2.5">
-                <!-- 1. 7VIP بالكارت الأسود المرفق -->
+                <!-- 1. 7VIP كارت أسود ذهبي -->
                 <button type="button" id="tier-7vip-btn" onclick="setCustomerTier('7vip')" class="tier-btn overflow-hidden rounded-2xl border-2 border-gold bg-black p-1.5 text-right transition">
-                  <img src="Gemini_Generated_Image_xkw5vjxkw5vjxkw5.jpg" alt="كارت 7VIP الأسود" class="h-14 w-full rounded-xl object-cover" />
+                  <div class="flex h-14 w-full flex-col justify-between rounded-xl border border-gold/50 bg-gradient-to-br from-zinc-900 via-black to-amber-950/60 p-2">
+                    <div class="flex items-center justify-between text-[10px] font-black text-gold">
+                      <span>MPW</span>
+                      <span>7VIP</span>
+                    </div>
+                    <div class="text-[9px] font-bold text-amber-200/90">BLACK CARD</div>
+                  </div>
                   <div class="mt-1.5 flex items-center justify-between px-0.5">
                     <span class="text-xs font-black text-gold">7VIP</span>
                     <span class="text-[10px] font-bold text-gray-300">كارت أسود</span>
                   </div>
                 </button>
 
-                <!-- 2. VVIP بالكارت الأزرق المرفق -->
+                <!-- 2. VVIP كارت أزرق ذهبي -->
                 <button type="button" id="tier-vvip-btn" onclick="setCustomerTier('vvip')" class="tier-btn overflow-hidden rounded-2xl border border-white/15 bg-black p-1.5 text-right transition">
-                  <img src="Gemini_Generated_Image_qvrj21qvrj21qvrj.jpg" alt="كارت VVIP الأزرق" class="h-14 w-full rounded-xl object-cover" />
+                  <div class="flex h-14 w-full flex-col justify-between rounded-xl border border-sky-400/50 bg-gradient-to-br from-blue-950 via-indigo-950 to-slate-950 p-2">
+                    <div class="flex items-center justify-between text-[10px] font-black text-sky-300">
+                      <span>MPW</span>
+                      <span>VVIP</span>
+                    </div>
+                    <div class="text-[9px] font-bold text-goldLight">BLUE CARD</div>
+                  </div>
                   <div class="mt-1.5 flex items-center justify-between px-0.5">
                     <span class="text-xs font-black text-sky-300">VVIP</span>
                     <span class="text-[10px] font-bold text-gray-300">كارت أزرق</span>
                   </div>
                 </button>
 
-                <!-- 3. VIP بالكارت الأبيض المرفق -->
+                <!-- 3. VIP كارت أبيض ذهبي -->
                 <button type="button" id="tier-vip-btn" onclick="setCustomerTier('vip')" class="tier-btn overflow-hidden rounded-2xl border border-white/15 bg-black p-1.5 text-right transition">
-<img src="card-vip.jpg" alt="كارت VIP الأبيض" class="h-14 w-full rounded-xl object-cover" />                  <div class="mt-1.5 flex items-center justify-between px-0.5">
+                  <div class="flex h-14 w-full flex-col justify-between rounded-xl border border-amber-300 bg-gradient-to-br from-white via-stone-100 to-amber-100 p-2">
+                    <div class="flex items-center justify-between text-[10px] font-black text-zinc-900">
+                      <span>MPW</span>
+                      <span class="rounded bg-amber-500/20 px-1 text-amber-800">VIP</span>
+                    </div>
+                    <div class="text-[9px] font-extrabold text-amber-800">WHITE CARD</div>
+                  </div>
+                  <div class="mt-1.5 flex items-center justify-between px-0.5">
                     <span class="text-xs font-black text-white">VIP</span>
                     <span class="text-[10px] font-bold text-gray-300">كارت أبيض</span>
                   </div>
                 </button>
 
-                <!-- 4. بلا كارت لأي عميل غير مشترك -->
-                <button type="button" id="tier-none-btn" onclick="setCustomerTier('none')" class="tier-btn flex flex-col justify-between overflow-hidden rounded-2xl border border-white/15 bg-charcoal p-2 text-right transition">
-                  <div class="flex h-14 w-full items-center justify-center rounded-xl border border-dashed border-white/20 bg-black/50 text-lg text-gray-400">
-                    👤
+                <!-- 4. بلا كارت لغير المشترك -->
+                <button type="button" id="tier-none-btn" onclick="setCustomerTier('none')" class="tier-btn overflow-hidden rounded-2xl border border-white/15 bg-charcoal p-1.5 text-right transition">
+                  <div class="flex h-14 w-full flex-col justify-between rounded-xl border border-dashed border-white/20 bg-black/50 p-2">
+                    <div class="flex items-center justify-between text-[10px] font-bold text-gray-400">
+                      <span>MPW</span>
+                      <span>👤</span>
+                    </div>
+                    <div class="text-[9px] font-bold text-gray-400">NO CARD</div>
                   </div>
                   <div class="mt-1.5 flex items-center justify-between px-0.5">
                     <span class="text-xs font-black text-gray-200">غير مشترك</span>
@@ -625,9 +646,6 @@
       ? new BroadcastChannel('mpw_limousine_channel')
       : null;
 
-    // =========================================================================
-    // إدارة الأصناف والتسعير (خاصة بالمدير العام محمود بورسعيد)
-    // =========================================================================
     function loadMenuItems() {
       try {
         const saved = JSON.parse(localStorage.getItem(STORAGE_KEYS.MENU) || 'null');
@@ -789,9 +807,6 @@
       `).join('');
     }
 
-    // =========================================================================
-    // تحديد خانة العميل (7VIP - VVIP - VIP - غير مشترك)
-    // =========================================================================
     function setCustomerTier(tierKey) {
       customerTier = CUSTOMER_TIERS[tierKey] ? tierKey : 'none';
       const keys = ['7vip', 'vvip', 'vip', 'none'];
@@ -806,9 +821,6 @@
       });
     }
 
-    // =========================================================================
-    // GPS والمزامنة السحابية والطلبات
-    // =========================================================================
     function calcDistanceKm(lat1, lon1, lat2, lon2) {
       const toRad = deg => (deg * Math.PI) / 180;
       const R = 6371;
