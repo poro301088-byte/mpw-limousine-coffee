@@ -3,19 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MPW Limousine Coffee — نظام الطلبات والموافقات</title>
+  <title>MPW Limousine Coffee — نظام الطلبات والـ VIP والموافقات</title>
   <style>
     :root {
-      --bg: #0c0c0e;
-      --card: #16161a;
-      --card-2: #1f1f25;
+      --bg: #0a0a0c;
+      --surface: #141418;
+      --surface-2: #1c1c22;
       --gold: #d4af37;
       --mint: #10b981;
       --warn: #f59e0b;
       --danger: #ef4444;
-      --text: #f5f5f7;
-      --muted: #a1a1aa;
-      --border: #2e2e36;
+      --text: #f4f4f6;
+      --muted: #9ca3af;
+      --border: #2b2b34;
     }
     * { box-sizing: border-box; }
     body {
@@ -25,65 +25,76 @@
       background: var(--bg);
       color: var(--text);
     }
-    .app-wrap {
-      max-width: 920px;
+    .container {
+      max-width: 980px;
       margin: 0 auto;
     }
     .header {
-      background: linear-gradient(135deg, #16161a, #211d11);
+      background: linear-gradient(135deg, #141418 0%, #221c0c 100%);
       border: 1px solid var(--gold);
       border-radius: 14px;
       padding: 16px;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
       display: flex;
       flex-wrap: wrap;
       justify-content: space-between;
       align-items: center;
       gap: 12px;
     }
-    .brand-title {
+    .title {
+      color: var(--gold);
       font-size: 20px;
       font-weight: bold;
-      color: var(--gold);
     }
-    .brand-sub {
-      font-size: 13px;
+    .subtitle {
       color: var(--muted);
+      font-size: 13px;
       margin-top: 4px;
+    }
+    .sound-bar {
+      background: var(--surface);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
     }
     .grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1.15fr 0.85fr;
       gap: 16px;
     }
-    @media (max-width: 760px) {
+    @media (max-width: 800px) {
       .grid { grid-template-columns: 1fr; }
     }
-    .box {
-      background: var(--card);
+    .card {
+      background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 14px;
       padding: 16px;
       margin-bottom: 16px;
     }
-    .box-title {
+    .card-title {
+      color: var(--gold);
       font-size: 16px;
       font-weight: bold;
-      color: var(--gold);
       margin-bottom: 12px;
     }
     label {
       display: block;
       font-size: 13px;
       color: var(--muted);
-      margin-bottom: 6px;
+      margin-bottom: 5px;
     }
     input, select, textarea {
       width: 100%;
       padding: 10px 12px;
       border-radius: 10px;
       border: 1px solid var(--border);
-      background: var(--card-2);
+      background: var(--surface-2);
       color: var(--text);
       font-size: 14px;
       margin-bottom: 12px;
@@ -93,106 +104,105 @@
       padding: 10px 14px;
       border-radius: 10px;
       border: none;
-      font-size: 14px;
       font-weight: bold;
+      font-size: 13px;
       cursor: pointer;
-      transition: opacity 0.15s ease;
     }
-    button:hover { opacity: 0.92; }
     .btn-gold {
       background: var(--gold);
       color: #111;
       width: 100%;
     }
-    .btn-sound {
+    .btn-mint {
       background: var(--mint);
-      color: #06281e;
-    }
-    .btn-approve {
-      background: var(--mint);
-      color: #052219;
+      color: #052319;
     }
     .btn-reject {
       background: var(--danger);
       color: #fff;
     }
-    .btn-clear {
-      background: #2b2b33;
+    .btn-ghost {
+      background: var(--surface-2);
       color: var(--text);
       border: 1px solid var(--border);
     }
-    .sound-bar {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 14px;
-      padding: 12px;
-      border-radius: 12px;
-      background: var(--card);
-      border: 1px solid rgba(16, 185, 129, 0.35);
-    }
-    .order-item {
-      background: var(--card-2);
+    .order-box {
+      background: var(--surface-2);
       border: 1px solid var(--border);
       border-radius: 12px;
       padding: 14px;
       margin-bottom: 12px;
     }
-    .order-top {
+    .order-head {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 8px;
       flex-wrap: wrap;
+      gap: 8px;
       margin-bottom: 8px;
     }
-    .status-pending { color: var(--warn); font-weight: bold; }
-    .status-approved { color: var(--mint); font-weight: bold; }
-    .status-rejected { color: var(--danger); font-weight: bold; }
-    .customer-live-box {
+    .pill-vip {
+      background: rgba(212, 175, 55, 0.16);
+      color: var(--gold);
+      border: 1px solid rgba(212, 175, 55, 0.4);
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    .st-pending { color: var(--warn); font-weight: bold; }
+    .st-approved { color: var(--mint); font-weight: bold; }
+    .st-rejected { color: var(--danger); font-weight: bold; }
+    .customer-status-box {
       margin-top: 10px;
       padding: 10px 12px;
       border-radius: 10px;
-      background: #121216;
-      border-right: 4px solid var(--gold);
+      background: #101014;
+      border-right: 4px solid var(--mint);
       font-size: 13px;
       line-height: 1.6;
     }
-    .actions-row {
+    .btn-row {
       display: flex;
       gap: 8px;
-      margin-top: 10px;
       flex-wrap: wrap;
+      margin-top: 10px;
     }
     .muted { color: var(--muted); font-size: 12px; }
   </style>
 </head>
 <body>
-  <div class="app-wrap">
+  <div class="container">
     <div class="header">
       <div>
-        <div class="brand-title">MPW LIMOUSINE COFFEE</div>
-        <div class="brand-sub">نظام استقبال الطلبات • اعتماد الإدارة والمشرفين والباريستا • تنبيه صوتي فوري</div>
+        <div class="title">MPW LIMOUSINE COFFEE</div>
+        <div class="subtitle">طلب من السيارة (Curbside) • عضويات VIP • اعتماد الإدارة والمشرفين والباريستا • تنبيه صوتي فوري</div>
       </div>
-      <button class="btn-clear" onclick="clearAllOrders()">🗑️ مسح السجل</button>
+      <button class="btn-ghost" onclick="resetOrders()">🗑️ تفريغ الطلبات</button>
     </div>
 
     <div class="sound-bar">
-      <button class="btn-sound" onclick="enableAlertSound()">🔔 تفعيل صوت إشعار الطلبات الجديدة</button>
-      <span id="sound-indicator" class="muted">الصوت متوقف حتى تضغط على زر التفعيل</span>
+      <button class="btn-mint" onclick="enableSoundAlert()">🔔 تفعيل صوت إشعار الطلبات الجديدة</button>
+      <span id="sound-status" class="muted">اضغط لتفعيل الصوت حتى يصدر تنبيه تلقائي عند وصول أي أوردر جديد</span>
     </div>
 
     <div class="grid">
-      <!-- قسم العميل -->
-      <div class="box">
-        <div class="box-title">🚗 إرسال أوردر جديد (واجهة العميل)</div>
-        <form id="customer-order-form" onsubmit="handleOrderSubmit(event)">
-          <label for="customer-name">اسم العميل أو رقم السيارة</label>
-          <input id="customer-name" type="text" placeholder="مثال: عميل سيارة رقم 24" required />
+      <!-- نموذج طلب العميل -->
+      <div class="card">
+        <div class="card-title">🚗 طلب جديد من السيارة (Curbside Order)</div>
+        <form onsubmit="submitOrder(event)">
+          <label for="car-info">رقم / نوع السيارة أو اسم العميل</label>
+          <input id="car-info" type="text" placeholder="مثال: سيارة سوداء لوحة 4821 — عميل VIP" required />
 
-          <label for="drink-choice">المشروب الأساسي</label>
-          <select id="drink-choice">
+          <label for="vip-tier">فئة العضوية / الخدمة</label>
+          <select id="vip-tier">
+            <option value="عادي (Standard)">عادي (Standard)</option>
+            <option value="VIP Gold">VIP Gold</option>
+            <option value="VIP Platinum">VIP Platinum</option>
+          </select>
+
+          <label for="item-name">المشروب / الصنف</label>
+          <select id="item-name">
             <option value="إسبريسو دبل">إسبريسو دبل</option>
             <option value="كورتادو بارد">كورتادو بارد</option>
             <option value="فلات وايت">فلات وايت</option>
@@ -201,185 +211,191 @@
             <option value="V60 مقطر">V60 مقطر</option>
           </select>
 
-          <label for="order-notes">ملاحظات التحضير أو الاستلام</label>
-          <textarea id="order-notes" rows="2" placeholder="مثال: سكر خفيف، استلام عند البوابة"></textarea>
+          <label for="pickup-spot">نقطة الاستلام / ملاحظات السيارة</label>
+          <input id="pickup-spot" type="text" placeholder="مثال: صف الانتظار الأول، الوصول خلال 3 دقائق" />
 
           <button type="submit" class="btn-gold">إرسال الأوردر الآن</button>
         </form>
       </div>
 
-      <!-- قسم الإدارة والمشرفين والباريستا -->
-      <div class="box">
-        <div class="box-title">☕ اعتماد الطلبات (الإدارة / المشرف / الباريستا)</div>
-        <label for="approver-role">اختر صفتك لاعتماد أو رفض الطلب</label>
+      <!-- لوحة اعتماد الإدارة / المشرفين / الباريستا -->
+      <div class="card">
+        <div class="card-title">☕ لوحة الاعتماد والتشغيل</div>
+        <label for="approver-role">اختر صفة المعتمد</label>
         <select id="approver-role">
           <option value="المدير العام">المدير العام</option>
           <option value="مشرف التشغيل">مشرف التشغيل</option>
           <option value="الباريستا">الباريستا</option>
         </select>
 
-        <div id="staff-summary" class="muted" style="line-height: 1.7;">
-          • أي أوردر جديد يبدأ بحالة <strong>بانتظار الموافقة</strong>.<br />
-          • عند الضغط على <strong>موافقة</strong> يظهر فوراً للعميل أن طلبه تمت الموافقة عليه وجارٍ تحضيره.<br />
-          • عند وصول أوردر جديد يصدر صوت تنبيه إذا كان الصوت مفعلاً.
+        <div class="muted" style="line-height: 1.75;">
+          • كل طلب جديد يدخل بحالة <strong>بانتظار الموافقة</strong> ويُشغّل صوت الإشعار.<br />
+          • عند الضغط على <strong>موافقة</strong> يظهر للعميل فوراً أن طلبه تمت الموافقة عليه وجارٍ تحضيره.<br />
+          • يمكنك التبديل بين صفة <strong>المدير العام</strong> أو <strong>مشرف التشغيل</strong> أو <strong>الباريستا</strong> في أي لحظة.
         </div>
       </div>
     </div>
 
-    <!-- قائمة الطلبات ومتابعة العميل -->
-    <div class="box">
-      <div class="box-title">📋 الطلبات الحالية وحالة العميل</div>
-      <div id="orders-list"></div>
+    <!-- قائمة الطلبات -->
+    <div class="card">
+      <div class="card-title">📋 سجل الطلبات وحالة العميل المباشرة</div>
+      <div id="orders-container"></div>
     </div>
   </div>
 
   <script>
-    const STORAGE_KEY = "mpw_limousine_orders_v1";
-    let soundReady = false;
-    let orders = loadOrders();
+    const STORAGE_KEY = "mpw_limousine_full_orders_v2";
+    let soundEnabled = false;
+    let ordersList = loadFromStorage();
 
-    function loadOrders() {
+    function loadFromStorage() {
       try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        return raw ? JSON.parse(raw) : [];
-      } catch (e) {
+        const data = localStorage.getItem(STORAGE_KEY);
+        return data ? JSON.parse(data) : [];
+      } catch (err) {
         return [];
       }
     }
 
-    function saveOrders() {
+    function saveToStorage() {
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(orders));
-      } catch (e) {}
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(ordersList));
+      } catch (err) {}
     }
 
-    function enableAlertSound() {
-      soundReady = true;
-      document.getElementById("sound-indicator").textContent = "✅ صوت الإشعارات مفعّل — سيصدر تنبيه عند كل أوردر جديد";
-      playNewOrderChime();
+    function enableSoundAlert() {
+      soundEnabled = true;
+      document.getElementById("sound-status").textContent = "✅ صوت الإشعارات مفعّل وجاهز لكل أوردر جديد";
+      playAlertTone();
     }
 
-    function playNewOrderChime() {
-      if (!soundReady) return;
-      const AudioCtx = window.AudioContext || window.webkitAudioContext;
-      if (!AudioCtx) return;
+    function playAlertTone() {
+      if (!soundEnabled) return;
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) return;
 
-      const ctx = new AudioCtx();
-      const now = ctx.currentTime;
+      const ctx = new AudioContextClass();
+      const t = ctx.currentTime;
+      const notes = [880, 1174.66, 880];
 
-      // نغمة مزدوجة واضحة لتنبيه الطلب الجديد
-      [880, 1174.66].forEach((freq, idx) => {
+      notes.forEach((freq, i) => {
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
         osc.type = "triangle";
-        osc.frequency.setValueAtTime(freq, now + idx * 0.16);
-        gain.gain.setValueAtTime(0.25, now + idx * 0.16);
+        osc.frequency.setValueAtTime(freq, t + i * 0.14);
+        gain.gain.setValueAtTime(0.25, t + i * 0.14);
         osc.connect(gain);
         gain.connect(ctx.destination);
-        osc.start(now + idx * 0.16);
-        osc.stop(now + idx * 0.16 + 0.14);
+        osc.start(t + i * 0.14);
+        osc.stop(t + i * 0.14 + 0.12);
       });
     }
 
-    function handleOrderSubmit(event) {
-      event.preventDefault();
-      const customerInput = document.getElementById("customer-name");
-      const drinkSelect = document.getElementById("drink-choice");
-      const notesInput = document.getElementById("order-notes");
+    function submitOrder(e) {
+      e.preventDefault();
+      const carInfoEl = document.getElementById("car-info");
+      const vipTierEl = document.getElementById("vip-tier");
+      const itemNameEl = document.getElementById("item-name");
+      const pickupSpotEl = document.getElementById("pickup-spot");
 
-      const newOrder = {
-        id: "ORD-" + Date.now().toString().slice(-5),
-        customerName: customerInput.value.trim(),
-        drink: drinkSelect.value,
-        notes: notesInput.value.trim(),
-        status: "pending", // pending | approved | rejected
-        handledBy: "",
+      const order = {
+        id: "MPW-" + Date.now().toString().slice(-5),
+        carInfo: carInfoEl.value.trim(),
+        vipTier: vipTierEl.value,
+        itemName: itemNameEl.value,
+        pickupSpot: pickupSpotEl.value.trim(),
+        status: "pending",
+        approvedBy: "",
         time: new Date().toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit" }),
-        customerStatusText: "⏳ طلبك قيد المراجعة الآن بانتظار موافقة الإدارة أو المشرف أو الباريستا."
+        customerMessage: "⏳ تم استلام طلبك وهو الآن بانتظار موافقة الإدارة أو المشرف أو الباريستا."
       };
 
-      orders.unshift(newOrder);
-      saveOrders();
-      renderOrders();
-      playNewOrderChime();
+      ordersList.unshift(order);
+      saveToStorage();
+      renderOrdersList();
+      playAlertTone();
 
-      customerInput.value = "";
-      notesInput.value = "";
+      carInfoEl.value = "";
+      pickupSpotEl.value = "";
     }
 
-    function approveOrder(orderId) {
+    function approveOrder(id) {
       const role = document.getElementById("approver-role").value;
-      orders = orders.map((order) => {
-        if (order.id !== orderId) return order;
+      ordersList = ordersList.map((o) => {
+        if (o.id !== id) return o;
         return {
-          ...order,
+          ...o,
           status: "approved",
-          handledBy: role,
-          customerStatusText: `✅ تمت الموافقة على أوردرك بواسطة (${role}) وجارٍ تحضيره الآن.`
+          approvedBy: role,
+          customerMessage: `✅ تمت الموافقة على أوردرك بواسطة (${role}) وجارٍ تحضيره الآن.`
         };
       });
-      saveOrders();
-      renderOrders();
+      saveToStorage();
+      renderOrdersList();
     }
 
-    function rejectOrder(orderId) {
+    function rejectOrder(id) {
       const role = document.getElementById("approver-role").value;
-      orders = orders.map((order) => {
-        if (order.id !== orderId) return order;
+      ordersList = ordersList.map((o) => {
+        if (o.id !== id) return o;
         return {
-          ...order,
+          ...o,
           status: "rejected",
-          handledBy: role,
-          customerStatusText: `❌ نعتذر، لم يتم اعتماد الطلب بواسطة (${role}).`
+          approvedBy: role,
+          customerMessage: `❌ نعتذر، تعذّر اعتماد الطلب حالياً بواسطة (${role}).`
         };
       });
-      saveOrders();
-      renderOrders();
+      saveToStorage();
+      renderOrdersList();
     }
 
-    function clearAllOrders() {
-      orders = [];
-      saveOrders();
-      renderOrders();
+    function resetOrders() {
+      ordersList = [];
+      saveToStorage();
+      renderOrdersList();
     }
 
-    function renderOrders() {
-      const listEl = document.getElementById("orders-list");
-      if (!listEl) return;
+    function renderOrdersList() {
+      const wrap = document.getElementById("orders-container");
+      if (!wrap) return;
 
-      if (orders.length === 0) {
-        listEl.innerHTML = `<div class="muted">لا توجد طلبات مسجلة حالياً. أرسل أوردر من واجهة العميل لتجربة الصوت والموافقة.</div>`;
+      if (ordersList.length === 0) {
+        wrap.innerHTML = `<div class="muted">لا توجد طلبات حالياً. أرسل أوردر من نموذج السيارة لتجربة الصوت والموافقة.</div>`;
         return;
       }
 
-      listEl.innerHTML = orders
-        .map((order) => {
-          let badge = `<span class="status-pending">بانتظار الموافقة</span>`;
-          if (order.status === "approved") {
-            badge = `<span class="status-approved">تمت الموافقة (${order.handledBy}) — جاري التحضير</span>`;
-          } else if (order.status === "rejected") {
-            badge = `<span class="status-rejected">مرفوض (${order.handledBy})</span>`;
+      wrap.innerHTML = ordersList
+        .map((o) => {
+          let statusHtml = `<span class="st-pending">بانتظار الموافقة</span>`;
+          if (o.status === "approved") {
+            statusHtml = `<span class="st-approved">تمت الموافقة (${o.approvedBy}) — جاري التحضير</span>`;
+          } else if (o.status === "rejected") {
+            statusHtml = `<span class="st-rejected">مرفوض (${o.approvedBy})</span>`;
           }
 
           return `
-            <div class="order-item">
-              <div class="order-top">
-                <div><strong>${order.id}</strong> — <span>${order.customerName}</span> <span class="muted">(${order.time})</span></div>
-                <div>${badge}</div>
+            <div class="order-box">
+              <div class="order-head">
+                <div>
+                  <strong>${o.id}</strong> — <span>${o.carInfo}</span>
+                  <span class="pill-vip">${o.vipTier}</span>
+                  <span class="muted">(${o.time})</span>
+                </div>
+                <div>${statusHtml}</div>
               </div>
-              <div><strong>المشروب:</strong> ${order.drink}</div>
-              ${order.notes ? `<div class="muted" style="margin-top:4px;"><strong>ملاحظات:</strong> ${order.notes}</div>` : ""}
+              <div><strong>الصنف:</strong> ${o.itemName}</div>
+              ${o.pickupSpot ? `<div class="muted" style="margin-top:4px;"><strong>الاستلام / ملاحظات:</strong> ${o.pickupSpot}</div>` : ""}
 
-              <div class="customer-live-box">
-                <strong>الظاهر للعميل:</strong> ${order.customerStatusText}
+              <div class="customer-status-box">
+                <strong>الظاهر للعميل:</strong> ${o.customerMessage}
               </div>
 
               ${
-                order.status === "pending"
+                o.status === "pending"
                   ? `
-                    <div class="actions-row">
-                      <button class="btn-approve" onclick="approveOrder('${order.id}')">✅ موافقة على الأوردر</button>
-                      <button class="btn-reject" onclick="rejectOrder('${order.id}')">✖ رفض الأوردر</button>
+                    <div class="btn-row">
+                      <button class="btn-mint" onclick="approveOrder('${o.id}')">✅ موافقة على الأوردر</button>
+                      <button class="btn-reject" onclick="rejectOrder('${o.id}')">✖ رفض الأوردر</button>
                     </div>
                   `
                   : ""
@@ -390,7 +406,7 @@
         .join("");
     }
 
-    renderOrders();
+    renderOrdersList();
   </script>
 </body>
 </html>
