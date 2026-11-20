@@ -32,7 +32,6 @@
       color: #F9FAFB;
     }
 
-    /* تنسيق إيصال الكاش الحراري للطباعة */
     #cashier-receipt-print {
       display: none;
     }
@@ -96,7 +95,7 @@
     </div>
   </header>
 
-  <!-- تنبيه صوتي / إشعار وصول أوردر جديد -->
+  <!-- تنبيه وصول أوردر جديد -->
   <div id="new-order-banner" class="hidden mx-auto mt-3 max-w-7xl px-4">
     <div class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-emerald-400/50 bg-emerald-950/70 px-4 py-3 text-emerald-100 shadow-lg">
       <div class="flex items-center gap-2.5 text-sm font-bold">
@@ -117,54 +116,97 @@
   <!-- المحتوى الرئيسي -->
   <main class="mx-auto max-w-7xl space-y-8 px-4 py-6">
 
-    <!-- بطاقة القيادة والإدارة ونطاق GPS المباشر -->
-    <section class="grid gap-4 rounded-3xl border border-gold/25 bg-charcoal/90 p-4 sm:grid-cols-2 lg:grid-cols-3">
-      <div class="rounded-2xl border border-white/10 bg-black/45 p-3.5">
-        <div class="text-[11px] font-bold text-gray-400">المدير العام</div>
-        <div class="mt-1 text-sm font-black text-gold">محمود بورسعيد</div>
-      </div>
-
-      <div class="rounded-2xl border border-white/10 bg-black/45 p-3.5">
-        <div class="text-[11px] font-bold text-gray-400">المسؤولون</div>
-        <div class="mt-1 text-sm font-extrabold text-white">محمود حسن • رقيه محمود</div>
-      </div>
-
-      <div class="rounded-2xl border border-sky-400/30 bg-sky-950/20 p-3.5 sm:col-span-2 lg:col-span-1">
-        <div class="flex items-center justify-between gap-2">
-          <span class="text-[11px] font-extrabold text-sky-300">📍 نطاق GPS المباشر</span>
-          <a id="gps-map-link" href="#" target="_blank" rel="noopener noreferrer" class="hidden text-[11px] font-bold text-gold underline hover:text-goldLight">
-            فتح الخريطة ↗
-          </a>
+    <!-- بطاقة القيادة وعلامة رادار GPS المرئية -->
+    <section class="grid gap-4 rounded-3xl border border-gold/25 bg-charcoal/90 p-4 lg:grid-cols-12">
+      <div class="space-y-3 lg:col-span-5 flex flex-col justify-between">
+        <div class="rounded-2xl border border-white/10 bg-black/45 p-3.5">
+          <div class="text-[11px] font-bold text-gray-400">المدير العام</div>
+          <div class="mt-1 text-base font-black text-gold">محمود بورسعيد</div>
         </div>
-        <div id="gps-range-summary" class="mt-1 text-xs font-bold text-gray-200">
-          لم يُحدد موقع العميل بعد — اضغط «تحديد موقع GPS» لإظهار النطاق والإحداثيات
+
+        <div class="rounded-2xl border border-white/10 bg-black/45 p-3.5">
+          <div class="text-[11px] font-bold text-gray-400">المسؤولون عن متابعة الطلبات والربط</div>
+          <div class="mt-1 text-sm font-extrabold text-white">محمود حسن • رقيه محمود</div>
+        </div>
+
+        <div class="rounded-2xl border border-white/10 bg-black/45 p-3.5">
+          <div class="text-[11px] font-bold text-gray-400">مسار الربط التشغيلي</div>
+          <div class="mt-1 text-xs font-extrabold text-emerald-300">العميل ← المسؤول ← باريستا 1 / باريستا 2</div>
+        </div>
+      </div>
+
+      <!-- علامة شكل وظهور GPS المرئية (رادار النطاق 15 كم) -->
+      <div class="lg:col-span-7 rounded-2xl border border-sky-400/35 bg-gradient-to-br from-sky-950/35 via-black/60 to-charcoal p-4">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-2.5">
+          <div class="flex items-center gap-2">
+            <span id="gps-indicator-dot" class="inline-block h-3 w-3 rounded-full bg-amber-400 animate-pulse"></span>
+            <h2 class="text-sm font-black text-sky-300">علامة ونطاق GPS المباشر (نطاق الخدمة 15 كم)</h2>
+          </div>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="captureGPS()" class="rounded-xl bg-sky-500/20 px-3 py-1 text-xs font-extrabold text-sky-200 hover:bg-sky-500/30">
+              📍 تحديد / تحديث GPS
+            </button>
+            <a id="gps-map-link" href="#" target="_blank" rel="noopener noreferrer" class="hidden rounded-xl bg-gold/20 px-3 py-1 text-xs font-extrabold text-gold underline hover:bg-gold hover:text-black">
+              خرائط Google ↗
+            </a>
+          </div>
+        </div>
+
+        <div class="mt-3 grid items-center gap-4 sm:grid-cols-12">
+          <div class="sm:col-span-5 flex flex-col items-center justify-center">
+            <div class="relative flex h-36 w-36 items-center justify-center rounded-full border-2 border-sky-400/40 bg-sky-950/30 shadow-inner">
+              <div class="h-24 w-24 rounded-full border border-dashed border-sky-400/35"></div>
+              <div class="h-12 w-12 rounded-full border border-sky-400/25"></div>
+              <div class="absolute h-3 w-3 rounded-full bg-gold ring-4 ring-gold/30" title="نقطة التمركز MPW"></div>
+              <div id="gps-radar-pin" class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transition-all duration-500">
+                <div class="flex h-6 w-6 items-center justify-center rounded-full border-2 border-white bg-emerald-500 text-[11px] font-black text-black shadow-lg">
+                  📍
+                </div>
+              </div>
+            </div>
+            <span class="mt-1.5 text-[10px] font-bold text-gray-400">المركز: ذهبي (MPW) • العميل: 📍</span>
+          </div>
+
+          <div class="sm:col-span-7 space-y-2">
+            <div class="h-2.5 w-full overflow-hidden rounded-full bg-black/80">
+              <div id="gps-range-bar" class="h-full w-1/6 rounded-full bg-amber-400 transition-all duration-300"></div>
+            </div>
+            <div id="gps-range-summary" class="text-xs font-bold leading-relaxed text-gray-200">
+              جاري قراءة موقع GPS...
+            </div>
+            <div id="gps-range-box" class="rounded-xl border border-white/10 bg-black/50 p-2.5 text-[11px] leading-relaxed text-gray-300">
+              اضغط «تحديد / تحديث GPS» أو اسمح بالوصول للموقع لإظهار الإحداثيات والمسافة داخل النطاق.
+            </div>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- لوحة الإدارة والمسؤولين وقسمي الباريستا (تظهر عند تسجيل الدخول بصلاحية) -->
+    <!-- لوحة الإدارة والمسؤولين وقسمي الباريستا -->
     <section id="staff-workspace" class="hidden space-y-6 rounded-3xl border border-gold/35 bg-charcoal p-4 sm:p-6 shadow-2xl">
       <div class="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-4">
         <div>
           <div class="flex items-center gap-2">
             <span class="rounded-lg bg-gold px-2.5 py-0.5 text-xs font-black text-black" id="active-role-badge">دور نشط</span>
-            <h2 class="text-xl font-extrabold text-white">لوحة العمليات الحية والطباعة</h2>
+            <h2 class="text-xl font-extrabold text-white">لوحة العمليات الحية وربط العملاء بالمسؤول والباريستا</h2>
           </div>
           <p class="mt-1 text-xs text-gray-400">
             المدير العام: <strong class="text-goldLight">محمود بورسعيد</strong> | المسؤولون: <strong class="text-gray-200">محمود حسن</strong> و <strong class="text-gray-200">رقيه محمود</strong>
           </p>
         </div>
 
-        <!-- تبويبات الأقسام -->
         <div class="flex flex-wrap gap-2">
           <button onclick="switchStaffTab('all')" id="tab-all" class="staff-tab rounded-xl bg-gold px-3.5 py-2 text-xs font-extrabold text-black">
             الطلبات والمسؤولين
           </button>
           <button onclick="switchStaffTab('barista1')" id="tab-barista1" class="staff-tab rounded-xl border border-white/15 bg-black/50 px-3.5 py-2 text-xs font-bold text-gray-200 hover:border-gold/50">
-            ☕ باريستا 1
+            ☕ باريستا 1 (<span id="count-barista1">0</span>)
           </button>
           <button onclick="switchStaffTab('barista2')" id="tab-barista2" class="staff-tab rounded-xl border border-white/15 bg-black/50 px-3.5 py-2 text-xs font-bold text-gray-200 hover:border-gold/50">
-            ☕ باريستا 2
+            ☕ باريستا 2 (<span id="count-barista2">0</span>)
+          </button>
+          <button onclick="switchStaffTab('admin_control')" id="tab-admin_control" class="staff-tab hidden rounded-xl border border-gold/40 bg-gold/10 px-3.5 py-2 text-xs font-extrabold text-gold hover:bg-gold hover:text-black">
+            🛠️ تحكم الإدارة (الأسعار والأصناف)
           </button>
           <button onclick="switchStaffTab('settings')" id="tab-settings" class="staff-tab rounded-xl border border-white/15 bg-black/50 px-3.5 py-2 text-xs font-bold text-gray-200 hover:border-gold/50">
             ⚙️ إعدادات السحابة والطباعة
@@ -179,7 +221,7 @@
           <div id="stat-pending" class="mt-1 text-2xl font-black text-amber-400">0</div>
         </div>
         <div class="rounded-2xl border border-white/10 bg-black/45 p-3.5">
-          <div class="text-xs text-gray-400">موافق عليه / للباريستا</div>
+          <div class="text-xs text-gray-400">مرتبط بالباريستا / معتمد</div>
           <div id="stat-approved" class="mt-1 text-2xl font-black text-sky-400">0</div>
         </div>
         <div class="rounded-2xl border border-white/10 bg-black/45 p-3.5">
@@ -192,11 +234,60 @@
         </div>
       </div>
 
-      <!-- قسم الإعدادات (Firebase + الطباعة التلقائية) -->
+      <!-- لوحة التحكم الخاصة بالمدير العام (إضافة صنف - تعديل تسعير - إزالة صنف) -->
+      <div id="admin-control-panel" class="hidden space-y-5 rounded-2xl border border-gold/40 bg-black/55 p-4 sm:p-5">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3">
+          <div>
+            <h3 class="text-base font-black text-gold">لوحة تحكم المدير العام (محمود بورسعيد) — إدارة المنيو والتسعير</h3>
+            <p class="text-xs text-gray-400">أضف صنفاً جديداً، أو عدّل السعر والاسم، أو أزل أي صنف مباشرة وتتم مزامنته لحظياً.</p>
+          </div>
+          <button onclick="resetMenuToDefault()" class="rounded-xl border border-amber-400/40 bg-amber-500/10 px-3 py-1.5 text-xs font-bold text-amber-300 hover:bg-amber-500/20">
+            استعادة المنيو الافتراضي
+          </button>
+        </div>
+
+        <!-- إضافة صنف جديد -->
+        <div class="grid gap-3 rounded-2xl border border-white/10 bg-charcoal p-3.5 sm:grid-cols-12">
+          <div class="sm:col-span-4">
+            <label class="mb-1 block text-[11px] font-bold text-gray-300">اسم الصنف الجديد</label>
+            <input id="new-item-name" type="text" placeholder="مثال: سبانش لاتيه مثلج خاص" class="w-full rounded-xl border border-white/15 bg-black/70 px-3 py-2 text-xs text-white focus:border-gold focus:outline-none" />
+          </div>
+          <div class="sm:col-span-4">
+            <label class="mb-1 block text-[11px] font-bold text-gray-300">الفئة</label>
+            <select id="new-item-category" class="w-full rounded-xl border border-white/15 bg-black/70 px-3 py-2 text-xs text-white focus:border-gold focus:outline-none">
+              <option value="إسبريسو وقهوة ساخنة">إسبريسو وقهوة ساخنة</option>
+              <option value="قهوة مختصة وتقطير">قهوة مختصة وتقطير</option>
+              <option value="مشروبات مثلجة وآيس كوفي">مشروبات مثلجة وآيس كوفي</option>
+              <option value="ماتشا وشاي ومشروبات دافئة">ماتشا وشاي ومشروبات دافئة</option>
+              <option value="سموزي وفريش ومشروبات طاقة">سموزي وفريش ومشروبات طاقة</option>
+              <option value="مخبوزات وحلويات وسناكس">مخبوزات وحلويات وسناكس</option>
+            </select>
+          </div>
+          <div class="sm:col-span-2">
+            <label class="mb-1 block text-[11px] font-bold text-gray-300">السعر (ج.م)</label>
+            <input id="new-item-price" type="number" min="1" step="0.5" placeholder="95" class="w-full rounded-xl border border-white/15 bg-black/70 px-3 py-2 text-xs text-white focus:border-gold focus:outline-none" />
+          </div>
+          <div class="flex items-end sm:col-span-2">
+            <button onclick="adminAddMenuItem()" class="w-full rounded-xl bg-emerald-500 py-2 text-xs font-black text-black hover:bg-emerald-400">
+              + إضافة صنف
+            </button>
+          </div>
+        </div>
+
+        <!-- بحث داخل لوحة تعديل الأصناف والتسعير -->
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <span class="text-xs font-extrabold text-gray-200">قائمة الأصناف الحالية للتعديل أو الإزالة:</span>
+          <input id="admin-menu-search" oninput="renderAdminMenuManager()" type="text" placeholder="ابحث لتعديل سعر أو حذف صنف..." class="w-full rounded-xl border border-white/15 bg-charcoal px-3 py-1.5 text-xs text-white focus:border-gold focus:outline-none sm:w-64" />
+        </div>
+
+        <div id="admin-menu-list" class="max-h-96 space-y-2 overflow-y-auto pr-1"></div>
+      </div>
+
+      <!-- قسم الإعدادات -->
       <div id="staff-settings-panel" class="hidden space-y-4 rounded-2xl border border-gold/30 bg-black/50 p-4">
         <h3 class="text-base font-extrabold text-gold">إعدادات الربط السحابي (Firebase) وطباعة الكاش</h3>
         <p class="text-xs leading-relaxed text-gray-300">
-          النظام متصل افتراضياً بقاعدة البيانات السحابية الخاصة بمشروع <strong>MPW Limousine Coffee</strong> لتعمل المزامنة على جميع الأجهزة تلقائياً.
+          متصل مباشرة بقاعدة البيانات: <strong class="text-goldLight">https://mpw-limousine-coffee-default-rtdb.firebaseio.com</strong>
         </p>
 
         <div class="grid gap-3 sm:grid-cols-2">
@@ -237,7 +328,7 @@
     <!-- قسم العميل: بيانات العميل + المنيو + السلة -->
     <div class="grid gap-6 lg:grid-cols-12">
 
-      <!-- المنيو (72 صنفاً مصنفاً) -->
+      <!-- المنيو -->
       <section class="space-y-5 lg:col-span-8">
         <div class="flex flex-wrap items-center justify-between gap-3 rounded-3xl border border-white/10 bg-charcoal p-4">
           <div>
@@ -247,10 +338,7 @@
           <input id="menu-search" oninput="renderMenu()" type="text" placeholder="ابحث عن مشروب أو صنف..." class="w-full rounded-xl border border-white/15 bg-black/60 px-3.5 py-2 text-xs text-white placeholder-gray-500 focus:border-gold focus:outline-none sm:w-60" />
         </div>
 
-        <!-- فلاتر الفئات -->
         <div id="category-filters" class="flex flex-wrap gap-2"></div>
-
-        <!-- شبكة الأصناف -->
         <div id="menu-grid" class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3"></div>
       </section>
 
@@ -259,11 +347,54 @@
         <div class="sticky top-20 space-y-4 rounded-3xl border border-gold/30 bg-charcoal p-5 shadow-xl">
           <h3 class="text-lg font-extrabold text-gold">إتمام طلب السيارة</h3>
 
-          <!-- بيانات العميل وتحديد النوع (عميل جديد / عميلة جديدة) -->
           <div class="space-y-3 rounded-2xl border border-white/10 bg-black/45 p-3.5">
             <div>
               <label class="mb-1 block text-xs font-bold text-gray-300">اسم العميل / رقم الهاتف</label>
               <input id="customer-name" type="text" placeholder="مثال: أستاذ أحمد - 010..." class="w-full rounded-xl border border-white/15 bg-charcoal px-3 py-2 text-xs text-white focus:border-gold focus:outline-none" />
+            </div>
+
+            <!-- 4 خانات للعملاء: 7VIP (الكارت الأسود) - VVIP (الكارت الأزرق) - VIP (الكارت الأبيض) - بدون كارت -->
+            <div>
+              <label class="mb-1.5 block text-xs font-bold text-gray-300">فئة العميل وبطاقة العضوية (4 خانات)</label>
+              <div class="grid grid-cols-2 gap-2.5">
+                <!-- 1. 7VIP بالكارت الأسود المرفق -->
+                <button type="button" id="tier-7vip-btn" onclick="setCustomerTier('7vip')" class="tier-btn overflow-hidden rounded-2xl border-2 border-gold bg-black p-1.5 text-right transition">
+                  <img src="Gemini_Generated_Image_xkw5vjxkw5vjxkw5.jpg" alt="كارت 7VIP الأسود" class="h-14 w-full rounded-xl object-cover" />
+                  <div class="mt-1.5 flex items-center justify-between px-0.5">
+                    <span class="text-xs font-black text-gold">7VIP</span>
+                    <span class="text-[10px] font-bold text-gray-300">كارت أسود</span>
+                  </div>
+                </button>
+
+                <!-- 2. VVIP بالكارت الأزرق المرفق -->
+                <button type="button" id="tier-vvip-btn" onclick="setCustomerTier('vvip')" class="tier-btn overflow-hidden rounded-2xl border border-white/15 bg-black p-1.5 text-right transition">
+                  <img src="Gemini_Generated_Image_qvrj21qvrj21qvrj.jpg" alt="كارت VVIP الأزرق" class="h-14 w-full rounded-xl object-cover" />
+                  <div class="mt-1.5 flex items-center justify-between px-0.5">
+                    <span class="text-xs font-black text-sky-300">VVIP</span>
+                    <span class="text-[10px] font-bold text-gray-300">كارت أزرق</span>
+                  </div>
+                </button>
+
+                <!-- 3. VIP بالكارت الأبيض المرفق -->
+                <button type="button" id="tier-vip-btn" onclick="setCustomerTier('vip')" class="tier-btn overflow-hidden rounded-2xl border border-white/15 bg-black p-1.5 text-right transition">
+                  <img src="ضهر VIP.jpg.jpg" alt="كارت VIP الأبيض" class="h-14 w-full rounded-xl object-cover" />
+                  <div class="mt-1.5 flex items-center justify-between px-0.5">
+                    <span class="text-xs font-black text-white">VIP</span>
+                    <span class="text-[10px] font-bold text-gray-300">كارت أبيض</span>
+                  </div>
+                </button>
+
+                <!-- 4. بلا كارت لأي عميل غير مشترك -->
+                <button type="button" id="tier-none-btn" onclick="setCustomerTier('none')" class="tier-btn flex flex-col justify-between overflow-hidden rounded-2xl border border-white/15 bg-charcoal p-2 text-right transition">
+                  <div class="flex h-14 w-full items-center justify-center rounded-xl border border-dashed border-white/20 bg-black/50 text-lg text-gray-400">
+                    👤
+                  </div>
+                  <div class="mt-1.5 flex items-center justify-between px-0.5">
+                    <span class="text-xs font-black text-gray-200">غير مشترك</span>
+                    <span class="text-[10px] font-bold text-gray-400">بلا كارت</span>
+                  </div>
+                </button>
+              </div>
             </div>
 
             <div>
@@ -290,16 +421,13 @@
                 </button>
                 <span id="gps-status" class="truncate text-[11px] text-gray-400">لم يُحدد الموقع بعد</span>
               </div>
-              <div id="gps-range-box" class="hidden rounded-xl border border-sky-400/25 bg-sky-950/30 p-2 text-[11px] leading-relaxed text-sky-200"></div>
             </div>
           </div>
 
-          <!-- عناصر السلة -->
           <div id="cart-items" class="max-h-64 space-y-2 overflow-y-auto rounded-2xl border border-white/10 bg-black/40 p-3 text-xs">
             <p class="py-6 text-center text-gray-500">السلة فارغة حالياً — أضف أصنافاً من المنيو</p>
           </div>
 
-          <!-- الإجمالي وزر الإرسال -->
           <div class="space-y-3 border-t border-white/10 pt-3">
             <div class="flex items-center justify-between text-sm font-extrabold">
               <span class="text-gray-300">الإجمالي:</span>
@@ -317,7 +445,7 @@
     </div>
   </main>
 
-  <!-- نافذة تسجيل الدخول للصلاحيات (إدارة / مسؤولين / باريستا 1 / باريستا 2) -->
+  <!-- نافذة تسجيل الدخول للصلاحيات -->
   <div id="auth-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
     <div class="w-full max-w-md space-y-4 rounded-3xl border border-gold/40 bg-charcoal p-6 shadow-2xl">
       <div class="flex items-center justify-between">
@@ -347,9 +475,6 @@
   <div id="cashier-receipt-print"></div>
 
   <script>
-    // =========================================================================
-    // 1. بيانات المنيو (72 صنفاً عبر فئات متنوعة)
-    // =========================================================================
     const CATEGORIES = [
       'الكل',
       'إسبريسو وقهوة ساخنة',
@@ -360,7 +485,7 @@
       'مخبوزات وحلويات وسناكس'
     ];
 
-    const MENU_ITEMS = (() => {
+    const DEFAULT_MENU_ITEMS = (() => {
       const base = [
         ['إسبريسو سنجل', 'إسبريسو وقهوة ساخنة', 45],
         ['إسبريسو دبل', 'إسبريسو وقهوة ساخنة', 60],
@@ -383,7 +508,6 @@
         ['قهوة تركي دبل', 'إسبريسو وقهوة ساخنة', 65],
         ['قهوة فرنساوي بندق', 'إسبريسو وقهوة ساخنة', 65],
         ['قهوة بالنوتيلا ساخنة', 'إسبريسو وقهوة ساخنة', 85],
-
         ['V60 حار', 'قهوة مختصة وتقطير', 95],
         ['V60 بارد', 'قهوة مختصة وتقطير', 100],
         ['كيمكس حار', 'قهوة مختصة وتقطير', 105],
@@ -395,7 +519,6 @@
         ['نيترو كولد برو', 'قهوة مختصة وتقطير', 115],
         ['إثيوبي ييرغاتشيف V60', 'قهوة مختصة وتقطير', 110],
         ['كولومبي هويلا V60', 'قهوة مختصة وتقطير', 110],
-
         ['آيس أمريكانو', 'مشروبات مثلجة وآيس كوفي', 70],
         ['آيس لاتيه', 'مشروبات مثلجة وآيس كوفي', 80],
         ['آيس سبانش لاتيه', 'مشروبات مثلجة وآيس كوفي', 95],
@@ -407,7 +530,6 @@
         ['فرابتشينو أوريو', 'مشروبات مثلجة وآيس كوفي', 105],
         ['فرابتشينو لوتس', 'مشروبات مثلجة وآيس كوفي', 110],
         ['فرابتشينو نوتيلا', 'مشروبات مثلجة وآيس كوفي', 110],
-
         ['ماتشا لاتيه ساخن', 'ماتشا وشاي ومشروبات دافئة', 95],
         ['آيس ماتشا لاتيه', 'ماتشا وشاي ومشروبات دافئة', 100],
         ['ماتشا فراولة بارد', 'ماتشا وشاي ومشروبات دافئة', 110],
@@ -417,7 +539,6 @@
         ['هوت شوكليت كلاسيك', 'ماتشا وشاي ومشروبات دافئة', 80],
         ['هوت شوكليت مارشميلو', 'ماتشا وشاي ومشروبات دافئة', 95],
         ['سحلب بالمكسرات', 'ماتشا وشاي ومشروبات دافئة', 75],
-
         ['سموزي مانجو', 'سموزي وفريش ومشروبات طاقة', 85],
         ['سموزي فراولة', 'سموزي وفريش ومشروبات طاقة', 85],
         ['سموزي توت مشكل', 'سموزي وفريش ومشروبات طاقة', 95],
@@ -428,7 +549,6 @@
         ['باشن فروت موهيتو', 'سموزي وفريش ومشروبات طاقة', 85],
         ['مشروب طاقة ليموزين خاص', 'سموزي وفريش ومشروبات طاقة', 95],
         ['آيس تي خوخ', 'سموزي وفريش ومشروبات طاقة', 70],
-
         ['كرواسون سادة', 'مخبوزات وحلويات وسناكس', 65],
         ['كرواسون شوكولاتة', 'مخبوزات وحلويات وسناكس', 75],
         ['كرواسون جبنة وزعتر', 'مخبوزات وحلويات وسناكس', 75],
@@ -449,15 +569,18 @@
       }));
     })();
 
-    // =========================================================================
-    // 2. بيانات القيادة ونطاق GPS والصلاحيات والإعدادات الافتراضية لـ Firebase
-    // =========================================================================
+    const CUSTOMER_TIERS = {
+      '7vip': { key: '7vip', label: '7VIP', cardText: 'كارت أسود', badgeCls: 'bg-black text-gold border border-gold/60' },
+      'vvip': { key: 'vvip', label: 'VVIP', cardText: 'كارت أزرق', badgeCls: 'bg-blue-950 text-sky-300 border border-sky-400/50' },
+      'vip': { key: 'vip', label: 'VIP', cardText: 'كارت أبيض', badgeCls: 'bg-white text-black font-black' },
+      'none': { key: 'none', label: 'عميل غير مشترك', cardText: 'بلا كارت', badgeCls: 'bg-white/10 text-gray-300 border border-white/15' }
+    };
+
     const LEADERSHIP = {
       generalManager: 'محمود بورسعيد',
       supervisors: ['محمود حسن', 'رقيه محمود']
     };
 
-    // نقطة تمركز الخدمة ونطاق GPS الافتراضي (كم)
     const GPS_SERVICE_ZONE = {
       label: 'نطاق خدمة MPW - الإسكندرية',
       baseLat: 31.2001,
@@ -483,14 +606,17 @@
     const STORAGE_KEYS = {
       ORDERS: 'mpw_limousine_orders_v1',
       CUSTOMERS: 'mpw_limousine_customers_v1',
-      CONFIG: 'mpw_limousine_cloud_config_v1'
+      CONFIG: 'mpw_limousine_cloud_config_v1',
+      MENU: 'mpw_limousine_menu_v1'
     };
 
+    let menuItems = [];
     let selectedCategory = 'الكل';
     let cart = [];
     let customerGender = 'male';
+    let customerTier = '7vip';
     let capturedGPS = null;
-    let currentSession = null; // { role, label }
+    let currentSession = null;
     let activeStaffTab = 'all';
     let orders = [];
     let knownOrderIds = new Set();
@@ -501,7 +627,188 @@
       : null;
 
     // =========================================================================
-    // 3. حساب نطاق GPS والمسافة وخريطة الموقع
+    // إدارة الأصناف والتسعير (خاصة بالمدير العام محمود بورسعيد)
+    // =========================================================================
+    function loadMenuItems() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEYS.MENU) || 'null');
+        menuItems = Array.isArray(saved) && saved.length ? saved : [...DEFAULT_MENU_ITEMS];
+      } catch {
+        menuItems = [...DEFAULT_MENU_ITEMS];
+      }
+    }
+
+    async function saveMenuItems(syncCloud = true) {
+      localStorage.setItem(STORAGE_KEYS.MENU, JSON.stringify(menuItems));
+      if (broadcastChannel) {
+        broadcastChannel.postMessage({ type: 'menu_updated', menuItems });
+      }
+      renderMenu();
+      if (currentSession && currentSession.role === 'admin') {
+        renderAdminMenuManager();
+      }
+      if (syncCloud) {
+        const cfg = getConfig();
+        if (cfg.dbUrl) {
+          try {
+            const url = `${cfg.dbUrl}/mpw_menu.json${cfg.apiKey ? `?auth=${encodeURIComponent(cfg.apiKey)}` : ''}`;
+            await fetch(url, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(menuItems)
+            });
+          } catch (e) {}
+        }
+      }
+    }
+
+    async function fetchFirebaseMenu() {
+      const cfg = getConfig();
+      if (!cfg.dbUrl) return;
+      try {
+        const res = await fetch(`${cfg.dbUrl}/mpw_menu.json${cfg.apiKey ? `?auth=${encodeURIComponent(cfg.apiKey)}` : ''}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (Array.isArray(data) && data.length) {
+          menuItems = data;
+          localStorage.setItem(STORAGE_KEYS.MENU, JSON.stringify(menuItems));
+          renderMenu();
+          if (currentSession && currentSession.role === 'admin') {
+            renderAdminMenuManager();
+          }
+        }
+      } catch (e) {}
+    }
+
+    async function adminAddMenuItem() {
+      if (!currentSession || currentSession.role !== 'admin') return;
+      const nameInput = document.getElementById('new-item-name');
+      const catInput = document.getElementById('new-item-category');
+      const priceInput = document.getElementById('new-item-price');
+
+      const name = (nameInput.value || '').trim();
+      const category = catInput.value;
+      const price = parseFloat(priceInput.value);
+
+      if (!name || isNaN(price) || price <= 0) {
+        alert('يرجى إدخال اسم الصنف وسعر صحيح أكبر من صفر.');
+        return;
+      }
+
+      const maxId = menuItems.reduce((m, i) => Math.max(m, Number(i.id) || 0), 0);
+      menuItems.unshift({
+        id: maxId + 1,
+        name,
+        category,
+        price
+      });
+
+      nameInput.value = '';
+      priceInput.value = '';
+      await saveMenuItems(true);
+      alert('تمت إضافة الصنف الجديد وتحديث المنيو.');
+    }
+
+    async function adminUpdateMenuItem(id) {
+      if (!currentSession || currentSession.role !== 'admin') return;
+      const nameEl = document.getElementById(`edit-name-${id}`);
+      const priceEl = document.getElementById(`edit-price-${id}`);
+      const catEl = document.getElementById(`edit-cat-${id}`);
+
+      const name = (nameEl.value || '').trim();
+      const price = parseFloat(priceEl.value);
+      const category = catEl.value;
+
+      if (!name || isNaN(price) || price <= 0) {
+        alert('تأكد من إدخال اسم صحيح وسعر أكبر من صفر.');
+        return;
+      }
+
+      const idx = menuItems.findIndex(i => i.id === id);
+      if (idx === -1) return;
+      menuItems[idx] = { ...menuItems[idx], name, price, category };
+
+      cart = cart.map(c => c.id === id ? { ...c, name, price, category } : c);
+      renderCart();
+      await saveMenuItems(true);
+      alert('تم حفظ التعديل والتسعير بنجاح.');
+    }
+
+    async function adminDeleteMenuItem(id) {
+      if (!currentSession || currentSession.role !== 'admin') return;
+      menuItems = menuItems.filter(i => i.id !== id);
+      cart = cart.filter(c => c.id !== id);
+      renderCart();
+      await saveMenuItems(true);
+    }
+
+    async function resetMenuToDefault() {
+      if (!currentSession || currentSession.role !== 'admin') return;
+      menuItems = [...DEFAULT_MENU_ITEMS];
+      await saveMenuItems(true);
+      alert('تمت استعادة المنيو الافتراضي.');
+    }
+
+    function renderAdminMenuManager() {
+      const container = document.getElementById('admin-menu-list');
+      if (!container) return;
+      const q = ((document.getElementById('admin-menu-search')?.value) || '').trim().toLowerCase();
+
+      const filtered = menuItems.filter(i =>
+        !q || i.name.toLowerCase().includes(q) || i.category.toLowerCase().includes(q)
+      );
+
+      if (!filtered.length) {
+        container.innerHTML = '<div class="rounded-xl border border-white/10 bg-charcoal p-4 text-center text-xs text-gray-400">لا توجد أصناف مطابقة.</div>';
+        return;
+      }
+
+      const catOptions = CATEGORIES.filter(c => c !== 'الكل').map(c => `<option value="${c}">${c}</option>`).join('');
+
+      container.innerHTML = filtered.map(item => `
+        <div class="grid items-center gap-2 rounded-xl border border-white/10 bg-charcoal p-2.5 sm:grid-cols-12">
+          <div class="sm:col-span-4">
+            <input id="edit-name-${item.id}" type="text" value="${item.name.replace(/"/g, '&quot;')}" class="w-full rounded-lg border border-white/15 bg-black/70 px-2.5 py-1.5 text-xs font-bold text-white focus:border-gold focus:outline-none" />
+          </div>
+          <div class="sm:col-span-4">
+            <select id="edit-cat-${item.id}" class="w-full rounded-lg border border-white/15 bg-black/70 px-2 py-1.5 text-xs text-gray-200 focus:border-gold focus:outline-none">
+              ${catOptions.replace(`value="${item.category}"`, `value="${item.category}" selected`)}
+            </select>
+          </div>
+          <div class="sm:col-span-2">
+            <input id="edit-price-${item.id}" type="number" min="1" step="0.5" value="${item.price}" class="w-full rounded-lg border border-white/15 bg-black/70 px-2.5 py-1.5 text-xs font-black text-gold focus:border-gold focus:outline-none" />
+          </div>
+          <div class="flex items-center justify-end gap-1.5 sm:col-span-2">
+            <button onclick="adminUpdateMenuItem(${item.id})" class="rounded-lg bg-gold px-2.5 py-1.5 text-[11px] font-black text-black hover:bg-goldLight">
+              حفظ
+            </button>
+            <button onclick="adminDeleteMenuItem(${item.id})" class="rounded-lg bg-red-500/20 px-2.5 py-1.5 text-[11px] font-bold text-red-300 hover:bg-red-500 hover:text-white">
+              إزالة
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // =========================================================================
+    // تحديد خانة العميل (7VIP - VVIP - VIP - غير مشترك)
+    // =========================================================================
+    function setCustomerTier(tierKey) {
+      customerTier = CUSTOMER_TIERS[tierKey] ? tierKey : 'none';
+      const keys = ['7vip', 'vvip', 'vip', 'none'];
+      keys.forEach(k => {
+        const btn = document.getElementById(`tier-${k}-btn`);
+        if (!btn) return;
+        if (k === customerTier) {
+          btn.className = btn.className.replace('border border-white/15', 'border-2 border-gold ring-2 ring-gold/30');
+        } else {
+          btn.className = btn.className.replace('border-2 border-gold ring-2 ring-gold/30', 'border border-white/15');
+        }
+      });
+    }
+
+    // =========================================================================
+    // GPS والمزامنة السحابية والطلبات
     // =========================================================================
     function calcDistanceKm(lat1, lon1, lat2, lon2) {
       const toRad = deg => (deg * Math.PI) / 180;
@@ -536,47 +843,62 @@
       };
     }
 
-    function formatGpsRangeText(gps) {
-      if (!gps) return 'لم يُحدد موقع العميل بعد';
-      const statusLabel = gps.inZone
-        ? `ضمن النطاق (${gps.distanceKm} كم من أصل ${gps.maxRadiusKm} كم)`
-        : `خارج النطاق المعتاد (${gps.distanceKm} كم — الحد ${gps.maxRadiusKm} كم)`;
-      const accPart = gps.accuracy ? ` • دقة ±${gps.accuracy}م` : '';
-      return `${gps.lat}, ${gps.lng}${accPart} • ${statusLabel}`;
-    }
-
-    function updateGpsDisplay(gps) {
+    function updateGpsDisplay(gps, errorMessage = '') {
       const rangeSummary = document.getElementById('gps-range-summary');
       const mapLink = document.getElementById('gps-map-link');
       const rangeBox = document.getElementById('gps-range-box');
+      const dot = document.getElementById('gps-indicator-dot');
+      const bar = document.getElementById('gps-range-bar');
+      const pin = document.getElementById('gps-radar-pin');
 
       if (!gps) {
-        rangeSummary.textContent = 'لم يُحدد موقع العميل بعد — اضغط «تحديد موقع GPS» لإظهار النطاق والإحداثيات';
+        dot.className = 'inline-block h-3 w-3 rounded-full bg-amber-400 animate-pulse';
+        bar.style.width = '15%';
+        bar.className = 'h-full rounded-full bg-amber-400 transition-all duration-300';
+        pin.style.left = '50%';
+        pin.style.top = '50%';
+        rangeSummary.textContent = errorMessage || 'لم يُحدد موقع العميل بعد — اضغط «تحديد / تحديث GPS» لإظهار المؤشر';
         mapLink.classList.add('hidden');
-        rangeBox.classList.add('hidden');
+        rangeBox.innerHTML = 'اضغط «تحديد / تحديث GPS» أو اسمح بالوصول للموقع لإظهار الإحداثيات والمسافة داخل النطاق.';
         return;
       }
 
-      rangeSummary.textContent = formatGpsRangeText(gps);
+      const clampedRatio = Math.min(1, gps.distanceKm / gps.maxRadiusKm);
+      const angle = ((Number(gps.lat) + Number(gps.lng)) * 100) % (Math.PI * 2);
+      const maxOffsetPx = 56;
+      const offsetX = Math.cos(angle) * clampedRatio * maxOffsetPx;
+      const offsetY = Math.sin(angle) * clampedRatio * maxOffsetPx;
+      pin.style.left = `calc(50% + ${offsetX.toFixed(1)}px)`;
+      pin.style.top = `calc(50% + ${offsetY.toFixed(1)}px)`;
+
+      const ratioPct = Math.min(100, Math.max(8, Math.round(clampedRatio * 100)));
+      bar.style.width = `${ratioPct}%`;
+
+      if (gps.inZone) {
+        dot.className = 'inline-block h-3 w-3 rounded-full bg-emerald-400';
+        bar.className = 'h-full rounded-full bg-emerald-400 transition-all duration-300';
+      } else {
+        dot.className = 'inline-block h-3 w-3 rounded-full bg-rose-500';
+        bar.className = 'h-full rounded-full bg-rose-500 transition-all duration-300';
+      }
+
+      const accPart = gps.accuracy ? ` • دقة ±${gps.accuracy}م` : '';
+      rangeSummary.textContent = `${gps.lat}, ${gps.lng}${accPart} • ${gps.distanceKm} كم من ${gps.maxRadiusKm} كم (${gps.inZone ? 'داخل النطاق ✓' : 'خارج النطاق !'})`;
+
       mapLink.href = gps.mapUrl;
       mapLink.classList.remove('hidden');
 
-      rangeBox.classList.remove('hidden');
       rangeBox.className = gps.inZone
-        ? 'rounded-xl border border-emerald-400/35 bg-emerald-950/30 p-2 text-[11px] leading-relaxed text-emerald-200'
-        : 'rounded-xl border border-amber-400/35 bg-amber-950/30 p-2 text-[11px] leading-relaxed text-amber-200';
+        ? 'rounded-xl border border-emerald-400/35 bg-emerald-950/30 p-2.5 text-[11px] leading-relaxed text-emerald-200'
+        : 'rounded-xl border border-rose-400/35 bg-rose-950/30 p-2.5 text-[11px] leading-relaxed text-rose-200';
 
       rangeBox.innerHTML = `
         <div><strong>${gps.zoneName}</strong></div>
         <div>الإحداثيات: <span dir="ltr">${gps.lat}, ${gps.lng}</span>${gps.accuracy ? ` (±${gps.accuracy}m)` : ''}</div>
-        <div>نطاق المسافة: <strong>${gps.distanceKm} كم</strong> (النطاق المحدد: حتى ${gps.maxRadiusKm} كم) — <strong>${gps.inZone ? 'داخل النطاق ✓' : 'خارج النطاق !'}</strong></div>
-        <div class="mt-1"><a href="${gps.mapUrl}" target="_blank" rel="noopener noreferrer" class="font-extrabold text-gold underline">عرض الموقع على خرائط Google ↗</a></div>
+        <div>المسافة: <strong>${gps.distanceKm} كم</strong> من أصل <strong>${gps.maxRadiusKm} كم</strong> — <strong>${gps.inZone ? 'ضمن النطاق ✓' : 'خارج النطاق !'}</strong></div>
       `;
     }
 
-    // =========================================================================
-    // 4. توليد نغمة تنبيه صوتي «عميل جديد» بدون ملفات خارجية
-    // =========================================================================
     function playNewCustomerSound(gender = 'male') {
       try {
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -599,14 +921,9 @@
           osc.start(ctx.currentTime + i * 0.14);
           osc.stop(ctx.currentTime + i * 0.14 + 0.3);
         });
-      } catch (e) {
-        // تجاهل إذا منع المتصفح الصوت قبل تفاعل المستخدم
-      }
+      } catch (e) {}
     }
 
-    // =========================================================================
-    // 5. التخزين والمزامنة السحابية (Firebase Realtime Database + احتياطي محلي)
-    // =========================================================================
     function getConfig() {
       try {
         const saved = JSON.parse(localStorage.getItem(STORAGE_KEYS.CONFIG) || 'null');
@@ -682,9 +999,7 @@
         orders = list;
         localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(orders));
         processIncomingOrders(orders);
-      } catch (e) {
-        // استمرار بالبيانات المحلية عند تعذر الاتصال
-      }
+      } catch (e) {}
     }
 
     async function pushOrderToCloud(order) {
@@ -709,7 +1024,11 @@
       const cfg = getConfig();
       if (!cfg.dbUrl) return;
       fetchFirebaseOrders();
-      firebasePollTimer = setInterval(fetchFirebaseOrders, 2500);
+      fetchFirebaseMenu();
+      firebasePollTimer = setInterval(() => {
+        fetchFirebaseOrders();
+        fetchFirebaseMenu();
+      }, 2500);
     }
 
     function processIncomingOrders(list) {
@@ -739,13 +1058,10 @@
     function showNewOrderBanner(order) {
       const banner = document.getElementById('new-order-banner');
       const text = document.getElementById('new-order-banner-text');
-      text.textContent = `أوردر جديد #${order.shortId} — ${order.customerTypeLabel} (${order.customerName}) بإجمالي ${order.total} ج.م`;
+      text.textContent = `أوردر جديد #${order.shortId} — ${order.tierLabel || ''} (${order.customerName}) بإجمالي ${order.total} ج.م`;
       banner.classList.remove('hidden');
     }
 
-    // =========================================================================
-    // 6. عرض المنيو والسلة وإرسال الطلب
-    // =========================================================================
     function renderCategoryFilters() {
       const container = document.getElementById('category-filters');
       container.innerHTML = CATEGORIES.map(cat => {
@@ -771,7 +1087,7 @@
 
     function renderMenu() {
       const q = (document.getElementById('menu-search').value || '').trim().toLowerCase();
-      const filtered = MENU_ITEMS.filter(item => {
+      const filtered = menuItems.filter(item => {
         const matchCat = selectedCategory === 'الكل' || item.category === selectedCategory;
         const matchSearch = !q || item.name.toLowerCase().includes(q) || item.category.toLowerCase().includes(q);
         return matchCat && matchSearch;
@@ -795,7 +1111,7 @@
     }
 
     function addToCart(id) {
-      const item = MENU_ITEMS.find(m => m.id === id);
+      const item = menuItems.find(m => m.id === id);
       if (!item) return;
       const existing = cart.find(c => c.id === id);
       if (existing) {
@@ -859,10 +1175,11 @@
     function captureGPS() {
       const statusEl = document.getElementById('gps-status');
       if (!navigator.geolocation) {
-        statusEl.textContent = 'GPS غير مدعوم على هذا الجهاز';
+        statusEl.textContent = 'GPS غير مدعوم';
+        updateGpsDisplay(null, 'المتصفح أو الجهاز لا يدعم خدمة GPS.');
         return;
       }
-      statusEl.textContent = 'جاري تحديد الموقع والنطاق...';
+      statusEl.textContent = 'جاري تحديد GPS...';
       navigator.geolocation.getCurrentPosition(
         pos => {
           capturedGPS = buildGpsInfo(
@@ -874,10 +1191,13 @@
           statusEl.className = 'truncate text-[11px] font-bold text-emerald-400';
           updateGpsDisplay(capturedGPS);
         },
-        () => {
-          statusEl.textContent = 'تعذر الوصول للموقع';
+        err => {
+          const msg = err && err.code === 1
+            ? 'تم رفض إذن الموقع من المتصفح — فعّل إذن Location واسمح للموقع.'
+            : 'تعذر قراءة موقع GPS — تأكد من تشغيل GPS في الهاتف.';
+          statusEl.textContent = 'GPS غير متاح';
           statusEl.className = 'truncate text-[11px] text-amber-400';
-          updateGpsDisplay(null);
+          updateGpsDisplay(null, msg);
         },
         { enableHighAccuracy: true, timeout: 10000 }
       );
@@ -924,6 +1244,7 @@
       }
 
       const custInfo = resolveCustomerMeta(customerName, customerGender);
+      const tierObj = CUSTOMER_TIERS[customerTier] || CUSTOMER_TIERS.none;
       const total = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
       const now = Date.now();
       const id = `ord_${now}_${Math.random().toString(36).slice(2, 6)}`;
@@ -936,11 +1257,15 @@
         customerGender,
         isNewCustomer: custInfo.isNewCustomer,
         customerTypeLabel: custInfo.label,
+        tierKey: tierObj.key,
+        tierLabel: `${tierObj.label} (${tierObj.cardText})`,
         carInfo,
         gps: capturedGPS,
         items: cart.map(i => ({ id: i.id, name: i.name, price: i.price, qty: i.qty })),
         total,
         status: 'pending',
+        assignedBarista: null,
+        approvedBy: null,
         createdAt: now
       };
 
@@ -950,7 +1275,7 @@
 
       cart = [];
       renderCart();
-      feedback.textContent = `تم إرسال الأوردر (${order.shortId}) بنجاح — الحالة: ${custInfo.label} وبانتظار موافقة المسؤول.`;
+      feedback.textContent = `تم إرسال الأوردر (${order.shortId}) — ${order.tierLabel} (${custInfo.label}).`;
       feedback.className = 'rounded-xl bg-emerald-500/15 p-2.5 text-center text-xs font-bold text-emerald-300';
       feedback.classList.remove('hidden');
 
@@ -959,9 +1284,6 @@
       }
     }
 
-    // =========================================================================
-    // 7. صلاحيات الإدارة والمسؤولين والباريستا + الموافقة وطباعة الكاش
-    // =========================================================================
     function openAuthModal() {
       document.getElementById('pin-input').value = '';
       document.getElementById('pin-error').classList.add('hidden');
@@ -994,6 +1316,7 @@
       currentSession = null;
       document.getElementById('staff-workspace').classList.add('hidden');
       document.getElementById('logout-btn').classList.add('hidden');
+      document.getElementById('tab-admin_control').classList.add('hidden');
       document.getElementById('auth-icon').textContent = '🔒';
       document.getElementById('auth-label').textContent = 'دخول الإدارة / المسؤولين / الباريستا';
     }
@@ -1006,19 +1329,36 @@
       document.getElementById('auth-label').textContent = currentSession.label;
       document.getElementById('active-role-badge').textContent = currentSession.label;
 
+      const adminTabBtn = document.getElementById('tab-admin_control');
+      if (currentSession.role === 'admin') {
+        adminTabBtn.classList.remove('hidden');
+        renderAdminMenuManager();
+      } else {
+        adminTabBtn.classList.add('hidden');
+      }
+
       if (currentSession.role === 'barista1') {
         switchStaffTab('barista1');
       } else if (currentSession.role === 'barista2') {
         switchStaffTab('barista2');
+      } else if (currentSession.role === 'admin') {
+        switchStaffTab('admin_control');
       } else {
         switchStaffTab('all');
       }
     }
 
     function switchStaffTab(tab) {
+      if (tab === 'admin_control' && (!currentSession || currentSession.role !== 'admin')) {
+        tab = 'all';
+      }
       activeStaffTab = tab;
       document.querySelectorAll('.staff-tab').forEach(btn => {
-        btn.className = 'staff-tab rounded-xl border border-white/15 bg-black/50 px-3.5 py-2 text-xs font-bold text-gray-200 hover:border-gold/50';
+        if (btn.id === 'tab-admin_control') {
+          btn.className = 'staff-tab rounded-xl border border-gold/40 bg-gold/10 px-3.5 py-2 text-xs font-extrabold text-gold hover:bg-gold hover:text-black';
+        } else {
+          btn.className = 'staff-tab rounded-xl border border-white/15 bg-black/50 px-3.5 py-2 text-xs font-bold text-gray-200 hover:border-gold/50';
+        }
       });
       const activeBtn = document.getElementById(`tab-${tab}`);
       if (activeBtn) {
@@ -1026,7 +1366,12 @@
       }
 
       const settingsPanel = document.getElementById('staff-settings-panel');
+      const adminPanel = document.getElementById('admin-control-panel');
       const ordersFeed = document.getElementById('orders-feed');
+
+      settingsPanel.classList.add('hidden');
+      adminPanel.classList.add('hidden');
+      ordersFeed.classList.add('hidden');
 
       if (tab === 'settings') {
         const cfg = getConfig();
@@ -1035,9 +1380,10 @@
         document.getElementById('fb-project-id').value = cfg.projectId || '';
         document.getElementById('auto-print-on-approve').checked = Boolean(cfg.autoPrint);
         settingsPanel.classList.remove('hidden');
-        ordersFeed.classList.add('hidden');
+      } else if (tab === 'admin_control') {
+        renderAdminMenuManager();
+        adminPanel.classList.remove('hidden');
       } else {
-        settingsPanel.classList.add('hidden');
         ordersFeed.classList.remove('hidden');
         renderStaffOrders();
       }
@@ -1049,6 +1395,9 @@
 
       order.status = 'approved';
       order.approvedBy = currentSession ? currentSession.label : 'مسؤول';
+      if (!order.assignedBarista) {
+        order.assignedBarista = 'barista1';
+      }
       order.approvedAt = Date.now();
       order.printedToCashier = true;
 
@@ -1066,6 +1415,9 @@
       if (!order) return;
       order.assignedBarista = baristaKey;
       order.status = 'preparing';
+      if (!order.approvedBy) {
+        order.approvedBy = currentSession ? currentSession.label : 'مسؤول';
+      }
       await pushOrderToCloud(order);
       renderStaffOrders();
     }
@@ -1104,10 +1456,11 @@
         </div>
         <div style="margin-bottom:6px;border-bottom:1px dashed #000;padding-bottom:6px;">
           <div>العميل: <strong>${order.customerName}</strong> (${order.customerTypeLabel})</div>
+          <div>العضوية: <strong>${order.tierLabel || 'غير مشترك'}</strong></div>
           <div>السيارة: ${order.carInfo}</div>
           <div>GPS: ${gpsText}</div>
-          <div>الموافقة بواسطة: ${order.approvedBy || 'مسؤول'}</div>
-          <div>الباريستا: ${order.assignedBarista === 'barista1' ? 'باريستا 1' : order.assignedBarista === 'barista2' ? 'باريستا 2' : 'غير معيّن'}</div>
+          <div>المسؤول / الموافقة: ${order.approvedBy || 'محمود حسن / رقيه محمود'}</div>
+          <div>الباريستا المرتبط: ${order.assignedBarista === 'barista1' ? 'باريستا 1' : order.assignedBarista === 'barista2' ? 'باريستا 2' : 'غير معيّن'}</div>
         </div>
         <div style="margin-bottom:6px;border-bottom:1px dashed #000;padding-bottom:6px;">
           ${itemsRows}
@@ -1130,16 +1483,21 @@
       const completedCount = orders.filter(o => o.status === 'completed').length;
       const newCustCount = orders.filter(o => o.isNewCustomer).length;
 
+      const b1Count = orders.filter(o => o.assignedBarista === 'barista1' && o.status !== 'completed').length;
+      const b2Count = orders.filter(o => o.assignedBarista === 'barista2' && o.status !== 'completed').length;
+
       document.getElementById('stat-pending').textContent = pendingCount;
       document.getElementById('stat-approved').textContent = approvedCount;
       document.getElementById('stat-completed').textContent = completedCount;
       document.getElementById('stat-new-customers').textContent = newCustCount;
+      document.getElementById('count-barista1').textContent = b1Count;
+      document.getElementById('count-barista2').textContent = b2Count;
 
       let filtered = [...orders];
       if (activeStaffTab === 'barista1') {
-        filtered = filtered.filter(o => o.status !== 'pending' && (!o.assignedBarista || o.assignedBarista === 'barista1'));
+        filtered = filtered.filter(o => o.assignedBarista === 'barista1');
       } else if (activeStaffTab === 'barista2') {
-        filtered = filtered.filter(o => o.status !== 'pending' && (!o.assignedBarista || o.assignedBarista === 'barista2'));
+        filtered = filtered.filter(o => o.assignedBarista === 'barista2');
       }
 
       const feed = document.getElementById('orders-feed');
@@ -1153,17 +1511,22 @@
       }
 
       feed.innerHTML = filtered.map(order => {
+        const baristaName = order.assignedBarista === 'barista1'
+          ? 'باريستا 1'
+          : order.assignedBarista === 'barista2'
+            ? 'باريستا 2'
+            : 'غير مرتبط بباريستا بعد';
+
         const statusMap = {
           pending: { label: 'بانتظار موافقة المسؤول', cls: 'bg-amber-500/20 text-amber-300 border-amber-500/40' },
-          approved: { label: 'موافق عليه — جاهز للكاش والباريستا', cls: 'bg-sky-500/20 text-sky-300 border-sky-500/40' },
-          preparing: { label: `قيد التحضير (${order.assignedBarista === 'barista2' ? 'باريستا 2' : 'باريستا 1'})`, cls: 'bg-purple-500/20 text-purple-300 border-purple-500/40' },
+          approved: { label: `موافق عليه — مرتبط بـ ${baristaName}`, cls: 'bg-sky-500/20 text-sky-300 border-sky-500/40' },
+          preparing: { label: `قيد التحضير لدى ${baristaName}`, cls: 'bg-purple-500/20 text-purple-300 border-purple-500/40' },
           completed: { label: 'مكتمل التسليم', cls: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' }
         };
         const st = statusMap[order.status] || statusMap.pending;
 
-        const custBadgeCls = order.isNewCustomer
-          ? 'bg-emerald-500 text-black font-black'
-          : 'bg-white/10 text-gray-300 font-bold';
+        const tierInfo = CUSTOMER_TIERS[order.tierKey] || CUSTOMER_TIERS.none;
+        const tierText = order.tierLabel || `${tierInfo.label} (${tierInfo.cardText})`;
 
         const itemsHtml = order.items.map(i => `
           <li class="flex justify-between text-xs text-gray-200">
@@ -1175,26 +1538,36 @@
         const canApprove = currentSession && (currentSession.role === 'admin' || currentSession.role === 'supervisor');
 
         const gpsLine = order.gps
-          ? `📍 GPS: ${order.gps.lat}, ${order.gps.lng} • نطاق: ${order.gps.distanceKm ?? '-'} كم (${order.gps.inZone ? 'داخل النطاق' : 'خارج النطاق'}) <a href="${order.gps.mapUrl || `https://www.google.com/maps?q=${order.gps.lat},${order.gps.lng}`}" target="_blank" rel="noopener noreferrer" class="font-bold text-gold underline">الخريطة ↗</a>`
+          ? `📍 GPS: ${order.gps.lat}, ${order.gps.lng} • نطاق: ${order.gps.distanceKm ?? '-'} كم (${order.gps.inZone ? 'داخل النطاق ✓' : 'خارج النطاق !'}) <a href="${order.gps.mapUrl || `https://www.google.com/maps?q=${order.gps.lat},${order.gps.lng}`}" target="_blank" rel="noopener noreferrer" class="font-bold text-gold underline">الخريطة ↗</a>`
           : '📍 GPS: غير مرفق';
+
+        const linkSummary = `
+          <div class="rounded-xl border border-gold/20 bg-charcoal px-3 py-2 text-xs text-gray-200">
+            <strong>الربط:</strong> العميل <strong class="text-goldLight">${order.customerName}</strong>
+            ← المسؤول <strong class="text-sky-300">${order.approvedBy || 'محمود حسن / رقيه محمود (بانتظار الاعتماد)'}</strong>
+            ← الباريستا <strong class="text-emerald-300">${baristaName}</strong>
+          </div>
+        `;
 
         return `
           <div class="flex flex-col justify-between space-y-4 rounded-2xl border border-white/10 bg-black/50 p-4">
             <div class="space-y-2">
               <div class="flex flex-wrap items-center justify-between gap-2">
-                <div class="flex items-center gap-2">
+                <div class="flex flex-wrap items-center gap-1.5">
                   <span class="text-sm font-black text-white">#${order.shortId}</span>
-                  <span class="rounded-lg px-2.5 py-0.5 text-[11px] ${custBadgeCls}">${order.customerTypeLabel}</span>
+                  <span class="rounded-lg px-2.5 py-0.5 text-[11px] font-extrabold ${tierInfo.badgeCls}">${tierText}</span>
+                  <span class="rounded-lg bg-white/10 px-2 py-0.5 text-[10px] font-bold text-gray-300">${order.customerTypeLabel}</span>
                 </div>
                 <span class="rounded-lg border px-2.5 py-0.5 text-[11px] font-bold ${st.cls}">${st.label}</span>
               </div>
 
+              ${linkSummary}
+
               <div class="text-xs text-gray-300">
-                <strong>العميل:</strong> ${order.customerName} | <strong>السيارة:</strong> ${order.carInfo}
+                <strong>السيارة:</strong> ${order.carInfo}
               </div>
               <div class="text-[11px] leading-relaxed text-gray-400">
                 ${gpsLine}
-                ${order.approvedBy ? ` • اعتمد بواسطة: <strong class="text-gray-200">${order.approvedBy}</strong>` : ''}
               </div>
 
               <ul class="mt-2 space-y-1 rounded-xl border border-white/10 bg-charcoal p-2.5">
@@ -1221,11 +1594,11 @@
               ` : ''}
 
               ${order.status !== 'completed' ? `
-                <button onclick="assignBaristaAndPrepare('${order.id}', 'barista1')" class="rounded-xl border border-white/15 bg-white/5 px-2.5 py-2 text-xs font-bold text-gray-200 hover:border-gold">
-                  باريستا 1
+                <button onclick="assignBaristaAndPrepare('${order.id}', 'barista1')" class="rounded-xl border ${order.assignedBarista === 'barista1' ? 'border-emerald-400 bg-emerald-500/20 text-emerald-200' : 'border-white/15 bg-white/5 text-gray-200 hover:border-gold'} px-2.5 py-2 text-xs font-bold">
+                  ربط باريستا 1
                 </button>
-                <button onclick="assignBaristaAndPrepare('${order.id}', 'barista2')" class="rounded-xl border border-white/15 bg-white/5 px-2.5 py-2 text-xs font-bold text-gray-200 hover:border-gold">
-                  باريستا 2
+                <button onclick="assignBaristaAndPrepare('${order.id}', 'barista2')" class="rounded-xl border ${order.assignedBarista === 'barista2' ? 'border-emerald-400 bg-emerald-500/20 text-emerald-200' : 'border-white/15 bg-white/5 text-gray-200 hover:border-gold'} px-2.5 py-2 text-xs font-bold">
+                  ربط باريستا 2
                 </button>
                 <button onclick="completeOrder('${order.id}')" class="rounded-xl bg-sky-500/20 px-3 py-2 text-xs font-extrabold text-sky-300 hover:bg-sky-500 hover:text-black">
                   تم التسليم
@@ -1237,15 +1610,20 @@
       }).join('');
     }
 
-    // =========================================================================
-    // 8. التهيئة الأولية
-    // =========================================================================
     if (broadcastChannel) {
       broadcastChannel.onmessage = event => {
-        if (event.data && event.data.type === 'orders_updated') {
+        if (!event.data) return;
+        if (event.data.type === 'orders_updated') {
           orders = event.data.orders || [];
           localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(orders));
           processIncomingOrders(orders);
+        } else if (event.data.type === 'menu_updated') {
+          menuItems = event.data.menuItems || [...DEFAULT_MENU_ITEMS];
+          localStorage.setItem(STORAGE_KEYS.MENU, JSON.stringify(menuItems));
+          renderMenu();
+          if (currentSession && currentSession.role === 'admin') {
+            renderAdminMenuManager();
+          }
         }
       };
     }
@@ -1253,13 +1631,18 @@
     window.addEventListener('storage', e => {
       if (e.key === STORAGE_KEYS.ORDERS) {
         loadLocalOrders();
+      } else if (e.key === STORAGE_KEYS.MENU) {
+        loadMenuItems();
+        renderMenu();
       }
     });
 
+    loadMenuItems();
     renderCategoryFilters();
     renderMenu();
     renderCart();
-    updateGpsDisplay(null);
+    setCustomerTier('7vip');
+    captureGPS();
     updateSyncBadge();
     loadLocalOrders();
     startFirebaseSync();
