@@ -1,412 +1,638 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MPW Limousine Coffee — نظام الطلبات والـ VIP والموافقات</title>
-  <style>
-    :root {
-      --bg: #0a0a0c;
-      --surface: #141418;
-      --surface-2: #1c1c22;
-      --gold: #d4af37;
-      --mint: #10b981;
-      --warn: #f59e0b;
-      --danger: #ef4444;
-      --text: #f4f4f6;
-      --muted: #9ca3af;
-      --border: #2b2b34;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      padding: 16px;
-      font-family: Tahoma, Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-    }
-    .container {
-      max-width: 980px;
-      margin: 0 auto;
-    }
-    .header {
-      background: linear-gradient(135deg, #141418 0%, #221c0c 100%);
-      border: 1px solid var(--gold);
-      border-radius: 14px;
-      padding: 16px;
-      margin-bottom: 14px;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-    }
-    .title {
-      color: var(--gold);
-      font-size: 20px;
-      font-weight: bold;
-    }
-    .subtitle {
-      color: var(--muted);
-      font-size: 13px;
-      margin-top: 4px;
-    }
-    .sound-bar {
-      background: var(--surface);
-      border: 1px solid rgba(16, 185, 129, 0.4);
-      border-radius: 12px;
-      padding: 12px 14px;
-      margin-bottom: 16px;
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 10px;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: 1.15fr 0.85fr;
-      gap: 16px;
-    }
-    @media (max-width: 800px) {
-      .grid { grid-template-columns: 1fr; }
-    }
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 16px;
-      margin-bottom: 16px;
-    }
-    .card-title {
-      color: var(--gold);
-      font-size: 16px;
-      font-weight: bold;
-      margin-bottom: 12px;
-    }
-    label {
-      display: block;
-      font-size: 13px;
-      color: var(--muted);
-      margin-bottom: 5px;
-    }
-    input, select, textarea {
-      width: 100%;
-      padding: 10px 12px;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      background: var(--surface-2);
-      color: var(--text);
-      font-size: 14px;
-      margin-bottom: 12px;
-      font-family: inherit;
-    }
-    button {
-      padding: 10px 14px;
-      border-radius: 10px;
-      border: none;
-      font-weight: bold;
-      font-size: 13px;
-      cursor: pointer;
-    }
-    .btn-gold {
-      background: var(--gold);
-      color: #111;
-      width: 100%;
-    }
-    .btn-mint {
-      background: var(--mint);
-      color: #052319;
-    }
-    .btn-reject {
-      background: var(--danger);
-      color: #fff;
-    }
-    .btn-ghost {
-      background: var(--surface-2);
-      color: var(--text);
-      border: 1px solid var(--border);
-    }
-    .order-box {
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 14px;
-      margin-bottom: 12px;
-    }
-    .order-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 8px;
-    }
-    .pill-vip {
-      background: rgba(212, 175, 55, 0.16);
-      color: var(--gold);
-      border: 1px solid rgba(212, 175, 55, 0.4);
-      padding: 2px 8px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: bold;
-    }
-    .st-pending { color: var(--warn); font-weight: bold; }
-    .st-approved { color: var(--mint); font-weight: bold; }
-    .st-rejected { color: var(--danger); font-weight: bold; }
-    .customer-status-box {
-      margin-top: 10px;
-      padding: 10px 12px;
-      border-radius: 10px;
-      background: #101014;
-      border-right: 4px solid var(--mint);
-      font-size: 13px;
-      line-height: 1.6;
-    }
-    .btn-row {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-top: 10px;
-    }
-    .muted { color: var(--muted); font-size: 12px; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <div>
-        <div class="title">MPW LIMOUSINE COFFEE</div>
-        <div class="subtitle">طلب من السيارة (Curbside) • عضويات VIP • اعتماد الإدارة والمشرفين والباريستا • تنبيه صوتي فوري</div>
-      </div>
-      <button class="btn-ghost" onclick="resetOrders()">🗑️ تفريغ الطلبات</button>
-    </div>
+// استكمال الأصناف وحالة البرنامج
+    const EXTRA_ITEMS = [
+      ['مشروب طاقة ليموزين خاص', 'سموزي وفريش ومشروبات طاقة', 90],
+      ['آيس ريد بول ليمون', 'سموزي وفريش ومشروبات طاقة', 95],
+      ['كرواسون زبدة فرنسي', 'مخبوزات وحلويات وسناكس', 55],
+      ['كرواسون شوكولاتة', 'مخبوزات وحلويات وسناكس', 65],
+      ['تشيز كيك كلاسيك', 'مخبوزات وحلويات وسناكس', 85],
+      ['براونيز شوكولاتة داكنة', 'مخبوزات وحلويات وسناكس', 75],
+      ['كوكيز شوكولاتة ساخنة', 'مخبوزات وحلويات وسناكس', 65],
+      ['تارت لوتس', 'مخبوزات وحلويات وسناكس', 80]
+    ];
 
-    <div class="sound-bar">
-      <button class="btn-mint" onclick="enableSoundAlert()">🔔 تفعيل صوت إشعار الطلبات الجديدة</button>
-      <span id="sound-status" class="muted">اضغط لتفعيل الصوت حتى يصدر تنبيه تلقائي عند وصول أي أوردر جديد</span>
-    </div>
+    const MENU_ITEMS = [...base, ...EXTRA_ITEMS].map(([name, category, price], idx) => ({
+      id: 'ITEM-' + (idx + 1),
+      name,
+      category,
+      price: Number(price)
+    }));
 
-    <div class="grid">
-      <!-- نموذج طلب العميل -->
-      <div class="card">
-        <div class="card-title">🚗 طلب جديد من السيارة (Curbside Order)</div>
-        <form onsubmit="submitOrder(event)">
-          <label for="car-info">رقم / نوع السيارة أو اسم العميل</label>
-          <input id="car-info" type="text" placeholder="مثال: سيارة سوداء لوحة 4821 — عميل VIP" required />
+    const ROLE_PINS = {
+      '2026': { role: 'admin', label: 'المدير العام: محمود بورسعيد' },
+      '1010': { role: 'supervisor', label: 'مسؤول التشغيل: محمود حسن' },
+      '2020': { role: 'supervisor', label: 'مسؤولة التشغيل: رقيه محمود' },
+      '1111': { role: 'barista1', label: 'باريستا 1' },
+      '2222': { role: 'barista2', label: 'باريستا 2' }
+    };
 
-          <label for="vip-tier">فئة العضوية / الخدمة</label>
-          <select id="vip-tier">
-            <option value="عادي (Standard)">عادي (Standard)</option>
-            <option value="VIP Gold">VIP Gold</option>
-            <option value="VIP Platinum">VIP Platinum</option>
-          </select>
+    const CENTER_COORDS = { lat: 31.2465, lng: 29.9735 }; // ميامي - الإسكندرية
+    const MAX_RADIUS_KM = 15;
+    const ORDERS_STORAGE_KEY = 'mpw_limousine_orders_live_v1';
+    const MENU_STORAGE_KEY = 'mpw_limousine_menu_live_v1';
 
-          <label for="item-name">المشروب / الصنف</label>
-          <select id="item-name">
-            <option value="إسبريسو دبل">إسبريسو دبل</option>
-            <option value="كورتادو بارد">كورتادو بارد</option>
-            <option value="فلات وايت">فلات وايت</option>
-            <option value="قهوة فرنساوي">قهوة فرنساوي</option>
-            <option value="قهوة نوتيلا">قهوة نوتيلا</option>
-            <option value="V60 مقطر">V60 مقطر</option>
-          </select>
+    let currentRole = null;
+    let currentRoleLabel = '';
+    let activeStaffTab = 'all';
+    let selectedCategory = 'الكل';
+    let cart = [];
+    let customerTier = '7vip';
+    let customerGender = 'male';
+    let currentGPS = null;
+    let customMenu = loadCustomMenu();
+    let orders = loadOrders();
+    let audioUnlocked = false;
 
-          <label for="pickup-spot">نقطة الاستلام / ملاحظات السيارة</label>
-          <input id="pickup-spot" type="text" placeholder="مثال: صف الانتظار الأول، الوصول خلال 3 دقائق" />
-
-          <button type="submit" class="btn-gold">إرسال الأوردر الآن</button>
-        </form>
-      </div>
-
-      <!-- لوحة اعتماد الإدارة / المشرفين / الباريستا -->
-      <div class="card">
-        <div class="card-title">☕ لوحة الاعتماد والتشغيل</div>
-        <label for="approver-role">اختر صفة المعتمد</label>
-        <select id="approver-role">
-          <option value="المدير العام">المدير العام</option>
-          <option value="مشرف التشغيل">مشرف التشغيل</option>
-          <option value="الباريستا">الباريستا</option>
-        </select>
-
-        <div class="muted" style="line-height: 1.75;">
-          • كل طلب جديد يدخل بحالة <strong>بانتظار الموافقة</strong> ويُشغّل صوت الإشعار.<br />
-          • عند الضغط على <strong>موافقة</strong> يظهر للعميل فوراً أن طلبه تمت الموافقة عليه وجارٍ تحضيره.<br />
-          • يمكنك التبديل بين صفة <strong>المدير العام</strong> أو <strong>مشرف التشغيل</strong> أو <strong>الباريستا</strong> في أي لحظة.
-        </div>
-      </div>
-    </div>
-
-    <!-- قائمة الطلبات -->
-    <div class="card">
-      <div class="card-title">📋 سجل الطلبات وحالة العميل المباشرة</div>
-      <div id="orders-container"></div>
-    </div>
-  </div>
-
-  <script>
-    const STORAGE_KEY = "mpw_limousine_full_orders_v2";
-    let soundEnabled = false;
-    let ordersList = loadFromStorage();
-
-    function loadFromStorage() {
+    function loadCustomMenu() {
       try {
-        const data = localStorage.getItem(STORAGE_KEY);
-        return data ? JSON.parse(data) : [];
-      } catch (err) {
+        const raw = localStorage.getItem(MENU_STORAGE_KEY);
+        return raw ? JSON.parse(raw) : MENU_ITEMS;
+      } catch {
+        return MENU_ITEMS;
+      }
+    }
+
+    function saveCustomMenu() {
+      try {
+        localStorage.setItem(MENU_STORAGE_KEY, JSON.stringify(customMenu));
+      } catch {}
+    }
+
+    function loadOrders() {
+      try {
+        const raw = localStorage.getItem(ORDERS_STORAGE_KEY);
+        return raw ? JSON.parse(raw) : [];
+      } catch {
         return [];
       }
     }
 
-    function saveToStorage() {
+    function saveOrders() {
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(ordersList));
-      } catch (err) {}
+        localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(orders));
+      } catch {}
     }
 
-    function enableSoundAlert() {
-      soundEnabled = true;
-      document.getElementById("sound-status").textContent = "✅ صوت الإشعارات مفعّل وجاهز لكل أوردر جديد";
-      playAlertTone();
+    // فك قفل الصوت تلقائياً عند أول تفاعل في الصفحة + إمكانية تشغيله لأي أوردر جديد
+    function unlockAudioContext() {
+      audioUnlocked = true;
+    }
+    document.addEventListener('click', unlockAudioContext, { once: true });
+
+    function playNewCustomerSound(gender = 'male') {
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        const now = ctx.currentTime;
+        const notes = gender === 'female' ? [1046.5, 1318.5, 1567.98] : [783.99, 1046.5, 1318.5];
+
+        notes.forEach((freq, i) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, now + i * 0.14);
+          gain.gain.setValueAtTime(0.25, now + i * 0.14);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now + i * 0.14);
+          osc.stop(now + i * 0.14 + 0.12);
+        });
+      } catch {}
     }
 
-    function playAlertTone() {
-      if (!soundEnabled) return;
-      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-      if (!AudioContextClass) return;
-
-      const ctx = new AudioContextClass();
-      const t = ctx.currentTime;
-      const notes = [880, 1174.66, 880];
-
-      notes.forEach((freq, i) => {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = "triangle";
-        osc.frequency.setValueAtTime(freq, t + i * 0.14);
-        gain.gain.setValueAtTime(0.25, t + i * 0.14);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start(t + i * 0.14);
-        osc.stop(t + i * 0.14 + 0.12);
+    function setCustomerTier(tier) {
+      customerTier = tier;
+      document.querySelectorAll('.tier-btn').forEach((btn) => {
+        btn.classList.remove('border-2', 'border-gold');
+        btn.classList.add('border', 'border-white/15');
       });
+      const activeBtn = document.getElementById(`tier-${tier}-btn`);
+      if (activeBtn) {
+        activeBtn.classList.remove('border', 'border-white/15');
+        activeBtn.classList.add('border-2', 'border-gold');
+      }
     }
 
-    function submitOrder(e) {
-      e.preventDefault();
-      const carInfoEl = document.getElementById("car-info");
-      const vipTierEl = document.getElementById("vip-tier");
-      const itemNameEl = document.getElementById("item-name");
-      const pickupSpotEl = document.getElementById("pickup-spot");
-
-      const order = {
-        id: "MPW-" + Date.now().toString().slice(-5),
-        carInfo: carInfoEl.value.trim(),
-        vipTier: vipTierEl.value,
-        itemName: itemNameEl.value,
-        pickupSpot: pickupSpotEl.value.trim(),
-        status: "pending",
-        approvedBy: "",
-        time: new Date().toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit" }),
-        customerMessage: "⏳ تم استلام طلبك وهو الآن بانتظار موافقة الإدارة أو المشرف أو الباريستا."
-      };
-
-      ordersList.unshift(order);
-      saveToStorage();
-      renderOrdersList();
-      playAlertTone();
-
-      carInfoEl.value = "";
-      pickupSpotEl.value = "";
+    function setCustomerGender(gender) {
+      customerGender = gender;
+      const mBtn = document.getElementById('gender-male-btn');
+      const fBtn = document.getElementById('gender-female-btn');
+      if (gender === 'male') {
+        mBtn.className = 'rounded-xl border border-gold bg-gold/20 py-2 text-xs font-extrabold text-gold';
+        fBtn.className = 'rounded-xl border border-white/15 bg-charcoal py-2 text-xs font-bold text-gray-300';
+      } else {
+        fBtn.className = 'rounded-xl border border-gold bg-gold/20 py-2 text-xs font-extrabold text-gold';
+        mBtn.className = 'rounded-xl border border-white/15 bg-charcoal py-2 text-xs font-bold text-gray-300';
+      }
     }
 
-    function approveOrder(id) {
-      const role = document.getElementById("approver-role").value;
-      ordersList = ordersList.map((o) => {
-        if (o.id !== id) return o;
-        return {
-          ...o,
-          status: "approved",
-          approvedBy: role,
-          customerMessage: `✅ تمت الموافقة على أوردرك بواسطة (${role}) وجارٍ تحضيره الآن.`
-        };
-      });
-      saveToStorage();
-      renderOrdersList();
+    function haversineKm(lat1, lon1, lat2, lon2) {
+      const R = 6371;
+      const dLat = ((lat2 - lat1) * Math.PI) / 180;
+      const dLon = ((lon2 - lon1) * Math.PI) / 180;
+      const a =
+        Math.sin(dLat / 2) ** 2 +
+        Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLon / 2) ** 2;
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     }
 
-    function rejectOrder(id) {
-      const role = document.getElementById("approver-role").value;
-      ordersList = ordersList.map((o) => {
-        if (o.id !== id) return o;
-        return {
-          ...o,
-          status: "rejected",
-          approvedBy: role,
-          customerMessage: `❌ نعتذر، تعذّر اعتماد الطلب حالياً بواسطة (${role}).`
-        };
-      });
-      saveToStorage();
-      renderOrdersList();
-    }
+    function captureGPS() {
+      const gpsStatus = document.getElementById('gps-status');
+      const summaryEl = document.getElementById('gps-range-summary');
+      const boxEl = document.getElementById('gps-range-box');
+      const barEl = document.getElementById('gps-range-bar');
+      const pinEl = document.getElementById('gps-radar-pin');
+      const linkEl = document.getElementById('gps-map-link');
 
-    function resetOrders() {
-      ordersList = [];
-      saveToStorage();
-      renderOrdersList();
-    }
-
-    function renderOrdersList() {
-      const wrap = document.getElementById("orders-container");
-      if (!wrap) return;
-
-      if (ordersList.length === 0) {
-        wrap.innerHTML = `<div class="muted">لا توجد طلبات حالياً. أرسل أوردر من نموذج السيارة لتجربة الصوت والموافقة.</div>`;
+      if (!navigator.geolocation) {
+        gpsStatus.textContent = 'المتصفح لا يدعم GPS';
+        summaryEl.textContent = 'GPS غير مدعوم على هذا الجهاز.';
         return;
       }
 
-      wrap.innerHTML = ordersList
+      gpsStatus.textContent = 'جاري تحديد الموقع...';
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const { latitude, longitude } = pos.coords;
+          const distKm = haversineKm(CENTER_COORDS.lat, CENTER_COORDS.lng, latitude, longitude);
+          currentGPS = { lat: latitude, lng: longitude, distKm: Number(distKm.toFixed(2)) };
+
+          const inRange = distKm <= MAX_RADIUS_KM;
+          const pct = Math.min(100, Math.max(10, Math.round((distKm / MAX_RADIUS_KM) * 100)));
+
+          gpsStatus.textContent = `تم التحديد (${currentGPS.distKm} كم)`;
+          summaryEl.textContent = inRange
+            ? `ضمن نطاق الخدمة (${currentGPS.distKm} كم من أصل ${MAX_RADIUS_KM} كم)`
+            : `خارج النطاق المعتاد (${currentGPS.distKm} كم من أصل ${MAX_RADIUS_KM} كم)`;
+
+          boxEl.textContent = `الإحداثيات: ${latitude.toFixed(5)}, ${longitude.toFixed(5)} • المسافة: ${currentGPS.distKm} كم`;
+          barEl.style.width = `${pct}%`;
+          barEl.className = `h-full rounded-full transition-all duration-300 ${inRange ? 'bg-emerald-400' : 'bg-amber-400'}`;
+
+          const offsetPx = Math.min(54, Math.round((distKm / MAX_RADIUS_KM) * 54));
+          pinEl.style.transform = `translate(calc(-50% + ${offsetPx}px), calc(-50% - ${Math.round(offsetPx * 0.4)}px))`;
+
+          linkEl.href = `https://www.google.com/maps?q=${latitude},${longitude}`;
+          linkEl.classList.remove('hidden');
+        },
+        () => {
+          gpsStatus.textContent = 'تعذر الوصول للموقع';
+          summaryEl.textContent = 'يرجى السماح بصلاحية الموقع (GPS) لتحديد المسافة بدقة.';
+        }
+      );
+    }
+
+    function renderCategories() {
+      const wrap = document.getElementById('category-filters');
+      wrap.innerHTML = CATEGORIES.map((cat) => {
+        const active = selectedCategory === cat;
+        return `<button onclick="selectCategory('${cat}')" class="rounded-xl px-3.5 py-1.5 text-xs font-extrabold transition ${
+          active ? 'bg-gold text-black' : 'border border-white/15 bg-charcoal text-gray-300 hover:border-gold/50'
+        }">${cat}</button>`;
+      }).join('');
+    }
+
+    function selectCategory(cat) {
+      selectedCategory = cat;
+      renderCategories();
+      renderMenu();
+    }
+
+    function renderMenu() {
+      const grid = document.getElementById('menu-grid');
+      const query = (document.getElementById('menu-search')?.value || '').trim().toLowerCase();
+
+      const filtered = customMenu.filter((item) => {
+        const matchCat = selectedCategory === 'الكل' || item.category === selectedCategory;
+        const matchSearch = !query || item.name.toLowerCase().includes(query) || item.category.toLowerCase().includes(query);
+        return matchCat && matchSearch;
+      });
+
+      grid.innerHTML = filtered
+        .map(
+          (item) => `
+          <div class="flex flex-col justify-between rounded-2xl border border-white/10 bg-charcoal p-4 transition hover:border-gold/40">
+            <div>
+              <span class="rounded-full bg-white/5 px-2.5 py-0.5 text-[10px] font-bold text-gray-400">${item.category}</span>
+              <h4 class="mt-2 text-sm font-extrabold text-white">${item.name}</h4>
+            </div>
+            <div class="mt-4 flex items-center justify-between">
+              <span class="text-sm font-black text-gold">${item.price.toFixed(2)} ج.م</span>
+              <button onclick="addToCart('${item.id}')" class="rounded-xl bg-gold/15 px-3 py-1.5 text-xs font-extrabold text-gold transition hover:bg-gold hover:text-black">
+                + أضف للسلة
+              </button>
+            </div>
+          </div>
+        `
+        )
+        .join('');
+    }
+
+    function addToCart(itemId) {
+      const item = customMenu.find((m) => m.id === itemId);
+      if (!item) return;
+      const existing = cart.find((c) => c.id === itemId);
+      if (existing) {
+        existing.qty += 1;
+      } else {
+        cart.push({ ...item, qty: 1 });
+      }
+      renderCart();
+    }
+
+    function updateCartQty(itemId, delta) {
+      cart = cart
+        .map((c) => (c.id === itemId ? { ...c, qty: c.qty + delta } : c))
+        .filter((c) => c.qty > 0);
+      renderCart();
+    }
+
+    function renderCart() {
+      const wrap = document.getElementById('cart-items');
+      const totalEl = document.getElementById('cart-total');
+
+      if (cart.length === 0) {
+        wrap.innerHTML = '<p class="py-6 text-center text-gray-500">السلة فارغة حالياً — أضف أصنافاً من المنيو</p>';
+        totalEl.textContent = '0.00 ج.م';
+        return;
+      }
+
+      const total = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+      totalEl.textContent = `${total.toFixed(2)} ج.م`;
+
+      wrap.innerHTML = cart
+        .map(
+          (item) => `
+          <div class="flex items-center justify-between gap-2 rounded-xl border border-white/10 bg-charcoal p-2.5">
+            <div>
+              <div class="font-extrabold text-white">${item.name}</div>
+              <div class="text-[11px] text-gold">${(item.price * item.qty).toFixed(2)} ج.م</div>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <button onclick="updateCartQty('${item.id}', -1)" class="h-6 w-6 rounded-lg bg-white/10 font-black text-white">-</button>
+              <span class="min-w-5 text-center font-bold">${item.qty}</span>
+              <button onclick="updateCartQty('${item.id}', 1)" class="h-6 w-6 rounded-lg bg-gold font-black text-black">+</button>
+            </div>
+          </div>
+        `
+        )
+        .join('');
+    }
+
+    function submitOrder() {
+      const nameInput = document.getElementById('customer-name');
+      const carInput = document.getElementById('car-info');
+      const feedback = document.getElementById('order-feedback');
+
+      const customerName = nameInput.value.trim();
+      if (!customerName) {
+        feedback.textContent = 'من فضلك اكتب اسم العميل أو رقم الهاتف أولاً.';
+        feedback.className = 'rounded-xl bg-red-500/15 p-2.5 text-center text-xs font-bold text-red-300';
+        return;
+      }
+
+      if (cart.length === 0) {
+        feedback.textContent = 'السلة فارغة! اختر صنفاً واحداً على الأقل من المنيو.';
+        feedback.className = 'rounded-xl bg-amber-500/15 p-2.5 text-center text-xs font-bold text-amber-300';
+        return;
+      }
+
+      const total = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+      const newOrder = {
+        id: 'ORD-' + Date.now().toString().slice(-6),
+        customerName,
+        customerTier,
+        customerGender,
+        carInfo: carInput.value.trim() || 'سيارة العميل',
+        gps: currentGPS,
+        items: [...cart],
+        total,
+        status: 'pending_approval', // pending_approval | approved_barista1 | approved_barista2 | completed | rejected
+        assignedBarista: null,
+        approvedBy: null,
+        customerNotice: '⏳ تم إرسال طلبك بنجاح وهو الآن بانتظار موافقة المسؤول أو الإدارة أو الباريستا.',
+        createdAt: new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })
+      };
+
+      orders.unshift(newOrder);
+      saveOrders();
+      renderOrdersFeed();
+
+      // تشغيل صوت الإشعار + إظهار شريط التنبيه لأي أوردر جديد
+      playNewCustomerSound(customerGender);
+      const banner = document.getElementById('new-order-banner');
+      const bannerText = document.getElementById('new-order-banner-text');
+      if (banner && bannerText) {
+        bannerText.textContent = `وصل أوردر جديد (${newOrder.id}) من ${customerName} (${newOrder.carInfo}) — بانتظار الموافقة`;
+        banner.classList.remove('hidden');
+      }
+
+      feedback.textContent = `تم إرسال الأوردر (${newOrder.id}) — حالتك الحالية: بانتظار موافقة المسؤول / الإدارة / الباريستا.`;
+      feedback.className = 'rounded-xl bg-emerald-500/15 p-2.5 text-center text-xs font-bold text-emerald-300';
+
+      cart = [];
+      renderCart();
+      nameInput.value = '';
+      carInput.value = '';
+    }
+
+    // موافقة المسؤول / الإدارة / الباريستا وتحديث حالة العميل والباريستا
+    function approveAndAssignOrder(orderId, baristaSlot = 'barista1') {
+      const approverName = currentRoleLabel || 'المسؤول / الإدارة / الباريستا';
+      const baristaLabel = baristaSlot === 'barista2' ? 'باريستا 2' : 'باريستا 1';
+
+      orders = orders.map((o) => {
+        if (o.id !== orderId) return o;
+        return {
+          ...o,
+          status: baristaSlot === 'barista2' ? 'approved_barista2' : 'approved_barista1',
+          assignedBarista: baristaSlot,
+          approvedBy: approverName,
+          customerNotice: `✅ تمت الموافقة على أوردرك بواسطة (${approverName}) وتم تحويله إلى (${baristaLabel}) وجارٍ التحضير لسيارتك.`
+        };
+      });
+
+      saveOrders();
+      renderOrdersFeed();
+    }
+
+    function completeOrder(orderId) {
+      const actor = currentRoleLabel || 'الباريستا / المسؤول';
+      orders = orders.map((o) => {
+        if (o.id !== orderId) return o;
+        return {
+          ...o,
+          status: 'completed',
+          customerNotice: `🎉 تم تجهيز وتسليم أوردرك بنجاح (${actor}). نتمنى لك رحلة سعيدة مع MPW Limousine Coffee.`
+        };
+      });
+      saveOrders();
+      renderOrdersFeed();
+    }
+
+    function rejectOrder(orderId) {
+      const actor = currentRoleLabel || 'المسؤول / الإدارة';
+      orders = orders.map((o) => {
+        if (o.id !== orderId) return o;
+        return {
+          ...o,
+          status: 'rejected',
+          approvedBy: actor,
+          customerNotice: `❌ نعتذر، تعذّر اعتماد الطلب حالياً بواسطة (${actor}).`
+        };
+      });
+      saveOrders();
+      renderOrdersFeed();
+    }
+
+    function openAuthModal() {
+      document.getElementById('pin-error').classList.add('hidden');
+      document.getElementById('pin-input').value = '';
+      const modal = document.getElementById('auth-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeAuthModal() {
+      const modal = document.getElementById('auth-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function verifyPin() {
+      const pin = document.getElementById('pin-input').value.trim();
+      const matched = ROLE_PINS[pin];
+      if (!matched) {
+        document.getElementById('pin-error').classList.remove('hidden');
+        return;
+      }
+
+      currentRole = matched.role;
+      currentRoleLabel = matched.label;
+
+      document.getElementById('auth-icon').textContent = '🔓';
+      document.getElementById('auth-label').textContent = matched.label;
+      document.getElementById('active-role-badge').textContent = matched.label;
+      document.getElementById('logout-btn').classList.remove('hidden');
+      document.getElementById('staff-workspace').classList.remove('hidden');
+
+      if (currentRole === 'admin') {
+        document.getElementById('tab-admin_control').classList.remove('hidden');
+      } else {
+        document.getElementById('tab-admin_control').classList.add('hidden');
+      }
+
+      closeAuthModal();
+      renderOrdersFeed();
+      renderAdminMenuManager();
+    }
+
+    function logoutRole() {
+      currentRole = null;
+      currentRoleLabel = '';
+      document.getElementById('auth-icon').textContent = '🔒';
+      document.getElementById('auth-label').textContent = 'دخول الإدارة / المسؤولين / الباريستا';
+      document.getElementById('logout-btn').classList.add('hidden');
+      document.getElementById('staff-workspace').classList.add('hidden');
+    }
+
+    function switchStaffTab(tab) {
+      activeStaffTab = tab;
+      document.querySelectorAll('.staff-tab').forEach((btn) => {
+        btn.className =
+          'staff-tab rounded-xl border border-white/15 bg-black/50 px-3.5 py-2 text-xs font-bold text-gray-200 hover:border-gold/50';
+      });
+      if (tab === 'admin_control') {
+        document.getElementById('tab-admin_control').className =
+          'staff-tab rounded-xl bg-gold px-3.5 py-2 text-xs font-extrabold text-black';
+      } else {
+        const activeBtn = document.getElementById(`tab-${tab}`);
+        if (activeBtn) activeBtn.className = 'staff-tab rounded-xl bg-gold px-3.5 py-2 text-xs font-extrabold text-black';
+      }
+
+      document.getElementById('admin-control-panel').classList.toggle('hidden', tab !== 'admin_control');
+      document.getElementById('staff-settings-panel').classList.toggle('hidden', tab !== 'settings');
+      document.getElementById('orders-feed').classList.toggle('hidden', tab === 'admin_control' || tab === 'settings');
+
+      if (tab === 'admin_control') renderAdminMenuManager();
+      renderOrdersFeed();
+    }
+
+    function renderOrdersFeed() {
+      const pendingCount = orders.filter((o) => o.status === 'pending_approval').length;
+      const approvedCount = orders.filter((o) => o.status === 'approved_barista1' || o.status === 'approved_barista2').length;
+      const completedCount = orders.filter((o) => o.status === 'completed').length;
+      const b1Count = orders.filter((o) => o.assignedBarista === 'barista1' && o.status !== 'completed').length;
+      const b2Count = orders.filter((o) => o.assignedBarista === 'barista2' && o.status !== 'completed').length;
+
+      document.getElementById('stat-pending').textContent = pendingCount;
+      document.getElementById('stat-approved').textContent = approvedCount;
+      document.getElementById('stat-completed').textContent = completedCount;
+      document.getElementById('stat-new-customers').textContent = orders.length;
+      document.getElementById('count-barista1').textContent = b1Count;
+      document.getElementById('count-barista2').textContent = b2Count;
+
+      const feed = document.getElementById('orders-feed');
+      if (!feed) return;
+
+      const visibleOrders = orders.filter((o) => {
+        if (activeStaffTab === 'barista1') return o.assignedBarista === 'barista1';
+        if (activeStaffTab === 'barista2') return o.assignedBarista === 'barista2';
+        return true;
+      });
+
+      if (visibleOrders.length === 0) {
+        feed.innerHTML = '<div class="col-span-2 rounded-2xl border border-white/10 bg-black/40 p-6 text-center text-xs text-gray-400">لا توجد طلبات في هذا القسم حالياً.</div>';
+        return;
+      }
+
+      feed.innerHTML = visibleOrders
         .map((o) => {
-          let statusHtml = `<span class="st-pending">بانتظار الموافقة</span>`;
-          if (o.status === "approved") {
-            statusHtml = `<span class="st-approved">تمت الموافقة (${o.approvedBy}) — جاري التحضير</span>`;
-          } else if (o.status === "rejected") {
-            statusHtml = `<span class="st-rejected">مرفوض (${o.approvedBy})</span>`;
-          }
+          const badgeMap = {
+            pending_approval: '<span class="rounded-full bg-amber-500/15 px-2.5 py-1 text-[11px] font-extrabold text-amber-300">بانتظار الموافقة</span>',
+            approved_barista1: `<span class="rounded-full bg-sky-500/15 px-2.5 py-1 text-[11px] font-extrabold text-sky-300">معتمد → باريستا 1 (${o.approvedBy || ''})</span>`,
+            approved_barista2: `<span class="rounded-full bg-indigo-500/15 px-2.5 py-1 text-[11px] font-extrabold text-indigo-300">معتمد → باريستا 2 (${o.approvedBy || ''})</span>`,
+            completed: '<span class="rounded-full bg-emerald-500/15 px-2.5 py-1 text-[11px] font-extrabold text-emerald-300">تم التسليم</span>',
+            rejected: '<span class="rounded-full bg-red-500/15 px-2.5 py-1 text-[11px] font-extrabold text-red-300">مرفوض</span>'
+          };
+
+          const itemsHtml = o.items.map((it) => `<li>${it.name} × ${it.qty} (${(it.price * it.qty).toFixed(2)} ج.م)</li>`).join('');
 
           return `
-            <div class="order-box">
-              <div class="order-head">
+            <div class="space-y-3 rounded-2xl border border-white/10 bg-black/45 p-4">
+              <div class="flex flex-wrap items-center justify-between gap-2">
                 <div>
-                  <strong>${o.id}</strong> — <span>${o.carInfo}</span>
-                  <span class="pill-vip">${o.vipTier}</span>
-                  <span class="muted">(${o.time})</span>
+                  <span class="text-sm font-black text-gold">${o.id}</span>
+                  <span class="mx-1.5 text-xs font-extrabold text-white">${o.customerName}</span>
+                  <span class="rounded-md bg-white/10 px-2 py-0.5 text-[10px] font-bold text-goldLight">${o.customerTier.toUpperCase()}</span>
                 </div>
-                <div>${statusHtml}</div>
-              </div>
-              <div><strong>الصنف:</strong> ${o.itemName}</div>
-              ${o.pickupSpot ? `<div class="muted" style="margin-top:4px;"><strong>الاستلام / ملاحظات:</strong> ${o.pickupSpot}</div>` : ""}
-
-              <div class="customer-status-box">
-                <strong>الظاهر للعميل:</strong> ${o.customerMessage}
+                ${badgeMap[o.status] || ''}
               </div>
 
-              ${
-                o.status === "pending"
-                  ? `
-                    <div class="btn-row">
-                      <button class="btn-mint" onclick="approveOrder('${o.id}')">✅ موافقة على الأوردر</button>
-                      <button class="btn-reject" onclick="rejectOrder('${o.id}')">✖ رفض الأوردر</button>
-                    </div>
-                  `
-                  : ""
-              }
+              <div class="text-xs text-gray-300">
+                <strong>السيارة:</strong> ${o.carInfo} • <strong>الوقت:</strong> ${o.createdAt}
+                ${o.gps ? ` • <strong>المسافة:</strong> ${o.gps.distKm} كم` : ''}
+              </div>
+
+              <ul class="list-disc space-y-1 pr-5 text-xs text-gray-200">${itemsHtml}</ul>
+
+              <div class="flex items-center justify-between border-t border-white/10 pt-2 text-xs font-extrabold">
+                <span class="text-gray-400">الإجمالي:</span>
+                <span class="text-gold">${o.total.toFixed(2)} ج.م</span>
+              </div>
+
+              <div class="rounded-xl border border-emerald-500/25 bg-emerald-950/25 p-2.5 text-xs text-emerald-200">
+                <strong>حالة العميل:</strong> ${o.customerNotice}
+              </div>
+
+              <div class="flex flex-wrap gap-2 pt-1">
+                ${
+                  o.status === 'pending_approval'
+                    ? `
+                      <button onclick="approveAndAssignOrder('${o.id}', 'barista1')" class="rounded-xl bg-emerald-500 px-3 py-1.5 text-xs font-black text-black hover:bg-emerald-400">
+                        ✓ موافقة → باريستا 1
+                      </button>
+                      <button onclick="approveAndAssignOrder('${o.id}', 'barista2')" class="rounded-xl bg-sky-400 px-3 py-1.5 text-xs font-black text-black hover:bg-sky-300">
+                        ✓ موافقة → باريستا 2
+                      </button>
+                      <button onclick="rejectOrder('${o.id}')" class="rounded-xl bg-red-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-red-500">
+                        ✕ رفض
+                      </button>
+                    `
+                    : ''
+                }
+                ${
+                  o.status === 'approved_barista1' || o.status === 'approved_barista2'
+                    ? `
+                      <button onclick="completeOrder('${o.id}')" class="rounded-xl bg-gold px-3 py-1.5 text-xs font-black text-black hover:bg-goldLight">
+                        ✔ تم التسليم للسيارة
+                      </button>
+                    `
+                    : ''
+                }
+              </div>
             </div>
           `;
         })
-        .join("");
+        .join('');
     }
 
-    renderOrdersList();
+    function renderAdminMenuManager() {
+      const wrap = document.getElementById('admin-menu-list');
+      if (!wrap) return;
+      const q = (document.getElementById('admin-menu-search')?.value || '').trim().toLowerCase();
+      const list = customMenu.filter((m) => !q || m.name.toLowerCase().includes(q) || m.category.toLowerCase().includes(q));
+
+      wrap.innerHTML = list
+        .map(
+          (m) => `
+          <div class="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-white/10 bg-charcoal p-2.5 text-xs">
+            <div>
+              <strong class="text-white">${m.name}</strong>
+              <span class="mr-2 text-[11px] text-gray-400">(${m.category})</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <input type="number" step="0.5" min="1" value="${m.price}" onchange="adminUpdatePrice('${m.id}', this.value)" class="w-24 rounded-lg border border-white/15 bg-black/70 px-2 py-1 text-xs font-bold text-gold" />
+              <button onclick="adminDeleteMenuItem('${m.id}')" class="rounded-lg bg-red-500/20 px-2.5 py-1 font-bold text-red-300 hover:bg-red-500 hover:text-white">حذف</button>
+            </div>
+          </div>
+        `
+        )
+        .join('');
+    }
+
+    function adminAddMenuItem() {
+      const name = document.getElementById('new-item-name').value.trim();
+      const category = document.getElementById('new-item-category').value;
+      const price = parseFloat(document.getElementById('new-item-price').value);
+      if (!name || isNaN(price) || price <= 0) return;
+
+      customMenu.unshift({ id: 'CUSTOM-' + Date.now(), name, category, price });
+      saveCustomMenu();
+      renderMenu();
+      renderAdminMenuManager();
+      document.getElementById('new-item-name').value = '';
+      document.getElementById('new-item-price').value = '';
+    }
+
+    function adminUpdatePrice(id, val) {
+      const price = parseFloat(val);
+      if (isNaN(price) || price <= 0) return;
+      customMenu = customMenu.map((m) => (m.id === id ? { ...m, price } : m));
+      saveCustomMenu();
+      renderMenu();
+    }
+
+    function adminDeleteMenuItem(id) {
+      customMenu = customMenu.filter((m) => m.id !== id);
+      saveCustomMenu();
+      renderMenu();
+      renderAdminMenuManager();
+    }
+
+    function resetMenuToDefault() {
+      customMenu = [...MENU_ITEMS];
+      saveCustomMenu();
+      renderMenu();
+      renderAdminMenuManager();
+    }
+
+    function saveCloudAndPrintSettings() {
+      document.getElementById('sync-status-badge').textContent = 'متصل بالنظام المحلي / السحابي';
+    }
+
+    function clearCloudSettings() {
+      document.getElementById('fb-db-url').value = 'https://mpw-limousine-coffee-default-rtdb.firebaseio.com';
+    }
+
+    // تهيئة أولية
+    document.getElementById('sync-status-badge').textContent = 'جاهز للتشغيل المباشر';
+    document.getElementById('fb-db-url').value = 'https://mpw-limousine-coffee-default-rtdb.firebaseio.com';
+    renderCategories();
+    renderMenu();
+    renderCart();
+    renderOrdersFeed();
+    captureGPS();
   </script>
 </body>
 </html>
