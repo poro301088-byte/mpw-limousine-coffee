@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -72,22 +73,22 @@
 </head>
 <body class="min-h-screen bg-obsidian text-gray-100 selection:bg-gold selection:text-black">
 
-  <!-- هيدر علوي مبسط: يبدأ بالعميل ويحتوي على خانة اونر -->
+  <!-- هيدر علوي: يبدأ بالعميل ويحتوي على خانة اونر -->
   <header class="sticky top-0 z-40 border-b border-gold/25 bg-charcoal/95 backdrop-blur">
-    <div class="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-3 px-4 py-3">
+    <div class="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-3">
       <div class="flex items-center gap-3">
         <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-gold to-amber-600 text-lg font-black text-black shadow-lg shadow-gold/20">
           ☕
         </div>
         <div>
           <h1 class="text-base font-extrabold text-gold sm:text-lg">MPW Limousine Coffee</h1>
-          <p class="text-[11px] text-gray-400">تسجيل بيانات العميل وطلب السيارة</p>
+          <p class="text-[11px] text-gray-400">تسجيل بيانات العميل واختيار المشروبات</p>
         </div>
       </div>
 
       <div class="flex flex-wrap items-center gap-2">
-        <button type="button" onclick="enableImprovedAlertSound()" class="rounded-xl border border-emerald-400/40 bg-emerald-500/10 px-3 py-1.5 text-xs font-extrabold text-emerald-300 transition hover:bg-emerald-500/20">
-          🔔 تفعيل صوت الإشعار
+        <button type="button" onclick="playCleanNotificationTone()" class="rounded-xl border border-emerald-400/40 bg-emerald-500/10 px-3 py-1.5 text-xs font-extrabold text-emerald-300 transition hover:bg-emerald-500/20">
+          🔔 نغمة تنبيه هادئة
         </button>
 
         <span id="sync-status-badge" class="hidden rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-bold text-emerald-300">
@@ -107,7 +108,7 @@
   </header>
 
   <!-- تنبيه وصول أوردر جديد -->
-  <div id="new-order-banner" class="hidden mx-auto mt-3 max-w-4xl px-4">
+  <div id="new-order-banner" class="hidden mx-auto mt-3 max-w-5xl px-4">
     <div class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-emerald-400/50 bg-emerald-950/70 px-4 py-2.5 text-emerald-100 shadow-lg">
       <div class="flex items-center gap-2 text-xs font-bold sm:text-sm">
         <span>🔔</span>
@@ -119,24 +120,30 @@
     </div>
   </div>
 
-  <!-- المحتوى الرئيسي: يبدأ مباشرة بقائمة تسجيل العميل -->
-  <main class="mx-auto max-w-4xl space-y-6 px-4 py-6">
+  <!-- المحتوى الرئيسي: يبدأ بتسجيل العميل + قائمة المشروبات الظاهرة بوضوح -->
+  <main class="mx-auto max-w-5xl space-y-6 px-4 py-6">
 
-    <!-- 1. قائمة تسجيل بيانات العميل المطلوبة (البداية الأساسية للبرنامج) -->
+    <!-- 1. تسجيل بيانات العميل (البداية الأساسية للبرنامج) -->
     <section id="customer-registration-section" class="space-y-4 rounded-3xl border border-gold/35 bg-charcoal p-5 shadow-2xl">
       <div class="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3">
         <div>
           <h2 class="text-lg font-extrabold text-gold">تسجيل بيانات العميل وطلب السيارة</h2>
-          <p class="text-xs text-gray-400">سجّل بياناتك واختر فئة عضويتك وبيانات سيارتك ليتم تسجيل طلبك واعتماده</p>
+          <p class="text-xs text-gray-400">سجّل بياناتك واختر عضويتك وبيانات سيارتك ثم حدّد مشروباتك بالأسفل</p>
         </div>
-        <button
-          type="button"
-          onclick="playFerrariStartupSound()"
-          class="rounded-xl border border-red-500/40 bg-red-500/15 px-3 py-1.5 text-xs font-extrabold text-red-200 transition hover:bg-red-500/25"
-        >
-          🏎️ صوت الفراري
-        </button>
+
+        <!-- مشغل صوت حقيقي (رابط أو ملف صوتي من جهازك بدلاً من التوليف الصناعي المزعج) -->
+        <div class="flex flex-wrap items-center gap-2">
+          <button type="button" onclick="toggleCustomEngineAudio()" class="rounded-xl border border-gold/40 bg-gold/10 px-3 py-1.5 text-xs font-extrabold text-gold hover:bg-gold hover:text-black">
+            ▶️ تشغيل الصوت المخصص
+          </button>
+          <label class="cursor-pointer rounded-xl border border-white/15 bg-black/60 px-3 py-1.5 text-xs font-bold text-gray-200 hover:border-gold/40">
+            📁 اختيار ملف صوتي
+            <input id="custom-audio-file" type="file" accept="audio/*" onchange="handleCustomAudioUpload(event)" class="hidden" />
+          </label>
+        </div>
       </div>
+
+      <audio id="custom-sound-player" preload="none" class="hidden"></audio>
 
       <!-- تسجيل سريع بجيميل أو فيسبوك -->
       <div class="space-y-2.5 rounded-2xl border border-gold/20 bg-black/50 p-3.5">
@@ -265,37 +272,52 @@
           خرائط Google ↗
         </a>
       </div>
+    </section>
 
-      <!-- اختيار صنف سريع أو من السلة -->
-      <div class="rounded-2xl border border-white/10 bg-black/45 p-3.5 space-y-2.5">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-extrabold text-goldLight">اختيار صنف للطلب</span>
-          <span id="cart-total" class="text-sm font-black text-gold">0.00 ج.م</span>
+    <!-- 2. قائمة المشروبات والأصناف (ظاهرة بالكامل للعميل مع بحث وفئات وسلة) -->
+    <section id="drinks-menu-section" class="grid gap-5 rounded-3xl border border-gold/25 bg-charcoal p-5 shadow-2xl lg:grid-cols-12">
+      <div class="space-y-4 lg:col-span-8">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3">
+          <div>
+            <h2 class="text-lg font-extrabold text-gold">قائمة المشروبات والأصناف</h2>
+            <p class="text-xs text-gray-400">اختر مشروبك أو الصنف المطلوب لإضافته مباشرة إلى سلة الطلب</p>
+          </div>
+          <input
+            id="menu-search-input"
+            oninput="renderDrinksGrid()"
+            type="text"
+            placeholder="ابحث عن مشروب..."
+            class="w-full rounded-xl border border-white/15 bg-black/60 px-3.5 py-2 text-xs text-white focus:border-gold focus:outline-none sm:w-56"
+          />
         </div>
 
-        <div class="flex flex-wrap gap-2">
-          <select id="quick-item-select" class="flex-1 rounded-xl border border-white/15 bg-charcoal px-3 py-2 text-xs text-white focus:border-gold focus:outline-none"></select>
-          <button type="button" onclick="addQuickSelectedItem()" class="inline-flex items-center gap-1.5 rounded-xl bg-gold px-3.5 py-2 text-xs font-black text-black hover:bg-goldLight">
-            <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
-              <rect x="6" y="4" width="12" height="16" rx="3" />
-              <line x1="9" y1="8" x2="15" y2="8" />
-              <line x1="9" y1="12" x2="15" y2="12" />
-              <line x1="9" y1="16" x2="15" y2="16" />
-            </svg>
-            <span>ابعتهالو 😂</span>
-          </button>
-        </div>
+        <!-- أزرار الفئات -->
+        <div id="menu-categories-bar" class="flex flex-wrap gap-2"></div>
 
-        <div id="cart-items" class="space-y-1.5 text-xs">
-          <p class="py-2 text-center text-gray-500">السلة فارغة — اضغط «ابعتهالو 😂» لإضافة صنف</p>
-        </div>
+        <!-- شبكة المشروبات -->
+        <div id="drinks-grid" class="grid gap-2.5 sm:grid-cols-2"></div>
       </div>
 
-      <button type="button" onclick="submitOrder()" class="w-full rounded-2xl bg-gradient-to-r from-gold to-amber-500 py-3 text-sm font-black text-black shadow-lg shadow-gold/20 transition hover:brightness-110">
-        إرسال الأوردر الآن 🚀
-      </button>
+      <!-- سلة الطلب والإرسال -->
+      <aside class="flex flex-col justify-between space-y-4 rounded-2xl border border-gold/30 bg-black/50 p-4 lg:col-span-4">
+        <div class="space-y-3">
+          <div class="flex items-center justify-between border-b border-white/10 pb-2.5">
+            <h3 class="text-sm font-black text-goldLight">سلة المشروبات</h3>
+            <span id="cart-total" class="text-sm font-black text-gold">0.00 ج.م</span>
+          </div>
 
-      <p id="order-feedback" class="hidden rounded-xl bg-emerald-500/15 p-2.5 text-center text-xs font-bold text-emerald-300"></p>
+          <div id="cart-items" class="max-h-72 space-y-2 overflow-y-auto pr-1 text-xs">
+            <p class="py-4 text-center text-gray-500">لم تختر مشروبات بعد — اضغط «إضافة» من القائمة.</p>
+          </div>
+        </div>
+
+        <div class="space-y-2.5 pt-2">
+          <button type="button" onclick="submitOrder()" class="w-full rounded-2xl bg-gradient-to-r from-gold to-amber-500 py-3 text-sm font-black text-black shadow-lg shadow-gold/20 transition hover:brightness-110">
+            إرسال الأوردر الآن 🚀
+          </button>
+          <p id="order-feedback" class="hidden rounded-xl bg-emerald-500/15 p-2.5 text-center text-xs font-bold text-emerald-300"></p>
+        </div>
+      </aside>
     </section>
 
     <!-- متابعة حالة الطلب للعميل + نطق "هتشرب ابسط" عند الموافقة -->
@@ -319,17 +341,17 @@
       </div>
     </section>
 
-    <!-- 2. محتوى اونر: مخفي حتى فتحه بكلمة المرور 301088poro -->
+    <!-- 3. محتوى اونر: مخفي حتى فتحه بباسورد 301088poro مع بقاء مهام المدير العام والمسؤولين والباريستا كاملة -->
     <section id="owner-hidden-content" class="hidden space-y-6 rounded-3xl border-2 border-gold/50 bg-charcoal p-4 sm:p-6 shadow-2xl">
       <div class="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
         <div>
           <span class="rounded-lg bg-gold px-2.5 py-0.5 text-xs font-black text-black">اونر (OWNER)</span>
-          <h2 class="mt-1 text-lg font-extrabold text-white">لوحة الاونر — القيادة، الخريطة، المنيو، المسؤولون والباريستا</h2>
+          <h2 class="mt-1 text-lg font-extrabold text-white">لوحة الاونر — القيادة، المسؤولون، الباريستا، الخريطة والمنيو</h2>
         </div>
 
         <div class="flex flex-wrap gap-2">
           <button type="button" onclick="switchOwnerTab('all')" id="tab-all" class="owner-tab rounded-xl bg-gold px-3.5 py-2 text-xs font-extrabold text-black">
-            الطلبات والعمليات
+            المدير العام والمسؤولون
           </button>
           <button type="button" onclick="switchOwnerTab('barista1')" id="tab-barista1" class="owner-tab rounded-xl border border-white/15 bg-black/50 px-3.5 py-2 text-xs font-bold text-gray-200 hover:border-gold/50">
             ☕ باريستا 1 (<span id="count-barista1">0</span>)
@@ -341,24 +363,24 @@
             🛠️ المنيو والأسعار
           </button>
           <button type="button" onclick="switchOwnerTab('settings')" id="tab-settings" class="owner-tab rounded-xl border border-white/15 bg-black/50 px-3.5 py-2 text-xs font-bold text-gray-200 hover:border-gold/50">
-            ⚙️ السحابة والطباعة
+            ⚙️ السحابة والصوت والطباعة
           </button>
         </div>
       </div>
 
-      <!-- بطاقات القيادة والمسؤولين والباريستا -->
+      <!-- مهام وأدوار المدير العام، المسؤولين، والباريستا -->
       <div class="grid gap-3 sm:grid-cols-3">
-        <div class="rounded-2xl border border-gold/30 bg-black/50 p-3.5">
-          <div class="text-[11px] font-bold text-goldLight">المدير العام</div>
-          <div class="mt-1 text-sm font-black text-white">محمود بورسعيد</div>
+        <div class="rounded-2xl border border-gold/30 bg-black/50 p-3.5 space-y-1">
+          <div class="text-[11px] font-bold text-goldLight">المدير العام — محمود بورسعيد</div>
+          <div class="text-xs font-extrabold text-white">الإشراف العام، اعتماد الطلبات، الأسعار والطباعة</div>
         </div>
-        <div class="rounded-2xl border border-sky-400/30 bg-black/50 p-3.5">
-          <div class="text-[11px] font-bold text-sky-300">المسؤولون عن الطلبات والربط</div>
-          <div class="mt-1 text-sm font-black text-white">محمود حسن • رقيه محمود</div>
+        <div class="rounded-2xl border border-sky-400/30 bg-black/50 p-3.5 space-y-1">
+          <div class="text-[11px] font-bold text-sky-300">المسؤولون — محمود حسن • رقيه محمود</div>
+          <div class="text-xs font-extrabold text-white">مراجعة بيانات العميل والسيارة وتحويل الطلب للباريستا</div>
         </div>
-        <div class="rounded-2xl border border-emerald-400/30 bg-black/50 p-3.5">
-          <div class="text-[11px] font-bold text-emerald-300">مسار الربط التشغيلي</div>
-          <div class="mt-1 text-xs font-extrabold text-emerald-300">العميل ← المسؤول ← باريستا 1 / باريستا 2</div>
+        <div class="rounded-2xl border border-emerald-400/30 bg-black/50 p-3.5 space-y-1">
+          <div class="text-[11px] font-bold text-emerald-300">الباريستا — باريستا 1 / باريستا 2</div>
+          <div class="text-xs font-extrabold text-white">استلام الطلب المعتمد، بدء التحضير، جاهز للتسليم وإتمام التسليم</div>
         </div>
       </div>
 
@@ -390,7 +412,7 @@
           <div id="stat-pending" class="mt-1 text-xl font-black text-amber-400">0</div>
         </div>
         <div class="rounded-2xl border border-white/10 bg-black/45 p-3">
-          <div class="text-[11px] text-gray-400">معتمد للباريستا</div>
+          <div class="text-[11px] text-gray-400">قيد التحضير لدى الباريستا</div>
           <div id="stat-approved" class="mt-1 text-xl font-black text-sky-400">0</div>
         </div>
         <div class="rounded-2xl border border-white/10 bg-black/45 p-3">
@@ -414,7 +436,7 @@
 
         <div class="grid gap-3 rounded-2xl border border-white/10 bg-charcoal p-3 sm:grid-cols-12">
           <div class="sm:col-span-4">
-            <label class="mb-1 block text-[11px] font-bold text-gray-300">اسم الصنف</label>
+            <label class="mb-1 block text-[11px] font-bold text-gray-300">اسم المشروب / الصنف</label>
             <input id="new-item-name" type="text" placeholder="مثال: سبانش لاتيه" class="w-full rounded-xl border border-white/15 bg-black/70 px-3 py-2 text-xs text-white focus:border-gold focus:outline-none" />
           </div>
           <div class="sm:col-span-4">
@@ -443,21 +465,21 @@
         <div id="admin-menu-list" class="max-h-80 space-y-2 overflow-y-auto pr-1"></div>
       </div>
 
-      <!-- إعدادات السحابة والطباعة داخل اونر -->
+      <!-- إعدادات السحابة والصوت والطباعة داخل اونر -->
       <div id="owner-settings-panel" class="hidden space-y-4 rounded-2xl border border-gold/30 bg-black/50 p-4">
-        <h3 class="text-sm font-extrabold text-gold">إعدادات السحابة (Firebase) وطباعة الكاش</h3>
+        <h3 class="text-sm font-extrabold text-gold">إعدادات السحابة (Firebase)، رابط الصوت وطباعة الكاش</h3>
         <div class="grid gap-3 sm:grid-cols-2">
           <div>
             <label class="mb-1 block text-xs font-bold text-gray-300">Database URL</label>
             <input id="fb-db-url" type="text" class="w-full rounded-xl border border-white/15 bg-charcoal px-3 py-2 text-xs text-white focus:border-gold focus:outline-none" />
           </div>
           <div>
-            <label class="mb-1 block text-xs font-bold text-gray-300">API Key / Auth Secret</label>
-            <input id="fb-api-key" type="text" class="w-full rounded-xl border border-white/15 bg-charcoal px-3 py-2 text-xs text-white focus:border-gold focus:outline-none" />
+            <label class="mb-1 block text-xs font-bold text-gray-300">رابط ملف صوتي مخصص (MP3 / WAV)</label>
+            <input id="custom-audio-url" type="text" placeholder="https://example.com/sound.mp3" class="w-full rounded-xl border border-white/15 bg-charcoal px-3 py-2 text-xs text-white focus:border-gold focus:outline-none" />
           </div>
           <div>
-            <label class="mb-1 block text-xs font-bold text-gray-300">Project ID</label>
-            <input id="fb-project-id" type="text" class="w-full rounded-xl border border-white/15 bg-charcoal px-3 py-2 text-xs text-white focus:border-gold focus:outline-none" />
+            <label class="mb-1 block text-xs font-bold text-gray-300">API Key / Auth Secret</label>
+            <input id="fb-api-key" type="text" class="w-full rounded-xl border border-white/15 bg-charcoal px-3 py-2 text-xs text-white focus:border-gold focus:outline-none" />
           </div>
           <div class="flex items-end">
             <label class="flex cursor-pointer items-center gap-2 rounded-xl border border-white/15 bg-charcoal px-3 py-2.5 text-xs font-bold text-gray-200 w-full">
@@ -477,7 +499,7 @@
         </div>
       </div>
 
-      <!-- قائمة الطلبات الحية للاونر والمسؤولين والباريستا -->
+      <!-- قائمة الطلبات الحية ومهام المدير العام والمسؤولين والباريستا -->
       <div id="orders-feed" class="grid gap-4 md:grid-cols-2"></div>
     </section>
   </main>
@@ -489,7 +511,7 @@
         <h3 class="text-lg font-extrabold text-gold">دخول خانة اونر</h3>
         <button type="button" onclick="closeOwnerModal()" class="text-sm text-gray-400 hover:text-white">✕</button>
       </div>
-      <p class="text-xs text-gray-400">أدخل كلمة المرور لفتح لوحة الاونر (المدير العام، المسؤولين، الباريستا، الخريطة والمنيو).</p>
+      <p class="text-xs text-gray-400">أدخل كلمة المرور لفتح لوحة الاونر ومهام المدير العام والمسؤولين والباريستا.</p>
       <div>
         <label class="mb-1 block text-xs font-bold text-gray-300">كلمة المرور</label>
         <input id="owner-password-input" type="password" placeholder="أدخل كلمة المرور..." class="w-full rounded-xl border border-white/15 bg-black/70 px-4 py-2.5 text-center text-sm font-extrabold tracking-wider text-gold focus:border-gold focus:outline-none" />
@@ -595,13 +617,14 @@
     const CENTER_COORDS = { lat: 31.2465, lng: 29.9735 };
     const MAX_RADIUS_KM = 15;
     const DEFAULT_DB_URL = 'https://mpw-limousine-coffee-default-rtdb.firebaseio.com';
-    const ORDERS_STORAGE_KEY = 'mpw_limousine_orders_live_v4';
-    const MENU_STORAGE_KEY = 'mpw_limousine_menu_live_v4';
-    const SETTINGS_STORAGE_KEY = 'mpw_limousine_settings_v3';
+    const ORDERS_STORAGE_KEY = 'mpw_limousine_orders_live_v5';
+    const MENU_STORAGE_KEY = 'mpw_limousine_menu_live_v5';
+    const SETTINGS_STORAGE_KEY = 'mpw_limousine_settings_v5';
     const LAST_CUSTOMER_ORDER_KEY = 'mpw_limousine_last_customer_order_id';
 
     let isOwnerUnlocked = false;
     let activeOwnerTab = 'all';
+    let activeCategoryFilter = 'الكل';
     let cart = [];
     let customerTier = '7vip';
     let customerGender = 'male';
@@ -614,7 +637,6 @@
     let appSettings = loadSettings();
     let lastCustomerOrderId = localStorage.getItem(LAST_CUSTOMER_ORDER_KEY) || '';
     let cloudPollTimer = null;
-    let ferrariSoundPlayedOnLoad = false;
 
     let leafletMap = null;
     let customerMapMarker = null;
@@ -627,14 +649,14 @@
           : {
               dbUrl: DEFAULT_DB_URL,
               apiKey: '',
-              projectId: 'mpw-limousine-coffee',
+              customAudioUrl: '',
               autoPrintOnApprove: false
             };
       } catch {
         return {
           dbUrl: DEFAULT_DB_URL,
           apiKey: '',
-          projectId: 'mpw-limousine-coffee',
+          customAudioUrl: '',
           autoPrintOnApprove: false
         };
       }
@@ -736,7 +758,8 @@
             try {
               localStorage.setItem(MENU_STORAGE_KEY, JSON.stringify(customMenu));
             } catch {}
-            renderQuickMenuSelect();
+            renderMenuCategories();
+            renderDrinksGrid();
             renderAdminMenuManager();
           }
         }
@@ -761,7 +784,7 @@
             renderCustomerLiveTracker();
 
             if (detectedNewOrder) {
-              playImprovedAlertSound();
+              playCleanNotificationTone();
               showNewOrderBanner(detectedNewOrder);
             }
 
@@ -791,171 +814,55 @@
       }
     }
 
-    // صوت تشغيل محرك الفراري الممتد (~3.2 ثانية) في شاشة التسجيل الأولى
-    function playFerrariStartupSound() {
+    // تشغيل ملف صوتي حقيقي مرفوع أو رابط صوتي مخصص (بدون توليف صناعي مزعج)
+    function handleCustomAudioUpload(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      const player = document.getElementById('custom-sound-player');
+      if (!player) return;
+      const blobUrl = URL.createObjectURL(file);
+      player.src = blobUrl;
+      player.play().catch(() => {});
+    }
+
+    function toggleCustomEngineAudio() {
+      const player = document.getElementById('custom-sound-player');
+      if (!player) return;
+      const url = (document.getElementById('custom-audio-url')?.value || appSettings.customAudioUrl || '').trim();
+      if (url && player.src !== url) {
+        player.src = url;
+      }
+      if (!player.src) {
+        document.getElementById('custom-audio-file')?.click();
+        return;
+      }
+      if (player.paused) {
+        player.play().catch(() => {});
+      } else {
+        player.pause();
+      }
+    }
+
+    // نغمة تنبيه هادئة ونقية عند وصول أوردر جديد
+    function playCleanNotificationTone() {
       try {
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
         if (!AudioCtx) return;
-
         const ctx = new AudioCtx();
         const now = ctx.currentTime;
-        const totalDuration = 3.25;
 
-        // 1. دوران المارش والتقاط المحرك (0.00s -> 0.55s)
-        const crankOsc = ctx.createOscillator();
-        const crankGain = ctx.createGain();
-        crankOsc.type = 'sawtooth';
-        crankOsc.frequency.setValueAtTime(66, now);
-        crankOsc.frequency.setValueAtTime(94, now + 0.11);
-        crankOsc.frequency.setValueAtTime(70, now + 0.22);
-        crankOsc.frequency.setValueAtTime(105, now + 0.33);
-        crankOsc.frequency.exponentialRampToValueAtTime(240, now + 0.55);
-
-        crankGain.gain.setValueAtTime(0.001, now);
-        crankGain.gain.linearRampToValueAtTime(0.20, now + 0.08);
-        crankGain.gain.exponentialRampToValueAtTime(0.001, now + 0.56);
-
-        crankOsc.connect(crankGain);
-        crankGain.connect(ctx.destination);
-        crankOsc.start(now);
-        crankOsc.stop(now + 0.58);
-
-        // 2. توافقات محرك الفراري الممتدة: تشغيل + ريس أول + ريس ثاني + هدوء على الدوران العادي
-        const harmonics = [1.0, 1.5, 2.0, 2.5, 3.0];
-        const masterFilter = ctx.createBiquadFilter();
-        masterFilter.type = 'bandpass';
-        masterFilter.Q.setValueAtTime(2.8, now + 0.48);
-
-        masterFilter.frequency.setValueAtTime(360, now + 0.48);
-        masterFilter.frequency.exponentialRampToValueAtTime(1650, now + 0.92);
-        masterFilter.frequency.exponentialRampToValueAtTime(680, now + 1.45);
-        masterFilter.frequency.exponentialRampToValueAtTime(1950, now + 2.05);
-        masterFilter.frequency.exponentialRampToValueAtTime(520, now + 2.95);
-
-        const masterGain = ctx.createGain();
-        masterGain.gain.setValueAtTime(0.001, now + 0.48);
-        masterGain.gain.linearRampToValueAtTime(0.25, now + 0.85);
-        masterGain.gain.linearRampToValueAtTime(0.14, now + 1.45);
-        masterGain.gain.linearRampToValueAtTime(0.26, now + 2.02);
-        masterGain.gain.exponentialRampToValueAtTime(0.07, now + 2.95);
-        masterGain.gain.exponentialRampToValueAtTime(0.001, now + totalDuration);
-
-        harmonics.forEach((ratio, idx) => {
+        [523.25, 659.25].forEach((freq, i) => {
           const osc = ctx.createOscillator();
-          const hGain = ctx.createGain();
-          osc.type = idx % 2 === 0 ? 'sawtooth' : 'triangle';
-
-          const fIdle = 135 * ratio;
-          const fRev1 = 340 * ratio;
-          const fDip = 185 * ratio;
-          const fRev2 = 390 * ratio;
-          const fEnd = 145 * ratio;
-
-          osc.frequency.setValueAtTime(fIdle, now + 0.48);
-          osc.frequency.exponentialRampToValueAtTime(fRev1, now + 0.92);
-          osc.frequency.exponentialRampToValueAtTime(fDip, now + 1.45);
-          osc.frequency.exponentialRampToValueAtTime(fRev2, now + 2.05);
-          osc.frequency.exponentialRampToValueAtTime(fEnd, now + 2.95);
-
-          hGain.gain.setValueAtTime(0.22 / (idx + 1), now + 0.48);
-          osc.connect(hGain);
-          hGain.connect(masterFilter);
-
-          osc.start(now + 0.48);
-          osc.stop(now + totalDuration + 0.03);
-        });
-
-        // 3. ضجيج عادم واحتراق ممتد لمزيد من الواقعية
-        const bufferSize = Math.floor(ctx.sampleRate * 2.8);
-        const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-        const output = noiseBuffer.getChannelData(0);
-        for (let i = 0; i < bufferSize; i++) {
-          output[i] = (Math.random() * 2 - 1) * 0.35;
-        }
-
-        const whiteNoise = ctx.createBufferSource();
-        whiteNoise.buffer = noiseBuffer;
-
-        const noiseFilter = ctx.createBiquadFilter();
-        noiseFilter.type = 'lowpass';
-        noiseFilter.frequency.setValueAtTime(850, now + 0.48);
-        noiseFilter.frequency.exponentialRampToValueAtTime(2400, now + 0.92);
-        noiseFilter.frequency.exponentialRampToValueAtTime(1100, now + 1.45);
-        noiseFilter.frequency.exponentialRampToValueAtTime(2600, now + 2.05);
-        noiseFilter.frequency.exponentialRampToValueAtTime(620, now + 3.15);
-
-        const noiseGain = ctx.createGain();
-        noiseGain.gain.setValueAtTime(0.001, now + 0.48);
-        noiseGain.gain.linearRampToValueAtTime(0.11, now + 0.88);
-        noiseGain.gain.linearRampToValueAtTime(0.06, now + 1.45);
-        noiseGain.gain.linearRampToValueAtTime(0.12, now + 2.02);
-        noiseGain.gain.exponentialRampToValueAtTime(0.001, now + totalDuration);
-
-        whiteNoise.connect(noiseFilter);
-        noiseFilter.connect(noiseGain);
-        noiseGain.connect(ctx.destination);
-
-        whiteNoise.start(now + 0.48);
-        whiteNoise.stop(now + totalDuration + 0.03);
-
-        masterFilter.connect(masterGain);
-        masterGain.connect(ctx.destination);
-      } catch {}
-    }
-
-    window.addEventListener('DOMContentLoaded', () => {
-      setTimeout(() => {
-        playFerrariStartupSound();
-      }, 150);
-    });
-
-    document.addEventListener(
-      'pointerdown',
-      () => {
-        if (!ferrariSoundPlayedOnLoad) {
-          ferrariSoundPlayedOnLoad = true;
-          playFerrariStartupSound();
-        }
-      },
-      { once: true }
-    );
-
-    // صوت إشعار أفضل وأنظف عند وصول طلب جديد
-    function enableImprovedAlertSound() {
-      playImprovedAlertSound();
-    }
-
-    function playImprovedAlertSound() {
-      try {
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        if (!AudioCtx) return;
-        const ctx = new AudioCtx();
-        const now = ctx.currentTime;
-
-        const glideOsc = ctx.createOscillator();
-        const glideGain = ctx.createGain();
-        glideOsc.type = 'sine';
-        glideOsc.frequency.setValueAtTime(160, now);
-        glideOsc.frequency.exponentialRampToValueAtTime(420, now + 0.28);
-        glideGain.gain.setValueAtTime(0.001, now);
-        glideGain.gain.linearRampToValueAtTime(0.18, now + 0.05);
-        glideGain.gain.exponentialRampToValueAtTime(0.001, now + 0.32);
-        glideOsc.connect(glideGain);
-        glideGain.connect(ctx.destination);
-        glideOsc.start(now);
-        glideOsc.stop(now + 0.34);
-
-        [587.33, 880].forEach((freq, idx) => {
-          const chimeOsc = ctx.createOscillator();
-          const chimeGain = ctx.createGain();
-          chimeOsc.type = 'triangle';
-          chimeOsc.frequency.setValueAtTime(freq, now + 0.24 + idx * 0.13);
-          chimeGain.gain.setValueAtTime(0.22, now + 0.24 + idx * 0.13);
-          chimeGain.gain.exponentialRampToValueAtTime(0.001, now + 0.24 + idx * 0.13 + 0.22);
-          chimeOsc.connect(chimeGain);
-          chimeGain.connect(ctx.destination);
-          chimeOsc.start(now + 0.24 + idx * 0.13);
-          chimeOsc.stop(now + 0.24 + idx * 0.13 + 0.24);
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, now + i * 0.14);
+          gain.gain.setValueAtTime(0.001, now + i * 0.14);
+          gain.gain.linearRampToValueAtTime(0.14, now + i * 0.14 + 0.03);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.14 + 0.25);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now + i * 0.14);
+          osc.stop(now + i * 0.14 + 0.26);
         });
       } catch {}
     }
@@ -1131,18 +1038,68 @@
       );
     }
 
-    function renderQuickMenuSelect() {
-      const sel = document.getElementById('quick-item-select');
-      if (!sel) return;
-      sel.innerHTML = customMenu
-        .map((m) => `<option value="${m.id}">${m.name} — ${Number(m.price).toFixed(2)} ج.م</option>`)
+    function renderMenuCategories() {
+      const bar = document.getElementById('menu-categories-bar');
+      if (!bar) return;
+      const cats = ['الكل', ...new Set(customMenu.map((m) => m.category))];
+      bar.innerHTML = cats
+        .map((c) => {
+          const active = activeCategoryFilter === c;
+          return `
+            <button
+              type="button"
+              onclick="selectMenuCategory('${c.replace(/'/g, "\\'")}')"
+              class="rounded-xl px-3 py-1.5 text-xs font-extrabold transition ${
+                active
+                  ? 'bg-gold text-black'
+                  : 'border border-white/15 bg-black/50 text-gray-300 hover:border-gold/50'
+              }"
+            >
+              ${c}
+            </button>
+          `;
+        })
         .join('');
     }
 
-    function addQuickSelectedItem() {
-      const sel = document.getElementById('quick-item-select');
-      if (!sel || !sel.value) return;
-      addToCart(sel.value);
+    function selectMenuCategory(cat) {
+      activeCategoryFilter = cat;
+      renderMenuCategories();
+      renderDrinksGrid();
+    }
+
+    function renderDrinksGrid() {
+      const grid = document.getElementById('drinks-grid');
+      if (!grid) return;
+      const q = (document.getElementById('menu-search-input')?.value || '').trim().toLowerCase();
+
+      const filtered = customMenu.filter((m) => {
+        const matchCat = activeCategoryFilter === 'الكل' || m.category === activeCategoryFilter;
+        const matchSearch = !q || m.name.toLowerCase().includes(q) || m.category.toLowerCase().includes(q);
+        return matchCat && matchSearch;
+      });
+
+      if (filtered.length === 0) {
+        grid.innerHTML = '<div class="col-span-2 rounded-2xl border border-white/10 bg-black/40 p-6 text-center text-xs text-gray-400">لا توجد مشروبات مطابقة للبحث.</div>';
+        return;
+      }
+
+      grid.innerHTML = filtered
+        .map(
+          (item) => `
+          <div class="flex items-center justify-between gap-2 rounded-2xl border border-white/10 bg-black/45 p-3 transition hover:border-gold/40">
+            <div class="min-w-0">
+              <div class="truncate text-xs font-extrabold text-white">${item.name}</div>
+              <div class="text-[10px] text-gray-400">${item.category}</div>
+              <div class="mt-0.5 text-xs font-black text-gold">${Number(item.price).toFixed(2)} ج.م</div>
+            </div>
+            <button type="button" onclick="addToCart('${item.id}')" class="shrink-0 rounded-xl bg-gold/15 px-3 py-1.5 text-xs font-black text-gold transition hover:bg-gold hover:text-black">
+              + إضافة
+            </button>
+          </div>
+        `
+        )
+        .join('');
     }
 
     function addToCart(itemId) {
@@ -1169,7 +1126,7 @@
       const totalEl = document.getElementById('cart-total');
 
       if (cart.length === 0) {
-        wrap.innerHTML = '<p class="py-2 text-center text-gray-500">السلة فارغة — اضغط «ابعتهالو 😂» لإضافة صنف</p>';
+        wrap.innerHTML = '<p class="py-4 text-center text-gray-500">لم تختر مشروبات بعد — اضغط «إضافة» من القائمة.</p>';
         totalEl.textContent = '0.00 ج.م';
         return;
       }
@@ -1182,8 +1139,8 @@
           (item) => `
           <div class="flex items-center justify-between gap-2 rounded-xl border border-white/10 bg-charcoal px-3 py-2">
             <div>
-              <span class="font-extrabold text-white">${item.name}</span>
-              <span class="mr-2 text-[11px] text-gold">${(item.price * item.qty).toFixed(2)} ج.م</span>
+              <div class="font-extrabold text-white">${item.name}</div>
+              <div class="text-[11px] text-gold">${(item.price * item.qty).toFixed(2)} ج.م</div>
             </div>
             <div class="flex items-center gap-1.5">
               <button type="button" onclick="updateCartQty('${item.id}', -1)" class="h-6 w-6 rounded-lg bg-white/10 font-black text-white">-</button>
@@ -1203,12 +1160,18 @@
 
       const customerName = nameInput.value.trim();
       if (!customerName) {
-        feedback.textContent = 'من فضلك سجّل بياناتك أو اكتب اسم العميل أولاً.';
+        feedback.textContent = 'من فضلك اكتب اسم العميل أو رقم الهاتف أولاً.';
         feedback.className = 'rounded-xl bg-red-500/15 p-2.5 text-center text-xs font-bold text-red-300';
         return;
       }
 
-      const orderItems = cart.length > 0 ? [...cart] : [customMenu[0]].filter(Boolean).map((m) => ({ ...m, qty: 1 }));
+      if (cart.length === 0) {
+        feedback.textContent = 'من فضلك اختر مشروباً واحداً على الأقل من القائمة قبل إرسال الأوردر.';
+        feedback.className = 'rounded-xl bg-amber-500/15 p-2.5 text-center text-xs font-bold text-amber-300';
+        return;
+      }
+
+      const orderItems = [...cart];
       const total = orderItems.reduce((sum, item) => sum + item.price * item.qty, 0);
       const nowMs = Date.now();
 
@@ -1224,7 +1187,7 @@
         status: 'pending_approval',
         assignedBarista: null,
         approvedBy: null,
-        customerNotice: '⏳ تم تسجيل طلبك بنجاح وهو الآن بانتظار الموافقة.',
+        customerNotice: '⏳ تم إرسال طلبك وهو الآن بانتظار موافقة الإدارة والمسؤولين.',
         createdAtMs: nowMs,
         createdAt: new Date(nowMs).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })
       };
@@ -1242,7 +1205,7 @@
       renderOrdersFeed();
       renderCustomerLiveTracker();
 
-      playImprovedAlertSound();
+      playCleanNotificationTone();
       showNewOrderBanner(newOrder);
 
       feedback.textContent = `تم إرسال الطلب (${newOrder.id}) — حالتك الحالية: بانتظار الموافقة.`;
@@ -1266,8 +1229,10 @@
 
       const statusTextMap = {
         pending_approval: '⏳ بانتظار الموافقة',
-        approved_barista1: '✅ تمت الموافقة (باريستا 1) — هتشرب ابسط',
-        approved_barista2: '✅ تمت الموافقة (باريستا 2) — هتشرب ابسط',
+        approved_barista1: '✅ معتمد لدى باريستا 1 — هتشرب ابسط',
+        approved_barista2: '✅ معتمد لدى باريستا 2 — هتشرب ابسط',
+        preparing: '☕ جاري التحضير لدى الباريستا — هتشرب ابسط',
+        ready_for_car: '🚗 جاهز للتوصيل للسيارة — هتشرب ابسط',
         completed: '🎉 تم التسليم للسيارة',
         rejected: '❌ تعذّر اعتماد الطلب'
       };
@@ -1290,6 +1255,7 @@
       `;
     }
 
+    // مهام المدير العام والمسؤولين والباريستا على الطلبات
     function approveAndAssignOrder(orderId, baristaSlot = 'barista1') {
       const baristaLabel = baristaSlot === 'barista2' ? 'باريستا 2' : 'باريستا 1';
       let updatedTarget = null;
@@ -1300,7 +1266,7 @@
           ...o,
           status: baristaSlot === 'barista2' ? 'approved_barista2' : 'approved_barista1',
           assignedBarista: baristaSlot,
-          approvedBy: `اونر (${baristaLabel})`,
+          approvedBy: `الإدارة / المسؤول (${baristaLabel})`,
           customerNotice: `✅ تمت الموافقة على أوردرك وتحويله إلى (${baristaLabel}) — هتشرب ابسط.`
         };
         return updatedTarget;
@@ -1318,17 +1284,36 @@
       }
     }
 
-    function completeOrder(orderId) {
+    function updateBaristaStage(orderId, nextStage) {
+      const labels = {
+        preparing: {
+          status: 'preparing',
+          notice: '☕ الباريستا بدأ في تحضير مشروباتك الآن — هتشرب ابسط.'
+        },
+        ready_for_car: {
+          status: 'ready_for_car',
+          notice: '🚗 مشروباتك جاهزة ومتجهة للسيارة الآن — هتشرب ابسط.'
+        },
+        completed: {
+          status: 'completed',
+          notice: '🎉 تم تسليم الطلب للسيارة بنجاح.'
+        }
+      };
+
+      const cfg = labels[nextStage];
+      if (!cfg) return;
+
       let updatedTarget = null;
       orders = orders.map((o) => {
         if (o.id !== orderId) return o;
         updatedTarget = {
           ...o,
-          status: 'completed',
-          customerNotice: '🎉 تم تجهيز وتسليم أوردرك بنجاح.'
+          status: cfg.status,
+          customerNotice: cfg.notice
         };
         return updatedTarget;
       });
+
       saveOrders();
       if (updatedTarget) pushOrderToCloud(updatedTarget);
       renderOrdersFeed();
@@ -1457,13 +1442,15 @@
 
     function renderOrdersFeed() {
       const pendingCount = orders.filter((o) => o.status === 'pending_approval').length;
-      const approvedCount = orders.filter((o) => o.status === 'approved_barista1' || o.status === 'approved_barista2').length;
+      const activeBaristaCount = orders.filter((o) =>
+        ['approved_barista1', 'approved_barista2', 'preparing', 'ready_for_car'].includes(o.status)
+      ).length;
       const completedCount = orders.filter((o) => o.status === 'completed').length;
       const b1Count = orders.filter((o) => o.assignedBarista === 'barista1' && o.status !== 'completed').length;
       const b2Count = orders.filter((o) => o.assignedBarista === 'barista2' && o.status !== 'completed').length;
 
       document.getElementById('stat-pending').textContent = pendingCount;
-      document.getElementById('stat-approved').textContent = approvedCount;
+      document.getElementById('stat-approved').textContent = activeBaristaCount;
       document.getElementById('stat-completed').textContent = completedCount;
       document.getElementById('stat-new-customers').textContent = orders.length;
       document.getElementById('count-barista1').textContent = b1Count;
@@ -1489,6 +1476,8 @@
             pending_approval: '<span class="rounded-full bg-amber-500/15 px-2.5 py-1 text-[11px] font-extrabold text-amber-300">بانتظار الموافقة</span>',
             approved_barista1: '<span class="rounded-full bg-sky-500/15 px-2.5 py-1 text-[11px] font-extrabold text-sky-300">معتمد → باريستا 1</span>',
             approved_barista2: '<span class="rounded-full bg-indigo-500/15 px-2.5 py-1 text-[11px] font-extrabold text-indigo-300">معتمد → باريستا 2</span>',
+            preparing: '<span class="rounded-full bg-amber-400/15 px-2.5 py-1 text-[11px] font-extrabold text-amber-200">جاري التحضير</span>',
+            ready_for_car: '<span class="rounded-full bg-cyan-400/15 px-2.5 py-1 text-[11px] font-extrabold text-cyan-200">جاهز للسيارة</span>',
             completed: '<span class="rounded-full bg-emerald-500/15 px-2.5 py-1 text-[11px] font-extrabold text-emerald-300">تم التسليم</span>',
             rejected: '<span class="rounded-full bg-red-500/15 px-2.5 py-1 text-[11px] font-extrabold text-red-300">مرفوض</span>'
           };
@@ -1498,6 +1487,7 @@
             .join('');
 
           const mapHref = o.gps ? `https://www.google.com/maps?q=${o.gps.lat},${o.gps.lng}` : '';
+          const isBaristaStage = ['approved_barista1', 'approved_barista2', 'preparing', 'ready_for_car'].includes(o.status);
 
           return `
             <div class="space-y-3 rounded-2xl border border-white/10 bg-black/45 p-4">
@@ -1543,9 +1533,15 @@
                     : ''
                 }
                 ${
-                  o.status === 'approved_barista1' || o.status === 'approved_barista2'
+                  isBaristaStage
                     ? `
-                      <button type="button" onclick="completeOrder('${o.id}')" class="rounded-xl bg-gold px-3 py-1.5 text-xs font-black text-black hover:bg-goldLight">
+                      <button type="button" onclick="updateBaristaStage('${o.id}', 'preparing')" class="rounded-xl border border-amber-400/40 bg-amber-500/15 px-3 py-1.5 text-xs font-extrabold text-amber-200 hover:bg-amber-500/25">
+                        ☕ بدء التحضير
+                      </button>
+                      <button type="button" onclick="updateBaristaStage('${o.id}', 'ready_for_car')" class="rounded-xl border border-cyan-400/40 bg-cyan-500/15 px-3 py-1.5 text-xs font-extrabold text-cyan-200 hover:bg-cyan-500/25">
+                        🚗 جاهز للسيارة
+                      </button>
+                      <button type="button" onclick="updateBaristaStage('${o.id}', 'completed')" class="rounded-xl bg-gold px-3 py-1.5 text-xs font-black text-black hover:bg-goldLight">
                         ✔ تم التسليم
                       </button>
                     `
@@ -1593,7 +1589,8 @@
 
       customMenu.unshift({ id: 'CUSTOM-' + Date.now(), name, category, price });
       saveCustomMenu();
-      renderQuickMenuSelect();
+      renderMenuCategories();
+      renderDrinksGrid();
       renderAdminMenuManager();
       document.getElementById('new-item-name').value = '';
       document.getElementById('new-item-price').value = '';
@@ -1604,31 +1601,39 @@
       if (isNaN(price) || price <= 0) return;
       customMenu = customMenu.map((m) => (m.id === id ? { ...m, price } : m));
       saveCustomMenu();
-      renderQuickMenuSelect();
+      renderDrinksGrid();
     }
 
     function adminDeleteMenuItem(id) {
       customMenu = customMenu.filter((m) => m.id !== id);
       saveCustomMenu();
-      renderQuickMenuSelect();
+      renderMenuCategories();
+      renderDrinksGrid();
       renderAdminMenuManager();
     }
 
     function resetMenuToDefault() {
       customMenu = [...MENU_ITEMS];
       saveCustomMenu();
-      renderQuickMenuSelect();
+      renderMenuCategories();
+      renderDrinksGrid();
       renderAdminMenuManager();
     }
 
     function saveCloudAndPrintSettings() {
+      const audioUrl = (document.getElementById('custom-audio-url').value || '').trim();
       appSettings = {
         dbUrl: (document.getElementById('fb-db-url').value || DEFAULT_DB_URL).trim(),
         apiKey: document.getElementById('fb-api-key').value.trim(),
-        projectId: document.getElementById('fb-project-id').value.trim() || 'mpw-limousine-coffee',
+        customAudioUrl: audioUrl,
         autoPrintOnApprove: Boolean(document.getElementById('auto-print-on-approve').checked)
       };
       saveSettings();
+
+      if (audioUrl) {
+        const player = document.getElementById('custom-sound-player');
+        if (player) player.src = audioUrl;
+      }
 
       const fb = document.getElementById('settings-feedback');
       if (fb) {
@@ -1643,23 +1648,27 @@
       appSettings = {
         dbUrl: DEFAULT_DB_URL,
         apiKey: '',
-        projectId: 'mpw-limousine-coffee',
+        customAudioUrl: '',
         autoPrintOnApprove: false
       };
       saveSettings();
       document.getElementById('fb-db-url').value = DEFAULT_DB_URL;
       document.getElementById('fb-api-key').value = '';
-      document.getElementById('fb-project-id').value = 'mpw-limousine-coffee';
+      document.getElementById('custom-audio-url').value = '';
       document.getElementById('auto-print-on-approve').checked = false;
       syncFromCloudNow();
     }
 
     document.getElementById('fb-db-url').value = appSettings.dbUrl || DEFAULT_DB_URL;
     document.getElementById('fb-api-key').value = appSettings.apiKey || '';
-    document.getElementById('fb-project-id').value = appSettings.projectId || 'mpw-limousine-coffee';
+    document.getElementById('custom-audio-url').value = appSettings.customAudioUrl || '';
     document.getElementById('auto-print-on-approve').checked = Boolean(appSettings.autoPrintOnApprove);
+    if (appSettings.customAudioUrl) {
+      document.getElementById('custom-sound-player').src = appSettings.customAudioUrl;
+    }
 
-    renderQuickMenuSelect();
+    renderMenuCategories();
+    renderDrinksGrid();
     renderCart();
     renderOrdersFeed();
     renderCustomerLiveTracker();
