@@ -79,18 +79,9 @@
 </head>
 <body class="min-h-screen bg-obsidian text-gray-100 selection:bg-gold selection:text-black">
 
-  <!-- ملفات الأوديو الواقعية للبداية والفرامل -->
-  <audio
-    id="startup-race-audio"
-    preload="auto"
-    src="https://actions.google.com/sounds/v1/transportation/sports_car_revving.ogg"
-  ></audio>
-
-  <audio
-    id="brake-stop-audio"
-    preload="auto"
-    src="https://actions.google.com/sounds/v1/transportation/car_screech_brake.ogg"
-  ></audio>
+  <!-- عناصر الأوديو للبداية والفرامل -->
+  <audio id="startup-race-audio" preload="auto"></audio>
+  <audio id="brake-stop-audio" preload="auto"></audio>
 
   <!-- هيدر علوي -->
   <header class="sticky top-0 z-40 border-b border-gold/25 bg-charcoal/95 backdrop-blur">
@@ -761,9 +752,9 @@
 
     const CAFE_COORDS = { lat: 31.2465, lng: 29.9735 };
     const DEFAULT_DB_URL = 'https://mpw-limousine-coffee-default-rtdb.firebaseio.com';
-    const ORDERS_STORAGE_KEY = 'mpw_limousine_orders_live_v10';
-    const MENU_STORAGE_KEY = 'mpw_limousine_menu_live_v10';
-    const SETTINGS_STORAGE_KEY = 'mpw_limousine_settings_v10';
+    const ORDERS_STORAGE_KEY = 'mpw_limousine_orders_live_v11';
+    const MENU_STORAGE_KEY = 'mpw_limousine_menu_live_v11';
+    const SETTINGS_STORAGE_KEY = 'mpw_limousine_settings_v11';
     const DEVICE_GMAIL_STORAGE_KEY = 'mpw_device_bound_gmail';
     const LAST_CUSTOMER_ORDER_KEY = 'mpw_limousine_last_customer_order_id';
 
@@ -787,9 +778,10 @@
     let lastCustomerOrderId = localStorage.getItem(LAST_CUSTOMER_ORDER_KEY) || '';
     let cloudPollTimer = null;
 
-    let startupTimer = null;
-    let brakeTimer = null;
-    let startupAudioPlayed = false;
+    let audioCtx = null;
+    let startupStopTimer = null;
+    let brakeStopTimer = null;
+    let startupSoundDone = false;
 
     let customerMap = null;
     let customerMarker = null;
@@ -798,6 +790,153 @@
     let ownerMap = null;
     let ownerCustomerMarker = null;
     let ownerRouteLine = null;
+
+    function getAudioContext() {
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) return null;
+      if (!audioCtx) {
+        audioCtx = new Ctx();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume().catch(() => {});
+      }
+      return audioCtx;
+    }
+
+    // توليد صوت محرك رياضي واقعي لمدة 3 ثوانٍ بالضبط عند بداية التشغيل
+    function playStartupEngine3Sec() {
+      if (startupStopTimer) clearTimeout(startupStopTimer);
+
+      const ctx = getAudioContext();
+      if (!ctx) return;
+
+      const now = ctx.currentTime;
+      const duration = 3.0;
+
+      const osc1 = ctx.createOscillator();
+      const osc2 = ctx.createOscillator();
+      const filter = ctx.createBiquadFilter();
+      const gain = ctx.createGain();
+
+      osc1.type = 'sawtooth';
+      osc2.type = 'triangle';
+
+      osc1.frequency.setValueAtTime(52, now);
+      osc1.frequency.exponentialRampToValueAtTime(165, now + 1.1);
+      osc1.frequency.exponentialRampToValueAtTime(110, now + 1.8);
+      osc1.frequency.exponentialRampToValueAtTime(210, now + 2.75);
+      osc1.frequency.exponentialRampToValueAtTime(75, now + duration);
+
+      osc2.frequency.setValueAtTime(104, now);
+      osc2.frequency.exponentialRampToValueAtTime(325, now + 1.1);
+      osc2.frequency.exponentialRampToValueAtTime(215, now + 1.8);
+      osc2.frequency.exponentialRampToValueAtTime(415, now + 2.75);
+      osc2.frequency.exponentialRampToValueAtTime(145, now + duration);
+
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(420, now);
+      filter.frequency.exponentialRampToValueAtTime(1350, now + 2.5);
+      filter.frequency.exponentialRampToValueAtTime(350, now + duration);
+
+      gain.gain.setValueAtTime(0.01, now);
+      gain.gain.linearRampToValueAtTime(0.28, now + 0.25);
+      gain.gain.setValueAtTime(0.26, now + 2.6);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+      osc1.connect(filter);
+      osc2.connect(filter);
+      filter.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc1.start(now);
+      osc2.start(now);
+      osc1.stop(now + duration);
+      osc2.stop(now + duration);
+
+      startupSoundDone = true;
+      startupStopTimer = setTimeout(() => {
+        try {
+          osc1.disconnect();
+          osc2.disconnect();
+          gain.disconnect();
+        } catch {}
+      }, 3050);
+    }
+
+    // توليد صوت فرامل وتوقف سيارة واقعي لمدة ثانيتين (2 ثانية) بالضبط عند إرسال الأوردر
+    function playBrakeSound2Sec() {
+      if (brakeStopTimer) clearTimeout(brakeStopTimer);
+
+      const ctx = getAudioContext();
+      if (!ctx) return;
+
+      const now = ctx.currentTime;
+      const duration = 2.0;
+
+      // ضوضاء احتكاك الفرامل + صفير خفيف للتوقف
+      const bufferSize = Math.floor(ctx.sampleRate * duration);
+      const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = noiseBuffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * 1.15));
+      }
+
+      const noiseSource = ctx.createBufferSource();
+      noiseSource.buffer = noiseBuffer;
+
+      const bandpass = ctx.createBiquadFilter();
+      bandpass.type = 'bandpass';
+      bandpass.frequency.setValueAtTime(1950, now);
+      bandpass.frequency.linearRampToValueAtTime(1150, now + duration);
+      bandpass.Q.setValueAtTime(4.5, now);
+
+      const screechOsc = ctx.createOscillator();
+      screechOsc.type = 'sawtooth';
+      screechOsc.frequency.setValueAtTime(1480, now);
+      screechOsc.frequency.exponentialRampToValueAtTime(620, now + duration);
+
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0.01, now);
+      gain.gain.linearRampToValueAtTime(0.32, now + 0.12);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+      noiseSource.connect(bandpass);
+      screechOsc.connect(bandpass);
+      bandpass.connect(gain);
+      gain.connect(ctx.destination);
+
+      noiseSource.start(now);
+      screechOsc.start(now);
+      noiseSource.stop(now + duration);
+      screechOsc.stop(now + duration);
+
+      brakeStopTimer = setTimeout(() => {
+        try {
+          noiseSource.disconnect();
+          screechOsc.disconnect();
+          gain.disconnect();
+        } catch {}
+      }, 2050);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      playStartupEngine3Sec();
+    });
+
+    document.addEventListener(
+      'pointerdown',
+      () => {
+        const ctx = getAudioContext();
+        if (ctx && ctx.state === 'suspended') {
+          ctx.resume().then(() => {
+            if (!startupSoundDone) playStartupEngine3Sec();
+          }).catch(() => {});
+        } else if (!startupSoundDone) {
+          playStartupEngine3Sec();
+        }
+      },
+      { once: true }
+    );
 
     function loadSettings() {
       try {
@@ -860,61 +999,6 @@
         localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(orders));
       } catch {}
     }
-
-    // تشغيل ملف الأوديو الواقعي لسيارات السباق وضبط مدته على 3 ثوانٍ عند فتح التطبيق
-    function playStartupRaceAudio3Sec() {
-      const audioEl = document.getElementById('startup-race-audio');
-      if (!audioEl) return;
-
-      if (startupTimer) clearTimeout(startupTimer);
-      audioEl.pause();
-      audioEl.currentTime = 0;
-      audioEl.volume = 0.9;
-
-      const prom = audioEl.play();
-      if (prom && typeof prom.then === 'function') {
-        prom
-          .then(() => {
-            startupAudioPlayed = true;
-            startupTimer = setTimeout(() => {
-              audioEl.pause();
-              audioEl.currentTime = 0;
-            }, 3000);
-          })
-          .catch(() => {});
-      }
-    }
-
-    // تشغيل ملف الأوديو الواقعي لفرامل السيارة وضبط مدته على ثانيتين (2 ثانية) عند إرسال الأوردر
-    function playBrakeAudio2Sec() {
-      const audioEl = document.getElementById('brake-stop-audio');
-      if (!audioEl) return;
-
-      if (brakeTimer) clearTimeout(brakeTimer);
-      audioEl.pause();
-      audioEl.currentTime = 0;
-      audioEl.volume = 0.95;
-
-      audioEl.play().catch(() => {});
-      brakeTimer = setTimeout(() => {
-        audioEl.pause();
-        audioEl.currentTime = 0;
-      }, 2000);
-    }
-
-    window.addEventListener('DOMContentLoaded', () => {
-      playStartupRaceAudio3Sec();
-    });
-
-    document.addEventListener(
-      'pointerdown',
-      () => {
-        if (!startupAudioPlayed) {
-          playStartupRaceAudio3Sec();
-        }
-      },
-      { once: true }
-    );
 
     async function requestDeviceGmailBinding() {
       let suggestedEmail = boundDeviceGmail || '';
@@ -1516,8 +1600,8 @@
         return;
       }
 
-      // تشغيل صوت الفرامل الواقعي لمدة ثانيتين (2 ثانية) عند إرسال الأوردر
-      playBrakeAudio2Sec();
+      // تشغيل صوت الفرامل لمدة ثانيتين (2 ثانية) عند إرسال الأوردر
+      playBrakeSound2Sec();
 
       const orderItems = [...cart];
       const total = orderItems.reduce((sum, item) => sum + item.price * item.qty, 0);
@@ -1869,7 +1953,6 @@
       document.getElementById('owner-hidden-content').classList.add('hidden');
     }
 
-    // نافذة الباسورد المستقلة لكل مسؤول داخل قائمة الاونر
     function openStaffRoleModal(roleKey, targetTabAfterAuth = null) {
       pendingStaffRoleForModal = roleKey;
       pendingStaffTabAfterAuth = targetTabAfterAuth;
