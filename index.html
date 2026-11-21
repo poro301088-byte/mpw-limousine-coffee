@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MPW Limousine Coffee | نظام الطلب من السيارة وتتبع GPS</title>
+  <title>MPW Limousine Coffee | تسجيل العميل والطلبات</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -35,9 +35,9 @@
     }
 
     #customer-live-map {
-      height: 210px;
+      height: 190px;
       width: 100%;
-      border-radius: 16px;
+      border-radius: 14px;
       z-index: 1;
     }
 
@@ -72,127 +72,245 @@
 </head>
 <body class="min-h-screen bg-obsidian text-gray-100 selection:bg-gold selection:text-black">
 
-  <!-- الهيدر العلوي -->
+  <!-- هيدر علوي مبسط: يبدأ بالعميل ويحتوي على خانة اونر -->
   <header class="sticky top-0 z-40 border-b border-gold/25 bg-charcoal/95 backdrop-blur">
-    <div class="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-3">
+    <div class="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-3 px-4 py-3">
       <div class="flex items-center gap-3">
-        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-gold to-amber-600 text-xl font-black text-black shadow-lg shadow-gold/20">
+        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-gold to-amber-600 text-lg font-black text-black shadow-lg shadow-gold/20">
           ☕
         </div>
         <div>
-          <h1 class="text-lg font-extrabold text-gold sm:text-xl">MPW Limousine Coffee</h1>
-          <p class="text-xs text-gray-400">
-            المدير العام: <strong class="text-goldLight">محمود بورسعيد</strong> • المسؤولون: <strong class="text-gray-200">محمود حسن</strong> و <strong class="text-gray-200">رقيه محمود</strong>
-          </p>
+          <h1 class="text-base font-extrabold text-gold sm:text-lg">MPW Limousine Coffee</h1>
+          <p class="text-[11px] text-gray-400">تسجيل بيانات العميل وطلب السيارة</p>
         </div>
       </div>
 
       <div class="flex flex-wrap items-center gap-2">
-        <button type="button" onclick="enableSoundAlertManually()" class="rounded-xl border border-amber-400/40 bg-amber-500/10 px-3 py-2 text-xs font-extrabold text-amber-300 transition hover:bg-amber-500/20">
-          🏎️ تفعيل صوت بنزين الريس
+        <button type="button" onclick="enableImprovedAlertSound()" class="rounded-xl border border-emerald-400/40 bg-emerald-500/10 px-3 py-1.5 text-xs font-extrabold text-emerald-300 transition hover:bg-emerald-500/20">
+          🔔 تفعيل صوت الإشعار
         </button>
 
-        <span id="sync-status-badge" class="rounded-full border border-amber-500/40 bg-amber-500/10 px-3 py-1 text-xs font-bold text-amber-300">
-          جاري الاتصال بالسحابة...
+        <span id="sync-status-badge" class="hidden rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-bold text-emerald-300">
+          متصل
         </span>
 
-        <!-- خانة اونر -->
-        <button type="button" onclick="openOwnerModal()" class="flex items-center gap-1.5 rounded-xl border border-gold bg-gold/15 px-3.5 py-2 text-xs font-black text-gold transition hover:bg-gold hover:text-black sm:text-sm">
+        <button type="button" onclick="openOwnerModal()" class="flex items-center gap-1.5 rounded-xl border border-gold bg-gold/15 px-3.5 py-1.5 text-xs font-black text-gold transition hover:bg-gold hover:text-black">
           <span id="owner-lock-icon">👑</span>
           <span id="owner-btn-label">اونر</span>
         </button>
 
-        <button id="logout-btn" type="button" onclick="logoutOwner()" class="hidden rounded-xl border border-red-500/40 bg-red-500/10 px-3 py-2 text-xs font-bold text-red-300 transition hover:bg-red-500 hover:text-white">
+        <button id="logout-btn" type="button" onclick="logoutOwner()" class="hidden rounded-xl border border-red-500/40 bg-red-500/10 px-2.5 py-1.5 text-xs font-bold text-red-300 transition hover:bg-red-500 hover:text-white">
           خروج
         </button>
       </div>
     </div>
   </header>
 
-  <!-- تنبيه وصول أوردر جديد بصوت بنزين عربية ريس وهي بتتحرك -->
-  <div id="new-order-banner" class="hidden mx-auto mt-3 max-w-7xl px-4">
-    <div class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-400/50 bg-amber-950/70 px-4 py-3 text-amber-100 shadow-lg">
-      <div class="flex items-center gap-2.5 text-sm font-bold">
-        <span class="text-xl">🏎️</span>
+  <!-- تنبيه وصول أوردر جديد -->
+  <div id="new-order-banner" class="hidden mx-auto mt-3 max-w-4xl px-4">
+    <div class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-emerald-400/50 bg-emerald-950/70 px-4 py-2.5 text-emerald-100 shadow-lg">
+      <div class="flex items-center gap-2 text-xs font-bold sm:text-sm">
+        <span>🔔</span>
         <span id="new-order-banner-text">وصل طلب جديد الآن!</span>
       </div>
-      <div class="flex items-center gap-2">
-        <button type="button" onclick="playCarRevAndLaunchSound(customerGender)" class="rounded-lg bg-amber-500/25 px-2.5 py-1 text-xs font-bold text-amber-200 hover:bg-amber-500/40">
-          🔊 تجربة صوت ريس وانطلاق العربية
-        </button>
-        <button type="button" onclick="document.getElementById('new-order-banner').classList.add('hidden')" class="text-xs text-amber-300 hover:underline">
-          إغلاق
-        </button>
-      </div>
+      <button type="button" onclick="document.getElementById('new-order-banner').classList.add('hidden')" class="text-xs text-emerald-300 hover:underline">
+        إغلاق
+      </button>
     </div>
   </div>
 
-  <!-- المحتوى الرئيسي -->
-  <main class="mx-auto max-w-7xl space-y-8 px-4 py-6">
+  <!-- المحتوى الرئيسي: يبدأ مباشرة بقائمة تسجيل العميل -->
+  <main class="mx-auto max-w-4xl space-y-6 px-4 py-6">
 
-    <!-- بطاقة القيادة وخريطة موقع العميل بالضبط -->
-    <section class="grid gap-4 rounded-3xl border border-gold/25 bg-charcoal/90 p-4 lg:grid-cols-12">
-      <div class="space-y-3 lg:col-span-5 flex flex-col justify-between">
-        <div class="rounded-2xl border border-white/10 bg-black/45 p-3.5">
-          <div class="text-[11px] font-bold text-gray-400">المدير العام</div>
-          <div class="mt-1 text-base font-black text-gold">محمود بورسعيد</div>
+    <!-- 1. قائمة تسجيل بيانات العميل المطلوبة (البداية الأساسية للبرنامج) -->
+    <section id="customer-registration-section" class="space-y-4 rounded-3xl border border-gold/35 bg-charcoal p-5 shadow-2xl">
+      <div class="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3">
+        <div>
+          <h2 class="text-lg font-extrabold text-gold">تسجيل بيانات العميل وطلب السيارة</h2>
+          <p class="text-xs text-gray-400">سجّل بياناتك واختر فئة عضويتك وبيانات سيارتك ليتم تسجيل طلبك واعتماده</p>
         </div>
-
-        <div class="rounded-2xl border border-white/10 bg-black/45 p-3.5">
-          <div class="text-[11px] font-bold text-gray-400">المسؤولون عن متابعة الطلبات والربط</div>
-          <div class="mt-1 text-sm font-extrabold text-white">محمود حسن • رقيه محمود</div>
-        </div>
-
-        <div class="rounded-2xl border border-white/10 bg-black/45 p-3.5">
-          <div class="text-[11px] font-bold text-gray-400">مسار الربط التشغيلي</div>
-          <div class="mt-1 text-xs font-extrabold text-emerald-300">العميل ← المسؤول ← باريستا 1 / باريستا 2</div>
-        </div>
+        <button
+          type="button"
+          onclick="playFerrariStartupSound()"
+          class="rounded-xl border border-red-500/40 bg-red-500/15 px-3 py-1.5 text-xs font-extrabold text-red-200 transition hover:bg-red-500/25"
+        >
+          🏎️ صوت الفراري
+        </button>
       </div>
 
-      <!-- خريطة تحديد موقع العميل بالضبط + نطاق 15 كم -->
-      <div class="lg:col-span-7 rounded-2xl border border-sky-400/35 bg-gradient-to-br from-sky-950/35 via-black/60 to-charcoal p-4">
-        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-2.5">
-          <div class="flex items-center gap-2">
-            <span id="gps-indicator-dot" class="inline-block h-3 w-3 rounded-full bg-amber-400 animate-pulse"></span>
-            <h2 class="text-sm font-black text-sky-300">خريطة موقع العميل بالضبط (نطاق الخدمة 15 كم)</h2>
-          </div>
-          <div class="flex items-center gap-2">
-            <button type="button" onclick="captureGPS()" class="rounded-xl bg-sky-500/20 px-3 py-1 text-xs font-extrabold text-sky-200 hover:bg-sky-500/30">
-              📍 تحديد موقع العميل الآن
+      <!-- تسجيل سريع بجيميل أو فيسبوك -->
+      <div class="space-y-2.5 rounded-2xl border border-gold/20 bg-black/50 p-3.5">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-black text-goldLight">تسجيل سريع عبر جيميل أو فيسبوك</span>
+          <span id="social-auth-badge" class="rounded-full bg-white/10 px-2.5 py-0.5 text-[10px] font-bold text-gray-300">غير مسجل</span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <button type="button" onclick="signInWithProvider('google')" class="flex items-center justify-center gap-1.5 rounded-xl border border-red-400/40 bg-red-500/15 py-2 text-xs font-extrabold text-red-200 transition hover:bg-red-500/25">
+            <span>G</span>
+            <span>دخول بجيميل</span>
+          </button>
+          <button type="button" onclick="signInWithProvider('facebook')" class="flex items-center justify-center gap-1.5 rounded-xl border border-blue-400/40 bg-blue-500/15 py-2 text-xs font-extrabold text-blue-200 transition hover:bg-blue-500/25">
+            <span>f</span>
+            <span>دخول بفيسبوك</span>
+          </button>
+        </div>
+
+        <div id="social-login-box" class="hidden space-y-2 rounded-xl border border-white/10 bg-charcoal p-2.5">
+          <label id="social-input-label" class="block text-[11px] font-bold text-gray-300">أدخل الحساب:</label>
+          <input id="social-account-input" type="text" placeholder="name@gmail.com" class="w-full rounded-lg border border-white/15 bg-black/70 px-3 py-1.5 text-xs text-white focus:border-gold focus:outline-none" />
+          <div class="flex gap-2">
+            <button type="button" onclick="confirmSocialLogin()" class="flex-1 rounded-lg bg-gold py-1.5 text-xs font-black text-black hover:bg-goldLight">
+              تأكيد
             </button>
-            <a id="gps-map-link" href="#" target="_blank" rel="noopener noreferrer" class="hidden rounded-xl bg-gold/20 px-3 py-1 text-xs font-extrabold text-gold underline hover:bg-gold hover:text-black">
-              خرائط Google ↗
-            </a>
-          </div>
-        </div>
-
-        <div class="mt-3 space-y-2.5">
-          <div id="customer-live-map" class="border border-sky-400/25 bg-black/70"></div>
-
-          <div class="h-2 w-full overflow-hidden rounded-full bg-black/80">
-            <div id="gps-range-bar" class="h-full w-1/6 rounded-full bg-amber-400 transition-all duration-300"></div>
-          </div>
-          <div class="flex flex-wrap items-center justify-between gap-2 text-xs">
-            <span id="gps-range-summary" class="font-bold text-gray-200">جاري قراءة موقع GPS للعميل...</span>
-            <span id="gps-range-box" class="text-[11px] text-sky-300">بانتظار تحديد الإحداثيات الدقيقة...</span>
+            <button type="button" onclick="cancelSocialLogin()" class="rounded-lg bg-white/10 px-3 py-1.5 text-xs font-bold text-gray-300">
+              إلغاء
+            </button>
           </div>
         </div>
       </div>
+
+      <!-- الحقول الأساسية لتسجيل العميل -->
+      <div class="grid gap-4 sm:grid-cols-2">
+        <div>
+          <label class="mb-1 block text-xs font-bold text-gray-300">اسم العميل / رقم الهاتف</label>
+          <input id="customer-name" type="text" placeholder="مثال: أستاذ أحمد - 010..." class="w-full rounded-xl border border-white/15 bg-black/60 px-3.5 py-2.5 text-xs text-white focus:border-gold focus:outline-none" />
+        </div>
+
+        <div>
+          <label class="mb-1 block text-xs font-bold text-gray-300">بيانات السيارة / ملاحظات التوصيل</label>
+          <input id="car-info" type="text" placeholder="مثال: ليموزين سوداء - بجوار الكورنيش" class="w-full rounded-xl border border-white/15 bg-black/60 px-3.5 py-2.5 text-xs text-white focus:border-gold focus:outline-none" />
+        </div>
+      </div>
+
+      <!-- فئة العميل وبطاقة العضوية (4 خانات) -->
+      <div>
+        <label class="mb-1.5 block text-xs font-bold text-gray-300">فئة العميل وبطاقة العضوية</label>
+        <div class="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+          <button type="button" id="tier-7vip-btn" onclick="setCustomerTier('7vip')" class="tier-btn overflow-hidden rounded-2xl border-2 border-gold bg-black p-1.5 text-right transition">
+            <div class="flex h-12 w-full flex-col justify-between rounded-xl border border-gold/50 bg-gradient-to-br from-zinc-900 via-black to-amber-950/60 p-2">
+              <div class="flex items-center justify-between text-[10px] font-black text-gold">
+                <span>MPW</span>
+                <span>7VIP</span>
+              </div>
+              <div class="text-[9px] font-bold text-amber-200/90">BLACK CARD</div>
+            </div>
+            <div class="mt-1 flex items-center justify-between px-0.5">
+              <span class="text-xs font-black text-gold">7VIP</span>
+              <span class="text-[10px] text-gray-300">أسود</span>
+            </div>
+          </button>
+
+          <button type="button" id="tier-vvip-btn" onclick="setCustomerTier('vvip')" class="tier-btn overflow-hidden rounded-2xl border border-white/15 bg-black p-1.5 text-right transition">
+            <div class="flex h-12 w-full flex-col justify-between rounded-xl border border-sky-400/50 bg-gradient-to-br from-blue-950 via-indigo-950 to-slate-950 p-2">
+              <div class="flex items-center justify-between text-[10px] font-black text-sky-300">
+                <span>MPW</span>
+                <span>VVIP</span>
+              </div>
+              <div class="text-[9px] font-bold text-goldLight">BLUE CARD</div>
+            </div>
+            <div class="mt-1 flex items-center justify-between px-0.5">
+              <span class="text-xs font-black text-sky-300">VVIP</span>
+              <span class="text-[10px] text-gray-300">أزرق</span>
+            </div>
+          </button>
+
+          <button type="button" id="tier-vip-btn" onclick="setCustomerTier('vip')" class="tier-btn overflow-hidden rounded-2xl border border-white/15 bg-black p-1.5 text-right transition">
+            <div class="flex h-12 w-full flex-col justify-between rounded-xl border border-amber-300 bg-gradient-to-br from-white via-stone-100 to-amber-100 p-2">
+              <div class="flex items-center justify-between text-[10px] font-black text-zinc-900">
+                <span>MPW</span>
+                <span class="rounded bg-amber-500/20 px-1 text-amber-800">VIP</span>
+              </div>
+              <div class="text-[9px] font-extrabold text-amber-800">WHITE CARD</div>
+            </div>
+            <div class="mt-1 flex items-center justify-between px-0.5">
+              <span class="text-xs font-black text-white">VIP</span>
+              <span class="text-[10px] text-gray-300">أبيض</span>
+            </div>
+          </button>
+
+          <button type="button" id="tier-none-btn" onclick="setCustomerTier('none')" class="tier-btn overflow-hidden rounded-2xl border border-white/15 bg-black/50 p-1.5 text-right transition">
+            <div class="flex h-12 w-full flex-col justify-between rounded-xl border border-dashed border-white/20 bg-black/60 p-2">
+              <div class="flex items-center justify-between text-[10px] font-bold text-gray-400">
+                <span>MPW</span>
+                <span>👤</span>
+              </div>
+              <div class="text-[9px] font-bold text-gray-400">NO CARD</div>
+            </div>
+            <div class="mt-1 flex items-center justify-between px-0.5">
+              <span class="text-xs font-black text-gray-200">غير مشترك</span>
+              <span class="text-[10px] text-gray-400">بلا كارت</span>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <!-- الصفة عند أول زيارة -->
+      <div class="grid grid-cols-2 gap-2.5">
+        <button type="button" id="gender-male-btn" onclick="setCustomerGender('male')" class="rounded-xl border border-gold bg-gold/20 py-2 text-xs font-extrabold text-gold">
+          عميل جديد
+        </button>
+        <button type="button" id="gender-female-btn" onclick="setCustomerGender('female')" class="rounded-xl border border-white/15 bg-black/50 py-2 text-xs font-bold text-gray-300">
+          عميلة جديدة
+        </button>
+      </div>
+
+      <!-- تحديد موقع GPS -->
+      <div class="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-white/10 bg-black/45 p-3">
+        <button type="button" onclick="captureGPS()" class="rounded-xl border border-sky-400/40 bg-sky-500/15 px-3.5 py-2 text-xs font-extrabold text-sky-200 hover:bg-sky-500/25">
+          📍 تحديد موقع GPS
+        </button>
+        <span id="gps-status" class="text-xs text-gray-400">لم يُحدد الموقع بعد</span>
+        <a id="gps-map-link" href="#" target="_blank" rel="noopener noreferrer" class="hidden text-xs font-bold text-gold underline">
+          خرائط Google ↗
+        </a>
+      </div>
+
+      <!-- اختيار صنف سريع أو من السلة -->
+      <div class="rounded-2xl border border-white/10 bg-black/45 p-3.5 space-y-2.5">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-extrabold text-goldLight">اختيار صنف للطلب</span>
+          <span id="cart-total" class="text-sm font-black text-gold">0.00 ج.م</span>
+        </div>
+
+        <div class="flex flex-wrap gap-2">
+          <select id="quick-item-select" class="flex-1 rounded-xl border border-white/15 bg-charcoal px-3 py-2 text-xs text-white focus:border-gold focus:outline-none"></select>
+          <button type="button" onclick="addQuickSelectedItem()" class="inline-flex items-center gap-1.5 rounded-xl bg-gold px-3.5 py-2 text-xs font-black text-black hover:bg-goldLight">
+            <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+              <rect x="6" y="4" width="12" height="16" rx="3" />
+              <line x1="9" y1="8" x2="15" y2="8" />
+              <line x1="9" y1="12" x2="15" y2="12" />
+              <line x1="9" y1="16" x2="15" y2="16" />
+            </svg>
+            <span>ابعتهالو 😂</span>
+          </button>
+        </div>
+
+        <div id="cart-items" class="space-y-1.5 text-xs">
+          <p class="py-2 text-center text-gray-500">السلة فارغة — اضغط «ابعتهالو 😂» لإضافة صنف</p>
+        </div>
+      </div>
+
+      <button type="button" onclick="submitOrder()" class="w-full rounded-2xl bg-gradient-to-r from-gold to-amber-500 py-3 text-sm font-black text-black shadow-lg shadow-gold/20 transition hover:brightness-110">
+        إرسال الأوردر الآن 🚀
+      </button>
+
+      <p id="order-feedback" class="hidden rounded-xl bg-emerald-500/15 p-2.5 text-center text-xs font-bold text-emerald-300"></p>
     </section>
 
-    <!-- متابعة حالة الطلب المباشرة للعميل + نطق "هتشرب ابسط" عند الموافقة -->
+    <!-- متابعة حالة الطلب للعميل + نطق "هتشرب ابسط" عند الموافقة -->
     <section id="customer-order-tracker" class="rounded-3xl border border-emerald-400/30 bg-charcoal/90 p-4 sm:p-5">
       <div class="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3">
         <div>
-          <h2 class="text-base font-black text-emerald-300">🚗 متابعة حالة أوردرك المباشرة (شاشة العميل)</h2>
-          <p class="text-xs text-gray-400">عند الموافقة على أوردرك يظهر التحديث فوراً وتنطق الرسالة الصوتية: «هتشرب ابسط»</p>
+          <h2 class="text-sm font-black text-emerald-300">حالة الأوردر المباشرة</h2>
+          <p class="text-[11px] text-gray-400">عند موافقة المسؤول أو الإدارة أو الباريستا تُنطق: «هتشرب ابسط»</p>
         </div>
         <div class="flex items-center gap-2">
           <button type="button" onclick="speakCustomerApprovalPhrase()" class="rounded-xl border border-emerald-400/40 bg-emerald-500/15 px-3 py-1.5 text-xs font-extrabold text-emerald-200 hover:bg-emerald-500/25">
-            🗣️ تشغيل صوت «هتشرب ابسط»
+            🗣️ هتشرب ابسط
           </button>
           <button type="button" onclick="syncFromCloudNow()" class="rounded-xl border border-white/15 bg-black/50 px-3 py-1.5 text-xs font-bold text-gray-200 hover:border-gold/50">
-            🔄 تحديث الحالة الآن
+            🔄 تحديث
           </button>
         </div>
       </div>
@@ -201,22 +319,17 @@
       </div>
     </section>
 
-    <!-- لوحة اونر: تضم المدير العام والمسؤولين والباريستا وتحكم الإدارة -->
-    <section id="owner-workspace" class="hidden space-y-6 rounded-3xl border border-gold/40 bg-charcoal p-4 sm:p-6 shadow-2xl">
-      <div class="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-4">
+    <!-- 2. محتوى اونر: مخفي حتى فتحه بكلمة المرور 301088poro -->
+    <section id="owner-hidden-content" class="hidden space-y-6 rounded-3xl border-2 border-gold/50 bg-charcoal p-4 sm:p-6 shadow-2xl">
+      <div class="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
         <div>
-          <div class="flex items-center gap-2">
-            <span class="rounded-lg bg-gold px-2.5 py-0.5 text-xs font-black text-black">اونر (OWNER)</span>
-            <h2 class="text-xl font-extrabold text-white">لوحة الاونر — المدير العام والمسؤولون والباريستا</h2>
-          </div>
-          <p class="mt-1 text-xs text-gray-400">
-            المدير العام: <strong class="text-goldLight">محمود بورسعيد</strong> • المسؤولون: <strong class="text-gray-200">محمود حسن</strong> و <strong class="text-gray-200">رقيه محمود</strong> • باريستا 1 / باريستا 2
-          </p>
+          <span class="rounded-lg bg-gold px-2.5 py-0.5 text-xs font-black text-black">اونر (OWNER)</span>
+          <h2 class="mt-1 text-lg font-extrabold text-white">لوحة الاونر — القيادة، الخريطة، المنيو، المسؤولون والباريستا</h2>
         </div>
 
         <div class="flex flex-wrap gap-2">
           <button type="button" onclick="switchOwnerTab('all')" id="tab-all" class="owner-tab rounded-xl bg-gold px-3.5 py-2 text-xs font-extrabold text-black">
-            الطلبات والمسؤولين
+            الطلبات والعمليات
           </button>
           <button type="button" onclick="switchOwnerTab('barista1')" id="tab-barista1" class="owner-tab rounded-xl border border-white/15 bg-black/50 px-3.5 py-2 text-xs font-bold text-gray-200 hover:border-gold/50">
             ☕ باريستا 1 (<span id="count-barista1">0</span>)
@@ -225,69 +338,84 @@
             ☕ باريستا 2 (<span id="count-barista2">0</span>)
           </button>
           <button type="button" onclick="switchOwnerTab('admin_control')" id="tab-admin_control" class="owner-tab rounded-xl border border-gold/40 bg-gold/10 px-3.5 py-2 text-xs font-extrabold text-gold hover:bg-gold hover:text-black">
-            🛠️ تحكم المدير العام (المنيو والأسعار)
+            🛠️ المنيو والأسعار
           </button>
           <button type="button" onclick="switchOwnerTab('settings')" id="tab-settings" class="owner-tab rounded-xl border border-white/15 bg-black/50 px-3.5 py-2 text-xs font-bold text-gray-200 hover:border-gold/50">
-            ⚙️ إعدادات السحابة والطباعة
+            ⚙️ السحابة والطباعة
           </button>
         </div>
       </div>
 
-      <!-- بطاقات الأدوار داخل خانة اونر -->
+      <!-- بطاقات القيادة والمسؤولين والباريستا -->
       <div class="grid gap-3 sm:grid-cols-3">
         <div class="rounded-2xl border border-gold/30 bg-black/50 p-3.5">
           <div class="text-[11px] font-bold text-goldLight">المدير العام</div>
           <div class="mt-1 text-sm font-black text-white">محمود بورسعيد</div>
-          <div class="mt-1 text-[11px] text-gray-400">إشراف كامل + اعتماد الطلبات + إدارة الأسعار والأصناف</div>
         </div>
         <div class="rounded-2xl border border-sky-400/30 bg-black/50 p-3.5">
           <div class="text-[11px] font-bold text-sky-300">المسؤولون عن الطلبات والربط</div>
           <div class="mt-1 text-sm font-black text-white">محمود حسن • رقيه محمود</div>
-          <div class="mt-1 text-[11px] text-gray-400">مراجعة الطلبات، تحديد موقع العميل، والربط بالباريستا</div>
         </div>
         <div class="rounded-2xl border border-emerald-400/30 bg-black/50 p-3.5">
-          <div class="text-[11px] font-bold text-emerald-300">قسم التحضير والتسليم</div>
-          <div class="mt-1 text-sm font-black text-white">باريستا 1 • باريستا 2</div>
-          <div class="mt-1 text-[11px] text-gray-400">استلام الطلبات المعتمدة وتجهيزها وتسليمها للسيارة</div>
+          <div class="text-[11px] font-bold text-emerald-300">مسار الربط التشغيلي</div>
+          <div class="mt-1 text-xs font-extrabold text-emerald-300">العميل ← المسؤول ← باريستا 1 / باريستا 2</div>
+        </div>
+      </div>
+
+      <!-- خريطة موقع العميل بالضبط داخل اونر -->
+      <div class="rounded-2xl border border-sky-400/35 bg-black/55 p-4 space-y-2.5">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div class="flex items-center gap-2">
+            <span id="gps-indicator-dot" class="inline-block h-2.5 w-2.5 rounded-full bg-amber-400"></span>
+            <h3 class="text-sm font-black text-sky-300">موقع العميل على الخريطة (نطاق 15 كم)</h3>
+          </div>
+          <button type="button" onclick="captureGPS()" class="rounded-xl bg-sky-500/20 px-3 py-1 text-xs font-extrabold text-sky-200 hover:bg-sky-500/30">
+            📍 تحديث الموقع
+          </button>
+        </div>
+        <div id="customer-live-map" class="border border-sky-400/25 bg-black/70"></div>
+        <div class="h-2 w-full overflow-hidden rounded-full bg-black/80">
+          <div id="gps-range-bar" class="h-full w-1/6 rounded-full bg-amber-400 transition-all duration-300"></div>
+        </div>
+        <div class="flex flex-wrap items-center justify-between gap-2 text-xs">
+          <span id="gps-range-summary" class="font-bold text-gray-200">بانتظار تحديد موقع العميل...</span>
+          <span id="gps-range-box" class="text-[11px] text-sky-300">—</span>
         </div>
       </div>
 
       <!-- إحصائيات سريعة -->
       <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <div class="rounded-2xl border border-white/10 bg-black/45 p-3.5">
-          <div class="text-xs text-gray-400">بانتظار الموافقة</div>
-          <div id="stat-pending" class="mt-1 text-2xl font-black text-amber-400">0</div>
+        <div class="rounded-2xl border border-white/10 bg-black/45 p-3">
+          <div class="text-[11px] text-gray-400">بانتظار الموافقة</div>
+          <div id="stat-pending" class="mt-1 text-xl font-black text-amber-400">0</div>
         </div>
-        <div class="rounded-2xl border border-white/10 bg-black/45 p-3.5">
-          <div class="text-xs text-gray-400">معتمد لدى الباريستا</div>
-          <div id="stat-approved" class="mt-1 text-2xl font-black text-sky-400">0</div>
+        <div class="rounded-2xl border border-white/10 bg-black/45 p-3">
+          <div class="text-[11px] text-gray-400">معتمد للباريستا</div>
+          <div id="stat-approved" class="mt-1 text-xl font-black text-sky-400">0</div>
         </div>
-        <div class="rounded-2xl border border-white/10 bg-black/45 p-3.5">
-          <div class="text-xs text-gray-400">مكتمل التسليم</div>
-          <div id="stat-completed" class="mt-1 text-2xl font-black text-emerald-400">0</div>
+        <div class="rounded-2xl border border-white/10 bg-black/45 p-3">
+          <div class="text-[11px] text-gray-400">مكتمل التسليم</div>
+          <div id="stat-completed" class="mt-1 text-xl font-black text-emerald-400">0</div>
         </div>
-        <div class="rounded-2xl border border-white/10 bg-black/45 p-3.5">
-          <div class="text-xs text-gray-400">إجمالي الطلبات</div>
-          <div id="stat-new-customers" class="mt-1 text-2xl font-black text-gold">0</div>
+        <div class="rounded-2xl border border-white/10 bg-black/45 p-3">
+          <div class="text-[11px] text-gray-400">إجمالي الطلبات</div>
+          <div id="stat-new-customers" class="mt-1 text-xl font-black text-gold">0</div>
         </div>
       </div>
 
-      <!-- لوحة تحكم المدير العام -->
-      <div id="admin-control-panel" class="hidden space-y-5 rounded-2xl border border-gold/40 bg-black/55 p-4 sm:p-5">
+      <!-- إدارة المنيو والأسعار داخل اونر -->
+      <div id="admin-control-panel" class="hidden space-y-4 rounded-2xl border border-gold/40 bg-black/55 p-4">
         <div class="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3">
-          <div>
-            <h3 class="text-base font-black text-gold">تحكم المدير العام (محمود بورسعيد) — إدارة المنيو والتسعير</h3>
-            <p class="text-xs text-gray-400">أضف صنفاً جديداً، أو عدّل السعر، أو احذف صنفاً ويتم التحديث فوراً.</p>
-          </div>
+          <h3 class="text-sm font-black text-gold">إدارة المنيو والأسعار</h3>
           <button type="button" onclick="resetMenuToDefault()" class="rounded-xl border border-amber-400/40 bg-amber-500/10 px-3 py-1.5 text-xs font-bold text-amber-300 hover:bg-amber-500/20">
             استعادة المنيو الافتراضي
           </button>
         </div>
 
-        <div class="grid gap-3 rounded-2xl border border-white/10 bg-charcoal p-3.5 sm:grid-cols-12">
+        <div class="grid gap-3 rounded-2xl border border-white/10 bg-charcoal p-3 sm:grid-cols-12">
           <div class="sm:col-span-4">
-            <label class="mb-1 block text-[11px] font-bold text-gray-300">اسم الصنف الجديد</label>
-            <input id="new-item-name" type="text" placeholder="مثال: سبانش لاتيه مثلج خاص" class="w-full rounded-xl border border-white/15 bg-black/70 px-3 py-2 text-xs text-white focus:border-gold focus:outline-none" />
+            <label class="mb-1 block text-[11px] font-bold text-gray-300">اسم الصنف</label>
+            <input id="new-item-name" type="text" placeholder="مثال: سبانش لاتيه" class="w-full rounded-xl border border-white/15 bg-black/70 px-3 py-2 text-xs text-white focus:border-gold focus:outline-none" />
           </div>
           <div class="sm:col-span-4">
             <label class="mb-1 block text-[11px] font-bold text-gray-300">الفئة</label>
@@ -302,263 +430,73 @@
           </div>
           <div class="sm:col-span-2">
             <label class="mb-1 block text-[11px] font-bold text-gray-300">السعر (ج.م)</label>
-            <input id="new-item-price" type="number" min="1" step="0.5" placeholder="95" class="w-full rounded-xl border border-white/15 bg-black/70 px-3 py-2 text-xs text-white focus:border-gold focus:outline-none" />
+            <input id="new-item-price" type="number" min="1" step="0.5" placeholder="90" class="w-full rounded-xl border border-white/15 bg-black/70 px-3 py-2 text-xs text-white focus:border-gold focus:outline-none" />
           </div>
           <div class="flex items-end sm:col-span-2">
             <button type="button" onclick="adminAddMenuItem()" class="w-full rounded-xl bg-emerald-500 py-2 text-xs font-black text-black hover:bg-emerald-400">
-              + إضافة صنف
+              + إضافة
             </button>
           </div>
         </div>
 
-        <div class="flex flex-wrap items-center justify-between gap-2">
-          <span class="text-xs font-extrabold text-gray-200">قائمة الأصناف الحالية:</span>
-          <input id="admin-menu-search" oninput="renderAdminMenuManager()" type="text" placeholder="ابحث لتعديل سعر أو حذف صنف..." class="w-full rounded-xl border border-white/15 bg-charcoal px-3 py-1.5 text-xs text-white focus:border-gold focus:outline-none sm:w-64" />
-        </div>
-
-        <div id="admin-menu-list" class="max-h-96 space-y-2 overflow-y-auto pr-1"></div>
+        <input id="admin-menu-search" oninput="renderAdminMenuManager()" type="text" placeholder="ابحث في المنيو..." class="w-full rounded-xl border border-white/15 bg-charcoal px-3 py-1.5 text-xs text-white focus:border-gold focus:outline-none sm:w-64" />
+        <div id="admin-menu-list" class="max-h-80 space-y-2 overflow-y-auto pr-1"></div>
       </div>
 
-      <!-- إعدادات السحابة والطباعة -->
+      <!-- إعدادات السحابة والطباعة داخل اونر -->
       <div id="owner-settings-panel" class="hidden space-y-4 rounded-2xl border border-gold/30 bg-black/50 p-4">
-        <h3 class="text-base font-extrabold text-gold">إعدادات الربط السحابي (Firebase) وطباعة الكاش</h3>
-        <p class="text-xs leading-relaxed text-gray-300">
-          متصل مباشرة بقاعدة البيانات: <strong class="text-goldLight">https://mpw-limousine-coffee-default-rtdb.firebaseio.com</strong>
-        </p>
-
+        <h3 class="text-sm font-extrabold text-gold">إعدادات السحابة (Firebase) وطباعة الكاش</h3>
         <div class="grid gap-3 sm:grid-cols-2">
           <div>
             <label class="mb-1 block text-xs font-bold text-gray-300">Database URL</label>
-            <input id="fb-db-url" type="text" placeholder="https://mpw-limousine-coffee-default-rtdb.firebaseio.com" class="w-full rounded-xl border border-white/15 bg-charcoal px-3 py-2 text-xs text-white focus:border-gold focus:outline-none" />
+            <input id="fb-db-url" type="text" class="w-full rounded-xl border border-white/15 bg-charcoal px-3 py-2 text-xs text-white focus:border-gold focus:outline-none" />
           </div>
           <div>
-            <label class="mb-1 block text-xs font-bold text-gray-300">API Key / Auth Secret (اختياري)</label>
-            <input id="fb-api-key" type="text" placeholder="AIzaSy... أو رمز المصادقة" class="w-full rounded-xl border border-white/15 bg-charcoal px-3 py-2 text-xs text-white focus:border-gold focus:outline-none" />
+            <label class="mb-1 block text-xs font-bold text-gray-300">API Key / Auth Secret</label>
+            <input id="fb-api-key" type="text" class="w-full rounded-xl border border-white/15 bg-charcoal px-3 py-2 text-xs text-white focus:border-gold focus:outline-none" />
           </div>
           <div>
-            <label class="mb-1 block text-xs font-bold text-gray-300">Project ID / الفرع (اختياري)</label>
-            <input id="fb-project-id" type="text" placeholder="mpw-limousine-coffee" class="w-full rounded-xl border border-white/15 bg-charcoal px-3 py-2 text-xs text-white focus:border-gold focus:outline-none" />
+            <label class="mb-1 block text-xs font-bold text-gray-300">Project ID</label>
+            <input id="fb-project-id" type="text" class="w-full rounded-xl border border-white/15 bg-charcoal px-3 py-2 text-xs text-white focus:border-gold focus:outline-none" />
           </div>
           <div class="flex items-end">
             <label class="flex cursor-pointer items-center gap-2 rounded-xl border border-white/15 bg-charcoal px-3 py-2.5 text-xs font-bold text-gray-200 w-full">
               <input id="auto-print-on-approve" type="checkbox" class="h-4 w-4 accent-gold" />
-              <span>فتح نافذة طباعة إيصال الكاش تلقائياً فور موافقة المسؤول</span>
+              <span>طباعة إيصال الكاش تلقائياً عند الموافقة</span>
             </label>
           </div>
         </div>
-
         <p id="settings-feedback" class="hidden rounded-xl bg-emerald-500/15 px-3 py-2 text-xs font-bold text-emerald-300"></p>
-
         <div class="flex flex-wrap gap-2">
           <button type="button" onclick="saveCloudAndPrintSettings()" class="rounded-xl bg-gold px-4 py-2 text-xs font-extrabold text-black hover:bg-goldLight">
-            حفظ الإعدادات وتفعيل الربط
+            حفظ الإعدادات
           </button>
           <button type="button" onclick="clearCloudSettings()" class="rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-xs font-bold text-gray-300 hover:bg-white/10">
-            استعادة الرابط الافتراضي
+            استعادة الافتراضي
           </button>
         </div>
       </div>
 
-      <!-- قائمة الطلبات الحية -->
+      <!-- قائمة الطلبات الحية للاونر والمسؤولين والباريستا -->
       <div id="orders-feed" class="grid gap-4 md:grid-cols-2"></div>
     </section>
-
-    <!-- قسم العميل: تسجيل الدخول بجيميل/فيسبوك + بيانات العميل + المنيو + السلة -->
-    <div class="grid gap-6 lg:grid-cols-12">
-
-      <!-- المنيو -->
-      <section class="space-y-5 lg:col-span-8">
-        <div class="flex flex-wrap items-center justify-between gap-3 rounded-3xl border border-white/10 bg-charcoal p-4">
-          <div>
-            <h2 class="text-xl font-extrabold text-gold">منيو MPW Limousine Coffee</h2>
-            <p class="text-xs text-gray-400">اضغط «ابعتهالو 😂» على الصنف المطلوب وسيتم تجهيزه وتوصيله إلى سيارتك</p>
-          </div>
-          <input id="menu-search" oninput="renderMenu()" type="text" placeholder="ابحث عن مشروب أو صنف..." class="w-full rounded-xl border border-white/15 bg-black/60 px-3.5 py-2 text-xs text-white placeholder-gray-500 focus:border-gold focus:outline-none sm:w-60" />
-        </div>
-
-        <div id="category-filters" class="flex flex-wrap gap-2"></div>
-        <div id="menu-grid" class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3"></div>
-      </section>
-
-      <!-- نموذج الطلب وتسجيل العميل وسلته -->
-      <aside class="lg:col-span-4">
-        <div class="sticky top-20 space-y-4 rounded-3xl border border-gold/30 bg-charcoal p-5 shadow-xl">
-          <h3 class="text-lg font-extrabold text-gold">تسجيل العميل وإتمام الطلب</h3>
-
-          <!-- تسجيل العميل أولاً عبر جيميل أو فيسبوك -->
-          <div class="space-y-2.5 rounded-2xl border border-gold/25 bg-black/55 p-3.5">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-black text-goldLight">1. تسجيل العميل (جيميل أو فيسبوك)</span>
-              <span id="social-auth-badge" class="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-bold text-gray-300">غير مسجل</span>
-            </div>
-
-            <div class="grid grid-cols-2 gap-2">
-              <button type="button" onclick="signInWithProvider('google')" class="flex items-center justify-center gap-1.5 rounded-xl border border-red-400/40 bg-red-500/15 py-2 text-xs font-extrabold text-red-200 transition hover:bg-red-500/25">
-                <span>G</span>
-                <span>دخول بجيميل</span>
-              </button>
-              <button type="button" onclick="signInWithProvider('facebook')" class="flex items-center justify-center gap-1.5 rounded-xl border border-blue-400/40 bg-blue-500/15 py-2 text-xs font-extrabold text-blue-200 transition hover:bg-blue-500/25">
-                <span>f</span>
-                <span>دخول بفيسبوك</span>
-              </button>
-            </div>
-
-            <div id="social-login-box" class="hidden space-y-2 rounded-xl border border-white/10 bg-charcoal p-2.5">
-              <label id="social-input-label" class="block text-[11px] font-bold text-gray-300">أدخل حساب الجيميل أو الاسم:</label>
-              <input id="social-account-input" type="text" placeholder="example@gmail.com" class="w-full rounded-lg border border-white/15 bg-black/70 px-2.5 py-1.5 text-xs text-white focus:border-gold focus:outline-none" />
-              <div class="flex gap-2">
-                <button type="button" onclick="confirmSocialLogin()" class="flex-1 rounded-lg bg-gold py-1.5 text-xs font-black text-black hover:bg-goldLight">
-                  تأكيد التسجيل
-                </button>
-                <button type="button" onclick="cancelSocialLogin()" class="rounded-lg bg-white/10 px-2.5 py-1.5 text-xs font-bold text-gray-300">
-                  إلغاء
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div class="space-y-3 rounded-2xl border border-white/10 bg-black/45 p-3.5">
-            <div>
-              <label class="mb-1 block text-xs font-bold text-gray-300">اسم العميل / الحساب / رقم الهاتف</label>
-              <input id="customer-name" type="text" placeholder="مثال: أستاذ أحمد - 010..." class="w-full rounded-xl border border-white/15 bg-charcoal px-3 py-2 text-xs text-white focus:border-gold focus:outline-none" />
-            </div>
-
-            <!-- 4 خانات للعملاء بتصاميم كروت مدمجة فورية -->
-            <div>
-              <label class="mb-1.5 block text-xs font-bold text-gray-300">فئة العميل وبطاقة العضوية (4 خانات)</label>
-              <div class="grid grid-cols-2 gap-2.5">
-                <!-- 1. 7VIP كارت أسود ذهبي -->
-                <button type="button" id="tier-7vip-btn" onclick="setCustomerTier('7vip')" class="tier-btn overflow-hidden rounded-2xl border-2 border-gold bg-black p-1.5 text-right transition">
-                  <div class="flex h-14 w-full flex-col justify-between rounded-xl border border-gold/50 bg-gradient-to-br from-zinc-900 via-black to-amber-950/60 p-2">
-                    <div class="flex items-center justify-between text-[10px] font-black text-gold">
-                      <span>MPW</span>
-                      <span>7VIP</span>
-                    </div>
-                    <div class="text-[9px] font-bold text-amber-200/90">BLACK CARD</div>
-                  </div>
-                  <div class="mt-1.5 flex items-center justify-between px-0.5">
-                    <span class="text-xs font-black text-gold">7VIP</span>
-                    <span class="text-[10px] font-bold text-gray-300">كارت أسود</span>
-                  </div>
-                </button>
-
-                <!-- 2. VVIP كارت أزرق ذهبي -->
-                <button type="button" id="tier-vvip-btn" onclick="setCustomerTier('vvip')" class="tier-btn overflow-hidden rounded-2xl border border-white/15 bg-black p-1.5 text-right transition">
-                  <div class="flex h-14 w-full flex-col justify-between rounded-xl border border-sky-400/50 bg-gradient-to-br from-blue-950 via-indigo-950 to-slate-950 p-2">
-                    <div class="flex items-center justify-between text-[10px] font-black text-sky-300">
-                      <span>MPW</span>
-                      <span>VVIP</span>
-                    </div>
-                    <div class="text-[9px] font-bold text-goldLight">BLUE CARD</div>
-                  </div>
-                  <div class="mt-1.5 flex items-center justify-between px-0.5">
-                    <span class="text-xs font-black text-sky-300">VVIP</span>
-                    <span class="text-[10px] font-bold text-gray-300">كارت أزرق</span>
-                  </div>
-                </button>
-
-                <!-- 3. VIP كارت أبيض ذهبي -->
-                <button type="button" id="tier-vip-btn" onclick="setCustomerTier('vip')" class="tier-btn overflow-hidden rounded-2xl border border-white/15 bg-black p-1.5 text-right transition">
-                  <div class="flex h-14 w-full flex-col justify-between rounded-xl border border-amber-300 bg-gradient-to-br from-white via-stone-100 to-amber-100 p-2">
-                    <div class="flex items-center justify-between text-[10px] font-black text-zinc-900">
-                      <span>MPW</span>
-                      <span class="rounded bg-amber-500/20 px-1 text-amber-800">VIP</span>
-                    </div>
-                    <div class="text-[9px] font-extrabold text-amber-800">WHITE CARD</div>
-                  </div>
-                  <div class="mt-1.5 flex items-center justify-between px-0.5">
-                    <span class="text-xs font-black text-white">VIP</span>
-                    <span class="text-[10px] font-bold text-gray-300">كارت أبيض</span>
-                  </div>
-                </button>
-
-                <!-- 4. بلا كارت لغير المشترك -->
-                <button type="button" id="tier-none-btn" onclick="setCustomerTier('none')" class="tier-btn overflow-hidden rounded-2xl border border-white/15 bg-charcoal p-1.5 text-right transition">
-                  <div class="flex h-14 w-full flex-col justify-between rounded-xl border border-dashed border-white/20 bg-black/50 p-2">
-                    <div class="flex items-center justify-between text-[10px] font-bold text-gray-400">
-                      <span>MPW</span>
-                      <span>👤</span>
-                    </div>
-                    <div class="text-[9px] font-bold text-gray-400">NO CARD</div>
-                  </div>
-                  <div class="mt-1.5 flex items-center justify-between px-0.5">
-                    <span class="text-xs font-black text-gray-200">غير مشترك</span>
-                    <span class="text-[10px] font-bold text-gray-400">بلا كارت</span>
-                  </div>
-                </button>
-              </div>
-            </div>
-
-            <div>
-              <label class="mb-1 block text-xs font-bold text-gray-300">الصفة عند أول زيارة</label>
-              <div class="grid grid-cols-2 gap-2">
-                <button type="button" id="gender-male-btn" onclick="setCustomerGender('male')" class="rounded-xl border border-gold bg-gold/20 py-2 text-xs font-extrabold text-gold">
-                  عميل جديد
-                </button>
-                <button type="button" id="gender-female-btn" onclick="setCustomerGender('female')" class="rounded-xl border border-white/15 bg-charcoal py-2 text-xs font-bold text-gray-300">
-                  عميلة جديدة
-                </button>
-              </div>
-            </div>
-
-            <div>
-              <label class="mb-1 block text-xs font-bold text-gray-300">بيانات السيارة / ملاحظات التوصيل</label>
-              <input id="car-info" type="text" placeholder="مثال: ليموزين سوداء - بجوار الكورنيش" class="w-full rounded-xl border border-white/15 bg-charcoal px-3 py-2 text-xs text-white focus:border-gold focus:outline-none" />
-            </div>
-
-            <div class="space-y-1.5 pt-1">
-              <div class="flex items-center justify-between gap-2">
-                <button type="button" onclick="captureGPS()" class="rounded-xl border border-sky-400/40 bg-sky-500/10 px-3 py-2 text-xs font-bold text-sky-300 hover:bg-sky-500/20">
-                  📍 تحديد موقع GPS
-                </button>
-                <span id="gps-status" class="truncate text-[11px] text-gray-400">لم يُحدد الموقع بعد</span>
-              </div>
-            </div>
-          </div>
-
-          <div id="cart-items" class="max-h-64 space-y-2 overflow-y-auto rounded-2xl border border-white/10 bg-black/40 p-3 text-xs">
-            <p class="py-6 text-center text-gray-500">السلة فارغة حالياً — اضغط «ابعتهالو 😂» على أي صنف</p>
-          </div>
-
-          <div class="space-y-3 border-t border-white/10 pt-3">
-            <div class="flex items-center justify-between text-sm font-extrabold">
-              <span class="text-gray-300">الإجمالي:</span>
-              <span id="cart-total" class="text-lg text-gold">0.00 ج.م</span>
-            </div>
-
-            <button type="button" onclick="submitOrder()" class="w-full rounded-2xl bg-gradient-to-r from-gold to-amber-500 py-3 text-sm font-black text-black shadow-lg shadow-gold/20 transition hover:brightness-110">
-              إرسال الأوردر الآن 🚀
-            </button>
-
-            <p id="order-feedback" class="hidden rounded-xl bg-emerald-500/15 p-2.5 text-center text-xs font-bold text-emerald-300"></p>
-          </div>
-        </div>
-      </aside>
-    </div>
   </main>
 
   <!-- نافذة باسورد خانة اونر: 301088poro -->
   <div id="owner-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
     <div class="w-full max-w-md space-y-4 rounded-3xl border border-gold/40 bg-charcoal p-6 shadow-2xl">
       <div class="flex items-center justify-between">
-        <h3 class="text-lg font-extrabold text-gold">دخول خانة اونر (OWNER)</h3>
+        <h3 class="text-lg font-extrabold text-gold">دخول خانة اونر</h3>
         <button type="button" onclick="closeOwnerModal()" class="text-sm text-gray-400 hover:text-white">✕</button>
       </div>
-
-      <p class="text-xs leading-relaxed text-gray-400">
-        تضم لوحة <strong class="text-goldLight">اونر</strong> أجزاء <strong class="text-white">المدير العام</strong>، <strong class="text-white">المسؤولين</strong>، و<strong class="text-white">الباريستا</strong>.
-        أدخل كلمة المرور لفتح اللوحة.
-      </p>
-
+      <p class="text-xs text-gray-400">أدخل كلمة المرور لفتح لوحة الاونر (المدير العام، المسؤولين، الباريستا، الخريطة والمنيو).</p>
       <div>
-        <label class="mb-1 block text-xs font-bold text-gray-300">كلمة مرور اونر</label>
+        <label class="mb-1 block text-xs font-bold text-gray-300">كلمة المرور</label>
         <input id="owner-password-input" type="password" placeholder="أدخل كلمة المرور..." class="w-full rounded-xl border border-white/15 bg-black/70 px-4 py-2.5 text-center text-sm font-extrabold tracking-wider text-gold focus:border-gold focus:outline-none" />
       </div>
-
-      <p id="owner-password-error" class="hidden text-center text-xs font-bold text-red-400">كلمة المرور غير صحيحة، حاول مرة أخرى.</p>
-
+      <p id="owner-password-error" class="hidden text-center text-xs font-bold text-red-400">كلمة المرور غير صحيحة.</p>
       <button type="button" onclick="verifyOwnerPassword()" class="w-full rounded-xl bg-gold py-2.5 text-sm font-black text-black hover:bg-goldLight">
-        فتح لوحة اونر
+        دخول اونر
       </button>
     </div>
   </div>
@@ -568,16 +506,6 @@
 
   <script>
     const OWNER_PASSWORD = '301088poro';
-
-    const CATEGORIES = [
-      'الكل',
-      'إسبريسو وقهوة ساخنة',
-      'قهوة مختصة وتقطير',
-      'مشروبات مثلجة وآيس كوفي',
-      'ماتشا وشاي ومشروبات دافئة',
-      'سموزي وفريش ومشروبات طاقة',
-      'مخبوزات وحلويات وسناكس'
-    ];
 
     const BASE_MENU_TUPLES = [
       ['إسبريسو سنجل', 'إسبريسو وقهوة ساخنة', 45],
@@ -667,14 +595,13 @@
     const CENTER_COORDS = { lat: 31.2465, lng: 29.9735 };
     const MAX_RADIUS_KM = 15;
     const DEFAULT_DB_URL = 'https://mpw-limousine-coffee-default-rtdb.firebaseio.com';
-    const ORDERS_STORAGE_KEY = 'mpw_limousine_orders_live_v3';
-    const MENU_STORAGE_KEY = 'mpw_limousine_menu_live_v3';
-    const SETTINGS_STORAGE_KEY = 'mpw_limousine_settings_v2';
+    const ORDERS_STORAGE_KEY = 'mpw_limousine_orders_live_v4';
+    const MENU_STORAGE_KEY = 'mpw_limousine_menu_live_v4';
+    const SETTINGS_STORAGE_KEY = 'mpw_limousine_settings_v3';
     const LAST_CUSTOMER_ORDER_KEY = 'mpw_limousine_last_customer_order_id';
 
     let isOwnerUnlocked = false;
     let activeOwnerTab = 'all';
-    let selectedCategory = 'الكل';
     let cart = [];
     let customerTier = '7vip';
     let customerGender = 'male';
@@ -687,10 +614,10 @@
     let appSettings = loadSettings();
     let lastCustomerOrderId = localStorage.getItem(LAST_CUSTOMER_ORDER_KEY) || '';
     let cloudPollTimer = null;
+    let ferrariSoundPlayedOnLoad = false;
 
     let leafletMap = null;
     let customerMapMarker = null;
-    let centerMapMarker = null;
 
     function loadSettings() {
       try {
@@ -763,12 +690,11 @@
       const badge = document.getElementById('sync-status-badge');
       if (!badge) return;
       badge.textContent = text;
+      badge.classList.remove('hidden');
       if (mode === 'ok') {
-        badge.className = 'rounded-full border border-emerald-500/40 bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-300';
-      } else if (mode === 'warn') {
-        badge.className = 'rounded-full border border-amber-500/40 bg-amber-500/10 px-3 py-1 text-xs font-bold text-amber-300';
+        badge.className = 'rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-bold text-emerald-300';
       } else {
-        badge.className = 'rounded-full border border-sky-500/40 bg-sky-500/10 px-3 py-1 text-xs font-bold text-sky-300';
+        badge.className = 'rounded-full border border-amber-500/40 bg-amber-500/10 px-2.5 py-1 text-[11px] font-bold text-amber-300';
       }
     }
 
@@ -780,13 +706,9 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(orderObj)
         });
-        if (res.ok) {
-          setSyncBadge('متصل بالسحابة (Firebase Live)', 'ok');
-        } else {
-          setSyncBadge('وضع محلي + محاولة السحابة', 'warn');
-        }
+        setSyncBadge(res.ok ? 'متصل' : 'محلي', res.ok ? 'ok' : 'warn');
       } catch {
-        setSyncBadge('وضع محلي (بدون اتصال سحابي)', 'warn');
+        setSyncBadge('محلي', 'warn');
       }
     }
 
@@ -814,7 +736,7 @@
             try {
               localStorage.setItem(MENU_STORAGE_KEY, JSON.stringify(customMenu));
             } catch {}
-            renderMenu();
+            renderQuickMenuSelect();
             renderAdminMenuManager();
           }
         }
@@ -839,7 +761,7 @@
             renderCustomerLiveTracker();
 
             if (detectedNewOrder) {
-              playCarRevAndLaunchSound(detectedNewOrder.customerGender || 'male');
+              playImprovedAlertSound();
               showNewOrderBanner(detectedNewOrder);
             }
 
@@ -853,12 +775,10 @@
               speakCustomerApprovalPhrase();
             }
           }
-          setSyncBadge('متصل بالسحابة (Firebase Live)', 'ok');
-        } else {
-          setSyncBadge('مزامنة محلية مفعّلة', 'warn');
+          setSyncBadge('متصل', 'ok');
         }
       } catch {
-        setSyncBadge('وضع محلي نشط', 'warn');
+        setSyncBadge('محلي', 'warn');
       }
     }
 
@@ -866,69 +786,181 @@
       const banner = document.getElementById('new-order-banner');
       const bannerText = document.getElementById('new-order-banner-text');
       if (banner && bannerText) {
-        bannerText.textContent = `وصل أوردر جديد (${orderObj.id}) من ${orderObj.customerName} (${orderObj.carInfo}) — بانتظار الموافقة`;
+        bannerText.textContent = `وصل أوردر جديد (${orderObj.id}) من ${orderObj.customerName} (${orderObj.carInfo})`;
         banner.classList.remove('hidden');
       }
     }
 
-    // صوت إشعار تنبيه: بنزين عربية ريس وهي بتتحرك وتنطلق
-    function enableSoundAlertManually() {
-      playCarRevAndLaunchSound('male');
-      setSyncBadge('صوت بنزين الريس مفعّل', 'info');
+    // صوت تشغيل محرك الفراري الممتد (~3.2 ثانية) في شاشة التسجيل الأولى
+    function playFerrariStartupSound() {
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+
+        const ctx = new AudioCtx();
+        const now = ctx.currentTime;
+        const totalDuration = 3.25;
+
+        // 1. دوران المارش والتقاط المحرك (0.00s -> 0.55s)
+        const crankOsc = ctx.createOscillator();
+        const crankGain = ctx.createGain();
+        crankOsc.type = 'sawtooth';
+        crankOsc.frequency.setValueAtTime(66, now);
+        crankOsc.frequency.setValueAtTime(94, now + 0.11);
+        crankOsc.frequency.setValueAtTime(70, now + 0.22);
+        crankOsc.frequency.setValueAtTime(105, now + 0.33);
+        crankOsc.frequency.exponentialRampToValueAtTime(240, now + 0.55);
+
+        crankGain.gain.setValueAtTime(0.001, now);
+        crankGain.gain.linearRampToValueAtTime(0.20, now + 0.08);
+        crankGain.gain.exponentialRampToValueAtTime(0.001, now + 0.56);
+
+        crankOsc.connect(crankGain);
+        crankGain.connect(ctx.destination);
+        crankOsc.start(now);
+        crankOsc.stop(now + 0.58);
+
+        // 2. توافقات محرك الفراري الممتدة: تشغيل + ريس أول + ريس ثاني + هدوء على الدوران العادي
+        const harmonics = [1.0, 1.5, 2.0, 2.5, 3.0];
+        const masterFilter = ctx.createBiquadFilter();
+        masterFilter.type = 'bandpass';
+        masterFilter.Q.setValueAtTime(2.8, now + 0.48);
+
+        masterFilter.frequency.setValueAtTime(360, now + 0.48);
+        masterFilter.frequency.exponentialRampToValueAtTime(1650, now + 0.92);
+        masterFilter.frequency.exponentialRampToValueAtTime(680, now + 1.45);
+        masterFilter.frequency.exponentialRampToValueAtTime(1950, now + 2.05);
+        masterFilter.frequency.exponentialRampToValueAtTime(520, now + 2.95);
+
+        const masterGain = ctx.createGain();
+        masterGain.gain.setValueAtTime(0.001, now + 0.48);
+        masterGain.gain.linearRampToValueAtTime(0.25, now + 0.85);
+        masterGain.gain.linearRampToValueAtTime(0.14, now + 1.45);
+        masterGain.gain.linearRampToValueAtTime(0.26, now + 2.02);
+        masterGain.gain.exponentialRampToValueAtTime(0.07, now + 2.95);
+        masterGain.gain.exponentialRampToValueAtTime(0.001, now + totalDuration);
+
+        harmonics.forEach((ratio, idx) => {
+          const osc = ctx.createOscillator();
+          const hGain = ctx.createGain();
+          osc.type = idx % 2 === 0 ? 'sawtooth' : 'triangle';
+
+          const fIdle = 135 * ratio;
+          const fRev1 = 340 * ratio;
+          const fDip = 185 * ratio;
+          const fRev2 = 390 * ratio;
+          const fEnd = 145 * ratio;
+
+          osc.frequency.setValueAtTime(fIdle, now + 0.48);
+          osc.frequency.exponentialRampToValueAtTime(fRev1, now + 0.92);
+          osc.frequency.exponentialRampToValueAtTime(fDip, now + 1.45);
+          osc.frequency.exponentialRampToValueAtTime(fRev2, now + 2.05);
+          osc.frequency.exponentialRampToValueAtTime(fEnd, now + 2.95);
+
+          hGain.gain.setValueAtTime(0.22 / (idx + 1), now + 0.48);
+          osc.connect(hGain);
+          hGain.connect(masterFilter);
+
+          osc.start(now + 0.48);
+          osc.stop(now + totalDuration + 0.03);
+        });
+
+        // 3. ضجيج عادم واحتراق ممتد لمزيد من الواقعية
+        const bufferSize = Math.floor(ctx.sampleRate * 2.8);
+        const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+        const output = noiseBuffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          output[i] = (Math.random() * 2 - 1) * 0.35;
+        }
+
+        const whiteNoise = ctx.createBufferSource();
+        whiteNoise.buffer = noiseBuffer;
+
+        const noiseFilter = ctx.createBiquadFilter();
+        noiseFilter.type = 'lowpass';
+        noiseFilter.frequency.setValueAtTime(850, now + 0.48);
+        noiseFilter.frequency.exponentialRampToValueAtTime(2400, now + 0.92);
+        noiseFilter.frequency.exponentialRampToValueAtTime(1100, now + 1.45);
+        noiseFilter.frequency.exponentialRampToValueAtTime(2600, now + 2.05);
+        noiseFilter.frequency.exponentialRampToValueAtTime(620, now + 3.15);
+
+        const noiseGain = ctx.createGain();
+        noiseGain.gain.setValueAtTime(0.001, now + 0.48);
+        noiseGain.gain.linearRampToValueAtTime(0.11, now + 0.88);
+        noiseGain.gain.linearRampToValueAtTime(0.06, now + 1.45);
+        noiseGain.gain.linearRampToValueAtTime(0.12, now + 2.02);
+        noiseGain.gain.exponentialRampToValueAtTime(0.001, now + totalDuration);
+
+        whiteNoise.connect(noiseFilter);
+        noiseFilter.connect(noiseGain);
+        noiseGain.connect(ctx.destination);
+
+        whiteNoise.start(now + 0.48);
+        whiteNoise.stop(now + totalDuration + 0.03);
+
+        masterFilter.connect(masterGain);
+        masterGain.connect(ctx.destination);
+      } catch {}
     }
 
-    function playCarRevAndLaunchSound(gender = 'male') {
+    window.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => {
+        playFerrariStartupSound();
+      }, 150);
+    });
+
+    document.addEventListener(
+      'pointerdown',
+      () => {
+        if (!ferrariSoundPlayedOnLoad) {
+          ferrariSoundPlayedOnLoad = true;
+          playFerrariStartupSound();
+        }
+      },
+      { once: true }
+    );
+
+    // صوت إشعار أفضل وأنظف عند وصول طلب جديد
+    function enableImprovedAlertSound() {
+      playImprovedAlertSound();
+    }
+
+    function playImprovedAlertSound() {
       try {
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
         if (!AudioCtx) return;
         const ctx = new AudioCtx();
         const now = ctx.currentTime;
 
-        // نبض ريس المحرك + دعسة بنزين وتحرك السيارة للأمام
-        const revPulses = [
-          { start: 0.0, dur: 0.24, fStart: 75, fEnd: 230, gain: 0.32 },
-          { start: 0.28, dur: 0.26, fStart: 90, fEnd: 285, gain: 0.36 },
-          { start: 0.58, dur: 0.65, fStart: 105, fEnd: 340, gain: 0.40 }
-        ];
+        const glideOsc = ctx.createOscillator();
+        const glideGain = ctx.createGain();
+        glideOsc.type = 'sine';
+        glideOsc.frequency.setValueAtTime(160, now);
+        glideOsc.frequency.exponentialRampToValueAtTime(420, now + 0.28);
+        glideGain.gain.setValueAtTime(0.001, now);
+        glideGain.gain.linearRampToValueAtTime(0.18, now + 0.05);
+        glideGain.gain.exponentialRampToValueAtTime(0.001, now + 0.32);
+        glideOsc.connect(glideGain);
+        glideGain.connect(ctx.destination);
+        glideOsc.start(now);
+        glideOsc.stop(now + 0.34);
 
-        revPulses.forEach((p) => {
-          const osc = ctx.createOscillator();
-          const shaper = ctx.createWaveShaper();
-          const filter = ctx.createBiquadFilter();
-          const gainNode = ctx.createGain();
-
-          // تشويه خفيف لإعطاء طابع صوت شكمان/محرك ريس
-          const curve = new Float32Array(256);
-          for (let i = 0; i < 256; i++) {
-            const x = (i * 2) / 256 - 1;
-            curve[i] = ((3 + 18) * x * 20 * (Math.PI / 180)) / (Math.PI + 18 * Math.abs(x));
-          }
-          shaper.curve = curve;
-
-          osc.type = 'sawtooth';
-          osc.frequency.setValueAtTime(p.fStart, now + p.start);
-          osc.frequency.exponentialRampToValueAtTime(p.fEnd, now + p.start + p.dur * 0.72);
-          osc.frequency.exponentialRampToValueAtTime(p.fStart * 1.25, now + p.start + p.dur);
-
-          filter.type = 'lowpass';
-          filter.frequency.setValueAtTime(gender === 'female' ? 950 : 780, now + p.start);
-
-          gainNode.gain.setValueAtTime(0.001, now + p.start);
-          gainNode.gain.linearRampToValueAtTime(p.gain, now + p.start + 0.05);
-          gainNode.gain.exponentialRampToValueAtTime(0.001, now + p.start + p.dur);
-
-          osc.connect(shaper);
-          shaper.connect(filter);
-          filter.connect(gainNode);
-          gainNode.connect(ctx.destination);
-
-          osc.start(now + p.start);
-          osc.stop(now + p.start + p.dur + 0.02);
+        [587.33, 880].forEach((freq, idx) => {
+          const chimeOsc = ctx.createOscillator();
+          const chimeGain = ctx.createGain();
+          chimeOsc.type = 'triangle';
+          chimeOsc.frequency.setValueAtTime(freq, now + 0.24 + idx * 0.13);
+          chimeGain.gain.setValueAtTime(0.22, now + 0.24 + idx * 0.13);
+          chimeGain.gain.exponentialRampToValueAtTime(0.001, now + 0.24 + idx * 0.13 + 0.22);
+          chimeOsc.connect(chimeGain);
+          chimeGain.connect(ctx.destination);
+          chimeOsc.start(now + 0.24 + idx * 0.13);
+          chimeOsc.stop(now + 0.24 + idx * 0.13 + 0.24);
         });
       } catch {}
     }
 
-    // رسالة صوتية للعميل عند الموافقة على الأوردر: "هتشرب ابسط"
+    // رسالة صوتية للعميل عند الموافقة: "هتشرب ابسط"
     function speakCustomerApprovalPhrase() {
       try {
         if (!('speechSynthesis' in window)) return;
@@ -949,13 +981,8 @@
       const input = document.getElementById('social-account-input');
       if (!box || !label || !input) return;
 
-      if (provider === 'google') {
-        label.textContent = 'أدخل حساب الجيميل (Gmail) أو اسمك:';
-        input.placeholder = 'name@gmail.com';
-      } else {
-        label.textContent = 'أدخل حساب فيسبوك (Facebook) أو اسمك:';
-        input.placeholder = 'facebook.com/username أو اسمك';
-      }
+      label.textContent = provider === 'facebook' ? 'أدخل حساب فيسبوك أو اسمك:' : 'أدخل حساب جيميل أو اسمك:';
+      input.placeholder = provider === 'facebook' ? 'facebook.com/username' : 'name@gmail.com';
       box.classList.remove('hidden');
       input.focus();
     }
@@ -973,13 +1000,13 @@
       const val = (input.value || '').trim();
       if (!val) return;
 
-      const providerLabel = socialProvider === 'facebook' ? 'Facebook' : 'Gmail';
+      const label = socialProvider === 'facebook' ? 'Facebook' : 'Gmail';
       if (badge) {
-        badge.textContent = `${providerLabel}: ${val}`;
+        badge.textContent = `${label}: ${val}`;
         badge.className = 'rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-[10px] font-extrabold text-emerald-300';
       }
       if (nameField && !nameField.value.trim()) {
-        nameField.value = `${val} (${providerLabel})`;
+        nameField.value = `${val} (${label})`;
       }
       document.getElementById('social-login-box').classList.add('hidden');
       input.value = '';
@@ -1004,10 +1031,10 @@
       const fBtn = document.getElementById('gender-female-btn');
       if (gender === 'male') {
         mBtn.className = 'rounded-xl border border-gold bg-gold/20 py-2 text-xs font-extrabold text-gold';
-        fBtn.className = 'rounded-xl border border-white/15 bg-charcoal py-2 text-xs font-bold text-gray-300';
+        fBtn.className = 'rounded-xl border border-white/15 bg-black/50 py-2 text-xs font-bold text-gray-300';
       } else {
         fBtn.className = 'rounded-xl border border-gold bg-gold/20 py-2 text-xs font-extrabold text-gold';
-        mBtn.className = 'rounded-xl border border-white/15 bg-charcoal py-2 text-xs font-bold text-gray-300';
+        mBtn.className = 'rounded-xl border border-white/15 bg-black/50 py-2 text-xs font-bold text-gray-300';
       }
     }
 
@@ -1031,7 +1058,7 @@
           attribution: '&copy; OpenStreetMap'
         }).addTo(leafletMap);
 
-        centerMapMarker = L.circleMarker([CENTER_COORDS.lat, CENTER_COORDS.lng], {
+        L.circleMarker([CENTER_COORDS.lat, CENTER_COORDS.lng], {
           radius: 7,
           color: '#D4AF37',
           fillColor: '#D4AF37',
@@ -1045,6 +1072,7 @@
           .bindPopup('موقع العميل الحالي')
           .openPopup();
       } else {
+        leafletMap.invalidateSize();
         leafletMap.setView([lat, lng], 15);
         if (customerMapMarker) {
           customerMapMarker.setLatLng([lat, lng]).setPopupContent('موقع العميل بالضبط').openPopup();
@@ -1059,15 +1087,12 @@
       const barEl = document.getElementById('gps-range-bar');
       const linkEl = document.getElementById('gps-map-link');
 
-      initCustomerMap(CENTER_COORDS.lat, CENTER_COORDS.lng);
-
       if (!navigator.geolocation) {
-        gpsStatus.textContent = 'المتصفح لا يدعم GPS';
-        summaryEl.textContent = 'GPS غير مدعوم على هذا الجهاز.';
+        gpsStatus.textContent = 'GPS غير مدعوم';
         return;
       }
 
-      gpsStatus.textContent = 'جاري تحديد موقع العميل...';
+      gpsStatus.textContent = 'جاري تحديد الموقع...';
       navigator.geolocation.getCurrentPosition(
         (pos) => {
           const { latitude, longitude } = pos.coords;
@@ -1077,79 +1102,47 @@
           const inRange = distKm <= MAX_RADIUS_KM;
           const pct = Math.min(100, Math.max(10, Math.round((distKm / MAX_RADIUS_KM) * 100)));
 
-          gpsStatus.textContent = `موقع العميل محدد (${currentGPS.distKm} كم)`;
-          summaryEl.textContent = inRange
-            ? `موقع العميل ضمن النطاق (${currentGPS.distKm} كم من أصل ${MAX_RADIUS_KM} كم)`
-            : `موقع العميل على بُعد (${currentGPS.distKm} كم من أصل ${MAX_RADIUS_KM} كم)`;
+          gpsStatus.textContent = `تم تحديد الموقع (${currentGPS.distKm} كم)`;
+          if (summaryEl) {
+            summaryEl.textContent = inRange
+              ? `ضمن النطاق (${currentGPS.distKm} كم من أصل ${MAX_RADIUS_KM} كم)`
+              : `على بُعد (${currentGPS.distKm} كم من أصل ${MAX_RADIUS_KM} كم)`;
+          }
+          if (boxEl) {
+            boxEl.textContent = `${latitude.toFixed(5)}, ${longitude.toFixed(5)} • ${currentGPS.distKm} كم`;
+          }
+          if (barEl) {
+            barEl.style.width = `${pct}%`;
+            barEl.className = `h-full rounded-full transition-all duration-300 ${inRange ? 'bg-emerald-400' : 'bg-amber-400'}`;
+          }
+          if (linkEl) {
+            linkEl.href = `https://www.google.com/maps?q=${latitude},${longitude}`;
+            linkEl.classList.remove('hidden');
+          }
 
-          boxEl.textContent = `إحداثيات العميل: ${latitude.toFixed(5)}, ${longitude.toFixed(5)} • المسافة: ${currentGPS.distKm} كم`;
-          barEl.style.width = `${pct}%`;
-          barEl.className = `h-full rounded-full transition-all duration-300 ${inRange ? 'bg-emerald-400' : 'bg-amber-400'}`;
-
-          linkEl.href = `https://www.google.com/maps?q=${latitude},${longitude}`;
-          linkEl.classList.remove('hidden');
-
-          initCustomerMap(latitude, longitude);
+          if (isOwnerUnlocked) {
+            initCustomerMap(latitude, longitude);
+          }
         },
         () => {
-          gpsStatus.textContent = 'تعذر الوصول للموقع';
-          summaryEl.textContent = 'يرجى السماح بصلاحية الموقع (GPS) لإظهار مكان العميل بالضبط على الخريطة.';
+          gpsStatus.textContent = 'تعذر تحديد الموقع';
         },
         { enableHighAccuracy: true, timeout: 10000 }
       );
     }
 
-    function renderCategories() {
-      const wrap = document.getElementById('category-filters');
-      wrap.innerHTML = CATEGORIES.map((cat) => {
-        const active = selectedCategory === cat;
-        return `<button type="button" onclick="selectCategory('${cat}')" class="rounded-xl px-3.5 py-1.5 text-xs font-extrabold transition ${
-          active ? 'bg-gold text-black' : 'border border-white/15 bg-charcoal text-gray-300 hover:border-gold/50'
-        }">${cat}</button>`;
-      }).join('');
-    }
-
-    function selectCategory(cat) {
-      selectedCategory = cat;
-      renderCategories();
-      renderMenu();
-    }
-
-    function renderMenu() {
-      const grid = document.getElementById('menu-grid');
-      if (!grid) return;
-      const query = (document.getElementById('menu-search')?.value || '').trim().toLowerCase();
-
-      const filtered = customMenu.filter((item) => {
-        const matchCat = selectedCategory === 'الكل' || item.category === selectedCategory;
-        const matchSearch = !query || item.name.toLowerCase().includes(query) || item.category.toLowerCase().includes(query);
-        return matchCat && matchSearch;
-      });
-
-      grid.innerHTML = filtered
-        .map(
-          (item) => `
-          <div class="flex flex-col justify-between rounded-2xl border border-white/10 bg-charcoal p-4 transition hover:border-gold/40">
-            <div>
-              <span class="rounded-full bg-white/5 px-2.5 py-0.5 text-[10px] font-bold text-gray-400">${item.category}</span>
-              <h4 class="mt-2 text-sm font-extrabold text-white">${item.name}</h4>
-            </div>
-            <div class="mt-4 flex items-center justify-between gap-2">
-              <span class="text-sm font-black text-gold">${Number(item.price).toFixed(2)} ج.م</span>
-              <button type="button" onclick="addToCart('${item.id}')" class="inline-flex items-center gap-1.5 rounded-xl bg-gold/20 px-3 py-1.5 text-xs font-black text-gold transition hover:bg-gold hover:text-black">
-                <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
-                  <rect x="6" y="4" width="12" height="16" rx="3" />
-                  <line x1="9" y1="8" x2="15" y2="8" />
-                  <line x1="9" y1="12" x2="15" y2="12" />
-                  <line x1="9" y1="16" x2="15" y2="16" />
-                </svg>
-                <span>ابعتهالو 😂</span>
-              </button>
-            </div>
-          </div>
-        `
-        )
+    function renderQuickMenuSelect() {
+      const sel = document.getElementById('quick-item-select');
+      if (!sel) return;
+      sel.innerHTML = customMenu
+        .map((m) => `<option value="${m.id}">${m.name} — ${Number(m.price).toFixed(2)} ج.م</option>`)
         .join('');
+    }
+
+    function addQuickSelectedItem() {
+      const sel = document.getElementById('quick-item-select');
+      if (!sel || !sel.value) return;
+      addToCart(sel.value);
     }
 
     function addToCart(itemId) {
@@ -1176,7 +1169,7 @@
       const totalEl = document.getElementById('cart-total');
 
       if (cart.length === 0) {
-        wrap.innerHTML = '<p class="py-6 text-center text-gray-500">السلة فارغة حالياً — اضغط «ابعتهالو 😂» على أي صنف</p>';
+        wrap.innerHTML = '<p class="py-2 text-center text-gray-500">السلة فارغة — اضغط «ابعتهالو 😂» لإضافة صنف</p>';
         totalEl.textContent = '0.00 ج.م';
         return;
       }
@@ -1187,10 +1180,10 @@
       wrap.innerHTML = cart
         .map(
           (item) => `
-          <div class="flex items-center justify-between gap-2 rounded-xl border border-white/10 bg-charcoal p-2.5">
+          <div class="flex items-center justify-between gap-2 rounded-xl border border-white/10 bg-charcoal px-3 py-2">
             <div>
-              <div class="font-extrabold text-white">${item.name}</div>
-              <div class="text-[11px] text-gold">${(item.price * item.qty).toFixed(2)} ج.م</div>
+              <span class="font-extrabold text-white">${item.name}</span>
+              <span class="mr-2 text-[11px] text-gold">${(item.price * item.qty).toFixed(2)} ج.م</span>
             </div>
             <div class="flex items-center gap-1.5">
               <button type="button" onclick="updateCartQty('${item.id}', -1)" class="h-6 w-6 rounded-lg bg-white/10 font-black text-white">-</button>
@@ -1215,14 +1208,10 @@
         return;
       }
 
-      if (cart.length === 0) {
-        feedback.textContent = 'السلة فارغة! اضغط «ابعتهالو 😂» على صنف واحد على الأقل.';
-        feedback.className = 'rounded-xl bg-amber-500/15 p-2.5 text-center text-xs font-bold text-amber-300';
-        return;
-      }
-
-      const total = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+      const orderItems = cart.length > 0 ? [...cart] : [customMenu[0]].filter(Boolean).map((m) => ({ ...m, qty: 1 }));
+      const total = orderItems.reduce((sum, item) => sum + item.price * item.qty, 0);
       const nowMs = Date.now();
+
       const newOrder = {
         id: 'ORD-' + nowMs.toString().slice(-6),
         customerName,
@@ -1230,12 +1219,12 @@
         customerGender,
         carInfo: carInput.value.trim() || 'سيارة العميل',
         gps: currentGPS,
-        items: [...cart],
+        items: orderItems,
         total,
         status: 'pending_approval',
         assignedBarista: null,
         approvedBy: null,
-        customerNotice: '⏳ تم إرسال طلبك بنجاح وهو الآن بانتظار موافقة المسؤول أو الإدارة أو الباريستا.',
+        customerNotice: '⏳ تم تسجيل طلبك بنجاح وهو الآن بانتظار الموافقة.',
         createdAtMs: nowMs,
         createdAt: new Date(nowMs).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })
       };
@@ -1253,10 +1242,10 @@
       renderOrdersFeed();
       renderCustomerLiveTracker();
 
-      playCarRevAndLaunchSound(customerGender);
+      playImprovedAlertSound();
       showNewOrderBanner(newOrder);
 
-      feedback.textContent = `تم إرسال الأوردر (${newOrder.id}) — حالتك الحالية: بانتظار الموافقة.`;
+      feedback.textContent = `تم إرسال الطلب (${newOrder.id}) — حالتك الحالية: بانتظار الموافقة.`;
       feedback.className = 'rounded-xl bg-emerald-500/15 p-2.5 text-center text-xs font-bold text-emerald-300';
 
       cart = [];
@@ -1269,20 +1258,18 @@
       const box = document.getElementById('customer-live-tracker-body');
       if (!box) return;
 
-      const targetOrder =
-        orders.find((o) => o.id === lastCustomerOrderId) || orders[0] || null;
-
+      const targetOrder = orders.find((o) => o.id === lastCustomerOrderId) || orders[0] || null;
       if (!targetOrder) {
         box.innerHTML = 'لم يتم إرسال طلب من هذا الجهاز بعد.';
         return;
       }
 
       const statusTextMap = {
-        pending_approval: '⏳ بانتظار موافقة المسؤول أو الإدارة أو الباريستا',
-        approved_barista1: '✅ تمت الموافقة وتحويل الطلب إلى باريستا 1 — هتشرب ابسط',
-        approved_barista2: '✅ تمت الموافقة وتحويل الطلب إلى باريستا 2 — هتشرب ابسط',
-        completed: '🎉 تم تجهيز وتسليم الأوردر لسيارتك',
-        rejected: '❌ تعذّر اعتماد الطلب حالياً'
+        pending_approval: '⏳ بانتظار الموافقة',
+        approved_barista1: '✅ تمت الموافقة (باريستا 1) — هتشرب ابسط',
+        approved_barista2: '✅ تمت الموافقة (باريستا 2) — هتشرب ابسط',
+        completed: '🎉 تم التسليم للسيارة',
+        rejected: '❌ تعذّر اعتماد الطلب'
       };
 
       box.innerHTML = `
@@ -1304,7 +1291,6 @@
     }
 
     function approveAndAssignOrder(orderId, baristaSlot = 'barista1') {
-      const approverName = 'اونر / المدير العام: محمود بورسعيد • المسؤولون: محمود حسن ورقيه محمود';
       const baristaLabel = baristaSlot === 'barista2' ? 'باريستا 2' : 'باريستا 1';
       let updatedTarget = null;
 
@@ -1314,7 +1300,7 @@
           ...o,
           status: baristaSlot === 'barista2' ? 'approved_barista2' : 'approved_barista1',
           assignedBarista: baristaSlot,
-          approvedBy: approverName,
+          approvedBy: `اونر (${baristaLabel})`,
           customerNotice: `✅ تمت الموافقة على أوردرك وتحويله إلى (${baristaLabel}) — هتشرب ابسط.`
         };
         return updatedTarget;
@@ -1325,7 +1311,6 @@
       renderOrdersFeed();
       renderCustomerLiveTracker();
 
-      // تشغيل الرسالة الصوتية للعميل: "هتشرب ابسط"
       speakCustomerApprovalPhrase();
 
       if (appSettings.autoPrintOnApprove && updatedTarget) {
@@ -1335,17 +1320,15 @@
 
     function completeOrder(orderId) {
       let updatedTarget = null;
-
       orders = orders.map((o) => {
         if (o.id !== orderId) return o;
         updatedTarget = {
           ...o,
           status: 'completed',
-          customerNotice: '🎉 تم تجهيز وتسليم أوردرك بنجاح. نتمنى لك رحلة سعيدة مع MPW Limousine Coffee.'
+          customerNotice: '🎉 تم تجهيز وتسليم أوردرك بنجاح.'
         };
         return updatedTarget;
       });
-
       saveOrders();
       if (updatedTarget) pushOrderToCloud(updatedTarget);
       renderOrdersFeed();
@@ -1354,18 +1337,15 @@
 
     function rejectOrder(orderId) {
       let updatedTarget = null;
-
       orders = orders.map((o) => {
         if (o.id !== orderId) return o;
         updatedTarget = {
           ...o,
           status: 'rejected',
-          approvedBy: 'اونر / الإدارة',
           customerNotice: '❌ نعتذر، تعذّر اعتماد الطلب حالياً.'
         };
         return updatedTarget;
       });
-
       saveOrders();
       if (updatedTarget) pushOrderToCloud(updatedTarget);
       renderOrdersFeed();
@@ -1378,36 +1358,27 @@
       if (!order || !printArea) return;
 
       const itemsRows = (order.items || [])
-        .map(
-          (it) => `
-          <div style="display:flex;justify-content:space-between;margin:3px 0;">
-            <span>${it.name} × ${it.qty}</span>
-            <span>${(it.price * it.qty).toFixed(2)} ج.م</span>
-          </div>
-        `
-        )
+        .map((it) => `<div style="display:flex;justify-content:space-between;margin:3px 0;"><span>${it.name} × ${it.qty}</span><span>${(it.price * it.qty).toFixed(2)} ج.م</span></div>`)
         .join('');
 
       printArea.innerHTML = `
         <div style="text-align:center;border-bottom:1px dashed #000;padding-bottom:6px;margin-bottom:6px;">
           <div style="font-size:15px;font-weight:bold;">MPW LIMOUSINE COFFEE</div>
           <div>إيصال كاش وتحضير (80mm)</div>
-          <div>المدير العام: محمود بورسعيد</div>
         </div>
-        <div><strong>رقم الطلب:</strong> ${order.id}</div>
+        <div><strong>الطلب:</strong> ${order.id}</div>
         <div><strong>العميل:</strong> ${order.customerName}</div>
         <div><strong>العضوية:</strong> ${TIER_LABELS[order.customerTier] || order.customerTier}</div>
         <div><strong>السيارة:</strong> ${order.carInfo}</div>
         <div><strong>الوقت:</strong> ${order.createdAt}</div>
-        ${order.gps ? `<div><strong>GPS:</strong> ${order.gps.lat.toFixed(5)}, ${order.gps.lng.toFixed(5)} (${order.gps.distKm} كم)</div>` : ''}
         <hr style="border:none;border-top:1px dashed #000;margin:6px 0;" />
         ${itemsRows}
         <hr style="border:none;border-top:1px dashed #000;margin:6px 0;" />
-        <div style="display:flex;justify-content:space-between;font-weight:bold;font-size:13px;">
+        <div style="display:flex;justify-content:space-between;font-weight:bold;">
           <span>الإجمالي:</span>
           <span>${Number(order.total).toFixed(2)} ج.م</span>
         </div>
-        <div style="text-align:center;margin-top:8px;font-size:11px;">هتشرب ابسط — MPW Limousine Coffee</div>
+        <div style="text-align:center;margin-top:8px;">هتشرب ابسط</div>
       `;
 
       window.print();
@@ -1415,7 +1386,12 @@
 
     function openOwnerModal() {
       if (isOwnerUnlocked) {
-        document.getElementById('owner-workspace').classList.toggle('hidden');
+        const sec = document.getElementById('owner-hidden-content');
+        sec.classList.toggle('hidden');
+        if (!sec.classList.contains('hidden')) {
+          const coords = currentGPS || CENTER_COORDS;
+          setTimeout(() => initCustomerMap(coords.lat, coords.lng), 80);
+        }
         return;
       }
       document.getElementById('owner-password-error').classList.add('hidden');
@@ -1440,13 +1416,16 @@
 
       isOwnerUnlocked = true;
       document.getElementById('owner-lock-icon').textContent = '🔓';
-      document.getElementById('owner-btn-label').textContent = 'اونر (مفتوح)';
+      document.getElementById('owner-btn-label').textContent = 'اونر';
       document.getElementById('logout-btn').classList.remove('hidden');
-      document.getElementById('owner-workspace').classList.remove('hidden');
+      document.getElementById('owner-hidden-content').classList.remove('hidden');
 
       closeOwnerModal();
       renderOrdersFeed();
       renderAdminMenuManager();
+
+      const coords = currentGPS || CENTER_COORDS;
+      setTimeout(() => initCustomerMap(coords.lat, coords.lng), 100);
     }
 
     function logoutOwner() {
@@ -1454,7 +1433,7 @@
       document.getElementById('owner-lock-icon').textContent = '👑';
       document.getElementById('owner-btn-label').textContent = 'اونر';
       document.getElementById('logout-btn').classList.add('hidden');
-      document.getElementById('owner-workspace').classList.add('hidden');
+      document.getElementById('owner-hidden-content').classList.add('hidden');
     }
 
     function switchOwnerTab(tab) {
@@ -1533,7 +1512,7 @@
 
               <div class="text-xs text-gray-300">
                 <strong>السيارة:</strong> ${o.carInfo} • <strong>الوقت:</strong> ${o.createdAt}
-                ${o.gps ? ` • <strong>المسافة:</strong> ${o.gps.distKm} كم • <a href="${mapHref}" target="_blank" rel="noopener noreferrer" class="text-sky-300 underline">مكان العميل بالضبط ↗</a>` : ''}
+                ${o.gps ? ` • <strong>المسافة:</strong> ${o.gps.distKm} كم • <a href="${mapHref}" target="_blank" rel="noopener noreferrer" class="text-sky-300 underline">الخريطة ↗</a>` : ''}
               </div>
 
               <ul class="list-disc space-y-1 pr-5 text-xs text-gray-200">${itemsHtml}</ul>
@@ -1567,13 +1546,13 @@
                   o.status === 'approved_barista1' || o.status === 'approved_barista2'
                     ? `
                       <button type="button" onclick="completeOrder('${o.id}')" class="rounded-xl bg-gold px-3 py-1.5 text-xs font-black text-black hover:bg-goldLight">
-                        ✔ تم التسليم للسيارة
+                        ✔ تم التسليم
                       </button>
                     `
                     : ''
                 }
                 <button type="button" onclick="printCashierReceipt('${o.id}')" class="rounded-xl border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-bold text-white hover:bg-white/20">
-                  🖨️ طباعة إيصال كاش
+                  🖨️ طباعة
                 </button>
               </div>
             </div>
@@ -1614,7 +1593,7 @@
 
       customMenu.unshift({ id: 'CUSTOM-' + Date.now(), name, category, price });
       saveCustomMenu();
-      renderMenu();
+      renderQuickMenuSelect();
       renderAdminMenuManager();
       document.getElementById('new-item-name').value = '';
       document.getElementById('new-item-price').value = '';
@@ -1625,20 +1604,20 @@
       if (isNaN(price) || price <= 0) return;
       customMenu = customMenu.map((m) => (m.id === id ? { ...m, price } : m));
       saveCustomMenu();
-      renderMenu();
+      renderQuickMenuSelect();
     }
 
     function adminDeleteMenuItem(id) {
       customMenu = customMenu.filter((m) => m.id !== id);
       saveCustomMenu();
-      renderMenu();
+      renderQuickMenuSelect();
       renderAdminMenuManager();
     }
 
     function resetMenuToDefault() {
       customMenu = [...MENU_ITEMS];
       saveCustomMenu();
-      renderMenu();
+      renderQuickMenuSelect();
       renderAdminMenuManager();
     }
 
@@ -1653,7 +1632,7 @@
 
       const fb = document.getElementById('settings-feedback');
       if (fb) {
-        fb.textContent = 'تم حفظ إعدادات السحابة والطباعة الحرارية بنجاح وجاري المزامنة الآن.';
+        fb.textContent = 'تم حفظ الإعدادات بنجاح.';
         fb.classList.remove('hidden');
       }
 
@@ -1675,14 +1654,12 @@
       syncFromCloudNow();
     }
 
-    // تهيئة أولية وتشغيل المزامنة الدورية
     document.getElementById('fb-db-url').value = appSettings.dbUrl || DEFAULT_DB_URL;
     document.getElementById('fb-api-key').value = appSettings.apiKey || '';
     document.getElementById('fb-project-id').value = appSettings.projectId || 'mpw-limousine-coffee';
     document.getElementById('auto-print-on-approve').checked = Boolean(appSettings.autoPrintOnApprove);
 
-    renderCategories();
-    renderMenu();
+    renderQuickMenuSelect();
     renderCart();
     renderOrdersFeed();
     renderCustomerLiveTracker();
