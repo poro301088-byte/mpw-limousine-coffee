@@ -79,13 +79,6 @@
 </head>
 <body class="min-h-screen bg-obsidian text-gray-100 selection:bg-gold selection:text-black">
 
-  <!-- صوت تشغيل السيارة الحقيقي -->
-  <audio
-    id="car-startup-audio"
-    preload="auto"
-    src="https://actions.google.com/sounds/v1/transportation/sports_car_revving.ogg"
-  ></audio>
-
   <!-- هيدر علوي -->
   <header class="sticky top-0 z-40 border-b border-gold/25 bg-charcoal/95 backdrop-blur">
     <div class="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-3">
@@ -296,7 +289,7 @@
           متابعة إلى صفحة المشروبات والخريطة ☕
         </button>
         <button type="button" onclick="submitOrder()" class="rounded-2xl border border-emerald-400/50 bg-emerald-500/15 px-5 py-3 text-sm font-black text-emerald-200 transition hover:bg-emerald-500/25">
-          ابعتهالو 😉
+          إرسال الأوردر
         </button>
       </div>
     </section>
@@ -372,7 +365,7 @@
           <div class="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3">
             <div>
               <h2 class="text-lg font-extrabold text-gold">قائمة المشروبات والأصناف</h2>
-              <p class="text-xs text-gray-400">استخدم دواسة البنزين أو زر «ابعتهالو 😉» بجانب كل مشروب</p>
+              <p class="text-xs text-gray-400">اضغط «دوس بنزين اوردرك» بجانب كل مشروب لإضافته</p>
             </div>
             <input
               id="menu-search-input"
@@ -396,29 +389,29 @@
             </div>
 
             <div id="cart-items" class="max-h-72 space-y-2 overflow-y-auto pr-1 text-xs">
-              <p class="py-4 text-center text-gray-500">لم تختر مشروبات بعد — اضغط «🦶 دواسة بنزين» أو «ابعتهالو 😉».</p>
+              <p class="py-4 text-center text-gray-500">لم تختر مشروبات بعد — اضغط «دوس بنزين اوردرك» من القائمة.</p>
             </div>
           </div>
 
           <div class="space-y-2.5 pt-2">
             <button type="button" onclick="submitOrder()" class="w-full rounded-2xl bg-gradient-to-r from-gold to-amber-500 py-3 text-sm font-black text-black shadow-lg shadow-gold/20 transition hover:brightness-110">
-              ابعتهالو 😉
+              إرسال الأوردر
             </button>
             <p id="order-feedback" class="hidden rounded-xl bg-emerald-500/15 p-2.5 text-center text-xs font-bold text-emerald-300"></p>
           </div>
         </aside>
       </section>
 
-      <!-- متابعة حالة الطلب للعميل + نطق "هتشرب ابسط" عند الموافقة -->
+      <!-- متابعة حالة الطلب للعميل + نطق "هتشرب وتفول ياباشا" عند الموافقة -->
       <section id="customer-order-tracker" class="rounded-3xl border border-emerald-400/30 bg-charcoal/90 p-4 sm:p-5">
         <div class="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3">
           <div>
             <h2 class="text-sm font-black text-emerald-300">حالة الأوردر المباشرة</h2>
-            <p class="text-[11px] text-gray-400">عند موافقة المسؤول أو الإدارة أو الباريستا تُنطق: «هتشرب ابسط»</p>
+            <p class="text-[11px] text-gray-400">عند موافقة المسؤول أو الإدارة أو الباريستا تُنطق: «هتشرب وتفول ياباشا»</p>
           </div>
           <div class="flex items-center gap-2">
             <button type="button" onclick="speakCustomerApprovalPhrase()" class="rounded-xl border border-emerald-400/40 bg-emerald-500/15 px-3 py-1.5 text-xs font-extrabold text-emerald-200 hover:bg-emerald-500/25">
-              🗣️ هتشرب ابسط
+              🗣️ هتشرب وتفول ياباشا
             </button>
             <button type="button" onclick="syncFromCloudNow()" class="rounded-xl border border-white/15 bg-black/50 px-3 py-1.5 text-xs font-bold text-gray-200 hover:border-gold/50">
               🔄 تحديث
@@ -462,15 +455,15 @@
       <div class="grid gap-3 sm:grid-cols-3">
         <div class="rounded-2xl border border-gold/30 bg-black/50 p-3.5 space-y-1">
           <div class="text-[11px] font-bold text-goldLight">المدير العام — محمود بورسعيد</div>
-          <div class="text-xs font-extrabold text-white">الإشراف الكامل، اعتماد الطلبات، الأسعار والطباعة</div>
+          <div class="text-xs font-extrabold text-white">قبول الأوردرات، إرسالها للبرينتر، الإشراف والأسعار</div>
         </div>
         <div class="rounded-2xl border border-sky-400/30 bg-black/50 p-3.5 space-y-1">
           <div class="text-[11px] font-bold text-sky-300">المسؤولون — محمود حسن • رقيه محمود</div>
-          <div class="text-xs font-extrabold text-white">استقبال بيانات العميل والسيارة وتحويل الطلب للباريستا</div>
+          <div class="text-xs font-extrabold text-white">استقبال الأوردرات، قبولها وإرسالها للبرينتر وتحويلها للباريستا</div>
         </div>
         <div class="rounded-2xl border border-emerald-400/30 bg-black/50 p-3.5 space-y-1">
           <div class="text-[11px] font-bold text-emerald-300">الباريستا — باريستا 1 / باريستا 2</div>
-          <div class="text-xs font-extrabold text-white">استلام الطلب المعتمد، بدء التحضير، جاهز للسيارة وإتمام التسليم</div>
+          <div class="text-xs font-extrabold text-white">قبول الأوردر، إرساله للبرينتر، بدء التحضير والتسليم للسيارة</div>
         </div>
       </div>
 
@@ -558,7 +551,7 @@
           <div class="sm:col-span-2">
             <label class="flex cursor-pointer items-center gap-2 rounded-xl border border-white/15 bg-charcoal px-3 py-2.5 text-xs font-bold text-gray-200 w-full">
               <input id="auto-print-on-approve" type="checkbox" class="h-4 w-4 accent-gold" />
-              <span>طباعة إيصال الكاش تلقائياً عند الموافقة</span>
+              <span>إرسال إيصال الأوردر إلى البرينتر تلقائياً عند القبول</span>
             </label>
           </div>
         </div>
@@ -597,7 +590,7 @@
     </div>
   </div>
 
-  <!-- قالب إيصال الكاش الحراري للطباعة -->
+  <!-- قالب إيصال البرينتر الحراري -->
   <div id="cashier-receipt-print"></div>
 
   <script>
@@ -690,9 +683,9 @@
 
     const CAFE_COORDS = { lat: 31.2465, lng: 29.9735 };
     const DEFAULT_DB_URL = 'https://mpw-limousine-coffee-default-rtdb.firebaseio.com';
-    const ORDERS_STORAGE_KEY = 'mpw_limousine_orders_live_v8';
-    const MENU_STORAGE_KEY = 'mpw_limousine_menu_live_v8';
-    const SETTINGS_STORAGE_KEY = 'mpw_limousine_settings_v8';
+    const ORDERS_STORAGE_KEY = 'mpw_limousine_orders_live_v9';
+    const MENU_STORAGE_KEY = 'mpw_limousine_menu_live_v9';
+    const SETTINGS_STORAGE_KEY = 'mpw_limousine_settings_v9';
     const DEVICE_GMAIL_STORAGE_KEY = 'mpw_device_bound_gmail';
     const LAST_CUSTOMER_ORDER_KEY = 'mpw_limousine_last_customer_order_id';
 
@@ -713,6 +706,9 @@
     let lastCustomerOrderId = localStorage.getItem(LAST_CUSTOMER_ORDER_KEY) || '';
     let cloudPollTimer = null;
 
+    let audioCtx = null;
+    let raceSoundUnlocked = false;
+
     let customerMap = null;
     let customerMarker = null;
     let customerRouteLine = null;
@@ -720,6 +716,133 @@
     let ownerMap = null;
     let ownerCustomerMarker = null;
     let ownerRouteLine = null;
+
+    function getAudioContext() {
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) return null;
+      if (!audioCtx) {
+        audioCtx = new Ctx();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume().catch(() => {});
+      }
+      return audioCtx;
+    }
+
+    // صوت مميز لسيارات السباق مدته 3 ثوانٍ بالضبط عند فتح التطبيق
+    function playRacingCarSound3Sec() {
+      const ctx = getAudioContext();
+      if (!ctx) return false;
+      if (ctx.state !== 'running') return false;
+
+      const now = ctx.currentTime;
+      const duration = 3.0;
+
+      const osc1 = ctx.createOscillator();
+      const osc2 = ctx.createOscillator();
+      const subOsc = ctx.createOscillator();
+      const filter = ctx.createBiquadFilter();
+      const gain = ctx.createGain();
+
+      osc1.type = 'sawtooth';
+      osc2.type = 'sawtooth';
+      subOsc.type = 'triangle';
+
+      osc1.frequency.setValueAtTime(75, now);
+      osc1.frequency.exponentialRampToValueAtTime(240, now + 0.85);
+      osc1.frequency.exponentialRampToValueAtTime(145, now + 1.35);
+      osc1.frequency.exponentialRampToValueAtTime(310, now + 2.35);
+      osc1.frequency.exponentialRampToValueAtTime(190, now + duration);
+
+      osc2.frequency.setValueAtTime(150, now);
+      osc2.frequency.exponentialRampToValueAtTime(480, now + 0.85);
+      osc2.frequency.exponentialRampToValueAtTime(290, now + 1.35);
+      osc2.frequency.exponentialRampToValueAtTime(620, now + 2.35);
+      osc2.frequency.exponentialRampToValueAtTime(380, now + duration);
+
+      subOsc.frequency.setValueAtTime(52, now);
+      subOsc.frequency.linearRampToValueAtTime(125, now + 2.2);
+      subOsc.frequency.linearRampToValueAtTime(75, now + duration);
+
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(550, now);
+      filter.frequency.exponentialRampToValueAtTime(2200, now + 1.1);
+      filter.frequency.exponentialRampToValueAtTime(2800, now + 2.3);
+      filter.frequency.exponentialRampToValueAtTime(900, now + duration);
+
+      gain.gain.setValueAtTime(0.01, now);
+      gain.gain.linearRampToValueAtTime(0.28, now + 0.15);
+      gain.gain.setValueAtTime(0.26, now + duration - 0.35);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+      osc1.connect(filter);
+      osc2.connect(filter);
+      subOsc.connect(filter);
+      filter.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc1.start(now);
+      osc2.start(now);
+      subOsc.start(now);
+
+      osc1.stop(now + duration);
+      osc2.stop(now + duration);
+      subOsc.stop(now + duration);
+
+      return true;
+    }
+
+    // صوت فرامل سيارة مدته ثانيتان (2 ثانية) بالضبط عند إرسال الأوردر
+    function playCarBrakeSound2Sec() {
+      const ctx = getAudioContext();
+      if (!ctx) return;
+
+      const now = ctx.currentTime;
+      const duration = 2.0;
+
+      // ضوضاء احتكاك الفرامل + صفير هبوط السرعة
+      const bufferSize = Math.floor(ctx.sampleRate * duration);
+      const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = noiseBuffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize);
+      }
+
+      const noiseSource = ctx.createBufferSource();
+      noiseSource.buffer = noiseBuffer;
+
+      const bandpass = ctx.createBiquadFilter();
+      bandpass.type = 'bandpass';
+      bandpass.frequency.setValueAtTime(1650, now);
+      bandpass.frequency.exponentialRampToValueAtTime(580, now + duration);
+      bandpass.Q.value = 3.2;
+
+      const brakeGain = ctx.createGain();
+      brakeGain.gain.setValueAtTime(0.01, now);
+      brakeGain.gain.linearRampToValueAtTime(0.32, now + 0.08);
+      brakeGain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+      noiseSource.connect(bandpass);
+      bandpass.connect(brakeGain);
+      brakeGain.connect(ctx.destination);
+
+      noiseSource.start(now);
+      noiseSource.stop(now + duration);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      raceSoundUnlocked = playRacingCarSound3Sec();
+    });
+
+    document.addEventListener(
+      'pointerdown',
+      () => {
+        if (!raceSoundUnlocked) {
+          raceSoundUnlocked = playRacingCarSound3Sec();
+        }
+      },
+      { once: true }
+    );
 
     function loadSettings() {
       try {
@@ -777,15 +900,6 @@
       } catch {}
     }
 
-    function playCarStartupAudio() {
-      const audioEl = document.getElementById('car-startup-audio');
-      if (!audioEl) return;
-      audioEl.currentTime = 0;
-      audioEl.volume = 0.85;
-      audioEl.play().catch(() => {});
-    }
-
-    // ربط التطبيق بحساب الجيميل المتواجد على الجهاز عند منح الأمر
     async function requestDeviceGmailBinding() {
       let suggestedEmail = boundDeviceGmail || '';
       if (!suggestedEmail && navigator.credentials && typeof navigator.credentials.get === 'function') {
@@ -935,7 +1049,6 @@
             renderCollectedCustomerOrdersBox();
 
             if (detectedNewOrder) {
-              playCarStartupAudio();
               showNewOrderBanner(detectedNewOrder);
             }
 
@@ -969,7 +1082,7 @@
       try {
         if (!('speechSynthesis' in window)) return;
         window.speechSynthesis.cancel();
-        const utter = new SpeechSynthesisUtterance('هتشرب ابسط');
+        const utter = new SpeechSynthesisUtterance('هتشرب وتفول ياباشا');
         utter.lang = 'ar-EG';
         utter.rate = 1.0;
         utter.pitch = 1.05;
@@ -1044,7 +1157,6 @@
       document.getElementById('customer-login-step').classList.add('hidden');
       document.getElementById('customer-drinks-and-map-page').classList.remove('hidden');
 
-      playCarStartupAudio();
       renderCollectedCustomerOrdersBox();
 
       setTimeout(() => {
@@ -1272,7 +1384,7 @@
       renderDrinksGrid();
     }
 
-    // بجانب كل مشروب: علامة دواسة بنزين بدلاً من + وزر ابعتهالو مع إيموشن يغمز
+    // بجانب كل مشروب: زر "دوس بنزين اوردرك" فقط بدون "ابعتهالو"
     function renderDrinksGrid() {
       const grid = document.getElementById('drinks-grid');
       if (!grid) return;
@@ -1292,29 +1404,19 @@
       grid.innerHTML = filtered
         .map(
           (item) => `
-          <div class="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-white/10 bg-black/45 p-3 transition hover:border-gold/40">
+          <div class="flex items-center justify-between gap-2 rounded-2xl border border-white/10 bg-black/45 p-3 transition hover:border-gold/40">
             <div class="min-w-0">
               <div class="truncate text-xs font-extrabold text-white">${item.name}</div>
               <div class="text-[10px] text-gray-400">${item.category}</div>
               <div class="mt-0.5 text-xs font-black text-gold">${Number(item.price).toFixed(2)} ج.م</div>
             </div>
-            <div class="flex items-center gap-1.5">
-              <button
-                type="button"
-                onclick="pressGasPedalDrink('${item.id}')"
-                title="دواسة بنزين"
-                class="rounded-xl border border-amber-400/40 bg-amber-500/15 px-2.5 py-1.5 text-[11px] font-black text-amber-200 transition hover:bg-amber-500/30"
-              >
-                🦶 دواسة بنزين
-              </button>
-              <button
-                type="button"
-                onclick="sendSingleDrinkDirectly('${item.id}')"
-                class="rounded-xl bg-gold/20 px-2.5 py-1.5 text-[11px] font-black text-gold transition hover:bg-gold hover:text-black"
-              >
-                ابعتهالو 😉
-              </button>
-            </div>
+            <button
+              type="button"
+              onclick="pressGasPedalDrink('${item.id}')"
+              class="shrink-0 rounded-xl border border-amber-400/50 bg-amber-500/15 px-3 py-1.5 text-[11px] font-black text-amber-200 transition hover:bg-gold hover:text-black"
+            >
+              دوس بنزين اوردرك
+            </button>
           </div>
         `
         )
@@ -1322,27 +1424,8 @@
     }
 
     function pressGasPedalDrink(itemId) {
-      playCarStartupAudio();
+      playCarBrakeSound2Sec();
       addToCart(itemId);
-    }
-
-    function sendSingleDrinkDirectly(itemId) {
-      playCarStartupAudio();
-      const item = customMenu.find((m) => m.id === itemId);
-      if (!item) return;
-
-      const existing = cart.find((c) => c.id === itemId);
-      if (existing) {
-        existing.qty += 1;
-      } else {
-        cart.push({ ...item, qty: 1 });
-      }
-      renderCart();
-
-      const nameInput = document.getElementById('customer-name');
-      if (nameInput && nameInput.value.trim()) {
-        submitOrder();
-      }
     }
 
     function addToCart(itemId) {
@@ -1369,7 +1452,7 @@
       const totalEl = document.getElementById('cart-total');
 
       if (cart.length === 0) {
-        wrap.innerHTML = '<p class="py-4 text-center text-gray-500">لم تختر مشروبات بعد — اضغط «🦶 دواسة بنزين» أو «ابعتهالو 😉».</p>';
+        wrap.innerHTML = '<p class="py-4 text-center text-gray-500">لم تختر مشروبات بعد — اضغط «دوس بنزين اوردرك» من القائمة.</p>';
         totalEl.textContent = '0.00 ج.م';
         return;
       }
@@ -1419,6 +1502,9 @@
         return;
       }
 
+      // تشغيل صوت فرامل سيارة مدته ثانيتان (2 ثانية) عند إرسال الأوردر
+      playCarBrakeSound2Sec();
+
       const orderItems = [...cart];
       const total = orderItems.reduce((sum, item) => sum + item.price * item.qty, 0);
       const nowMs = Date.now();
@@ -1454,8 +1540,6 @@
       renderOrdersFeed();
       renderCustomerLiveTracker();
       renderCollectedCustomerOrdersBox();
-
-      playCarStartupAudio();
       showNewOrderBanner(newOrder);
 
       if (feedback) {
@@ -1467,7 +1551,6 @@
       renderCart();
     }
 
-    // مربع صغير يجمع الأوردرات أمام العميل ليعلم ما طلب ويضيف أو يزيل
     function renderCollectedCustomerOrdersBox() {
       const box = document.getElementById('collected-customer-orders-box');
       const countBadge = document.getElementById('collected-orders-count');
@@ -1567,10 +1650,10 @@
 
       const statusTextMap = {
         pending_approval: '⏳ بانتظار الموافقة',
-        approved_barista1: '✅ معتمد لدى باريستا 1 — هتشرب ابسط',
-        approved_barista2: '✅ معتمد لدى باريستا 2 — هتشرب ابسط',
-        preparing: '☕ جاري التحضير لدى الباريستا — هتشرب ابسط',
-        ready_for_car: '🚗 جاهز للتوصيل للسيارة — هتشرب ابسط',
+        approved_barista1: '✅ معتمد لدى باريستا 1 — هتشرب وتفول ياباشا',
+        approved_barista2: '✅ معتمد لدى باريستا 2 — هتشرب وتفول ياباشا',
+        preparing: '☕ جاري التحضير لدى الباريستا — هتشرب وتفول ياباشا',
+        ready_for_car: '🚗 جاهز للتوصيل للسيارة — هتشرب وتفول ياباشا',
         completed: '🎉 تم التسليم للسيارة',
         rejected: '❌ تعذّر اعتماد الطلب'
       };
@@ -1593,18 +1676,26 @@
       `;
     }
 
-    function approveAndAssignOrder(orderId, baristaSlot = 'barista1') {
-      const baristaLabel = baristaSlot === 'barista2' ? 'باريستا 2' : 'باريستا 1';
+    // قبول الأوردر من المدير العام أو المسؤولين أو الباريستا وإرساله للبرينتر
+    function acceptOrderAndSendToPrinter(orderId, roleOrSlot = 'barista1') {
+      const slotMap = {
+        gm: { slot: 'barista1', actor: 'المدير العام (محمود بورسعيد) → باريستا 1' },
+        supervisor: { slot: 'barista1', actor: 'المسؤولون (محمود حسن • رقيه محمود) → باريستا 1' },
+        barista1: { slot: 'barista1', actor: 'باريستا 1' },
+        barista2: { slot: 'barista2', actor: 'باريستا 2' }
+      };
+
+      const cfg = slotMap[roleOrSlot] || slotMap.barista1;
       let updatedTarget = null;
 
       orders = orders.map((o) => {
         if (o.id !== orderId) return o;
         updatedTarget = {
           ...o,
-          status: baristaSlot === 'barista2' ? 'approved_barista2' : 'approved_barista1',
-          assignedBarista: baristaSlot,
-          approvedBy: `الإدارة / المسؤول (${baristaLabel})`,
-          customerNotice: `✅ تمت الموافقة على أوردرك وتحويله إلى (${baristaLabel}) — هتشرب ابسط.`
+          status: cfg.slot === 'barista2' ? 'approved_barista2' : 'approved_barista1',
+          assignedBarista: cfg.slot,
+          approvedBy: cfg.actor,
+          customerNotice: `✅ تم قبول أوردرك بواسطة (${cfg.actor}) وإرساله للبرينتر — هتشرب وتفول ياباشا.`
         };
         return updatedTarget;
       });
@@ -1616,21 +1707,18 @@
       renderCollectedCustomerOrdersBox();
 
       speakCustomerApprovalPhrase();
-
-      if (appSettings.autoPrintOnApprove && updatedTarget) {
-        printCashierReceipt(orderId);
-      }
+      sendOrderToPrinter(orderId);
     }
 
     function updateBaristaStage(orderId, nextStage) {
       const labels = {
         preparing: {
           status: 'preparing',
-          notice: '☕ الباريستا بدأ في تحضير مشروباتك الآن — هتشرب ابسط.'
+          notice: '☕ الباريستا بدأ في تحضير مشروباتك الآن — هتشرب وتفول ياباشا.'
         },
         ready_for_car: {
           status: 'ready_for_car',
-          notice: '🚗 مشروباتك جاهزة ومتجهة للسيارة الآن — هتشرب ابسط.'
+          notice: '🚗 مشروباتك جاهزة ومتجهة للسيارة الآن — هتشرب وتفول ياباشا.'
         },
         completed: {
           status: 'completed',
@@ -1677,7 +1765,7 @@
       renderCollectedCustomerOrdersBox();
     }
 
-    function printCashierReceipt(orderId) {
+    function sendOrderToPrinter(orderId) {
       const order = orders.find((o) => o.id === orderId);
       const printArea = document.getElementById('cashier-receipt-print');
       if (!order || !printArea) return;
@@ -1689,12 +1777,13 @@
       printArea.innerHTML = `
         <div style="text-align:center;border-bottom:1px dashed #000;padding-bottom:6px;margin-bottom:6px;">
           <div style="font-size:15px;font-weight:bold;">MPW LIMOUSINE COFFEE</div>
-          <div>إيصال كاش وتحضير (80mm)</div>
+          <div>إيصال برينتر الأوردر (80mm)</div>
         </div>
         <div><strong>الطلب:</strong> ${order.id}</div>
         <div><strong>العميل:</strong> ${order.customerName}</div>
         <div><strong>العضوية:</strong> ${TIER_LABELS[order.customerTier] || order.customerTier}</div>
         <div><strong>السيارة:</strong> ${order.carInfo}</div>
+        <div><strong>الاعتماد:</strong> ${order.approvedBy || 'الإدارة / المسؤول / الباريستا'}</div>
         <div><strong>الوقت:</strong> ${order.createdAt}</div>
         <hr style="border:none;border-top:1px dashed #000;margin:6px 0;" />
         ${itemsRows}
@@ -1703,7 +1792,7 @@
           <span>الإجمالي:</span>
           <span>${Number(order.total).toFixed(2)} ج.م</span>
         </div>
-        <div style="text-align:center;margin-top:8px;">هتشرب ابسط</div>
+        <div style="text-align:center;margin-top:8px;">هتشرب وتفول ياباشا</div>
       `;
 
       window.print();
@@ -1818,8 +1907,8 @@
         .map((o) => {
           const badgeMap = {
             pending_approval: '<span class="rounded-full bg-amber-500/15 px-2.5 py-1 text-[11px] font-extrabold text-amber-300">بانتظار الموافقة</span>',
-            approved_barista1: '<span class="rounded-full bg-sky-500/15 px-2.5 py-1 text-[11px] font-extrabold text-sky-300">معتمد → باريستا 1</span>',
-            approved_barista2: '<span class="rounded-full bg-indigo-500/15 px-2.5 py-1 text-[11px] font-extrabold text-indigo-300">معتمد → باريستا 2</span>',
+            approved_barista1: '<span class="rounded-full bg-sky-500/15 px-2.5 py-1 text-[11px] font-extrabold text-sky-300">مقبول → باريستا 1</span>',
+            approved_barista2: '<span class="rounded-full bg-indigo-500/15 px-2.5 py-1 text-[11px] font-extrabold text-indigo-300">مقبول → باريستا 2</span>',
             preparing: '<span class="rounded-full bg-amber-400/15 px-2.5 py-1 text-[11px] font-extrabold text-amber-200">جاري التحضير</span>',
             ready_for_car: '<span class="rounded-full bg-cyan-400/15 px-2.5 py-1 text-[11px] font-extrabold text-cyan-200">جاهز للسيارة</span>',
             completed: '<span class="rounded-full bg-emerald-500/15 px-2.5 py-1 text-[11px] font-extrabold text-emerald-300">تم التسليم</span>',
@@ -1866,11 +1955,17 @@
                 ${
                   o.status === 'pending_approval'
                     ? `
-                      <button type="button" onclick="approveAndAssignOrder('${o.id}', 'barista1')" class="rounded-xl bg-emerald-500 px-3 py-1.5 text-xs font-black text-black hover:bg-emerald-400">
-                        ✓ موافقة → باريستا 1
+                      <button type="button" onclick="acceptOrderAndSendToPrinter('${o.id}', 'gm')" class="rounded-xl bg-gold px-3 py-1.5 text-xs font-black text-black hover:bg-goldLight">
+                        🖨️ قبول المدير العام وإرسال للبرينتر
                       </button>
-                      <button type="button" onclick="approveAndAssignOrder('${o.id}', 'barista2')" class="rounded-xl bg-sky-400 px-3 py-1.5 text-xs font-black text-black hover:bg-sky-300">
-                        ✓ موافقة → باريستا 2
+                      <button type="button" onclick="acceptOrderAndSendToPrinter('${o.id}', 'supervisor')" class="rounded-xl bg-sky-400 px-3 py-1.5 text-xs font-black text-black hover:bg-sky-300">
+                        🖨️ قبول المسؤولين وإرسال للبرينتر
+                      </button>
+                      <button type="button" onclick="acceptOrderAndSendToPrinter('${o.id}', 'barista1')" class="rounded-xl bg-emerald-500 px-3 py-1.5 text-xs font-black text-black hover:bg-emerald-400">
+                        🖨️ قبول باريستا 1 وإرسال للبرينتر
+                      </button>
+                      <button type="button" onclick="acceptOrderAndSendToPrinter('${o.id}', 'barista2')" class="rounded-xl bg-indigo-400 px-3 py-1.5 text-xs font-black text-black hover:bg-indigo-300">
+                        🖨️ قبول باريستا 2 وإرسال للبرينتر
                       </button>
                       <button type="button" onclick="rejectOrder('${o.id}')" class="rounded-xl bg-red-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-red-500">
                         ✕ رفض
@@ -1893,8 +1988,8 @@
                     `
                     : ''
                 }
-                <button type="button" onclick="printCashierReceipt('${o.id}')" class="rounded-xl border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-bold text-white hover:bg-white/20">
-                  🖨️ طباعة
+                <button type="button" onclick="sendOrderToPrinter('${o.id}')" class="rounded-xl border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-bold text-white hover:bg-white/20">
+                  🖨️ إرسال للبرينتر
                 </button>
               </div>
             </div>
