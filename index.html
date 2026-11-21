@@ -8,6 +8,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -30,6 +32,13 @@
       font-family: 'Cairo', sans-serif;
       background-color: #0B0B0C;
       color: #F9FAFB;
+    }
+
+    #customer-live-map {
+      height: 210px;
+      width: 100%;
+      border-radius: 16px;
+      z-index: 1;
     }
 
     #cashier-receipt-print {
@@ -79,38 +88,39 @@
       </div>
 
       <div class="flex flex-wrap items-center gap-2">
-        <button type="button" onclick="enableSoundAlertManually()" class="rounded-xl border border-emerald-400/40 bg-emerald-500/10 px-3 py-2 text-xs font-extrabold text-emerald-300 transition hover:bg-emerald-500/20">
-          🔔 تفعيل صوت التنبيه
+        <button type="button" onclick="enableSoundAlertManually()" class="rounded-xl border border-amber-400/40 bg-amber-500/10 px-3 py-2 text-xs font-extrabold text-amber-300 transition hover:bg-amber-500/20">
+          🏎️ تفعيل صوت بنزين الريس
         </button>
 
         <span id="sync-status-badge" class="rounded-full border border-amber-500/40 bg-amber-500/10 px-3 py-1 text-xs font-bold text-amber-300">
           جاري الاتصال بالسحابة...
         </span>
 
-        <button type="button" onclick="openAuthModal()" class="flex items-center gap-1.5 rounded-xl border border-gold/40 bg-black/60 px-3.5 py-2 text-xs font-bold text-gold transition hover:bg-gold hover:text-black sm:text-sm">
-          <span id="auth-icon">🔒</span>
-          <span id="auth-label">دخول الإدارة / المسؤولين / الباريستا</span>
+        <!-- خانة اونر -->
+        <button type="button" onclick="openOwnerModal()" class="flex items-center gap-1.5 rounded-xl border border-gold bg-gold/15 px-3.5 py-2 text-xs font-black text-gold transition hover:bg-gold hover:text-black sm:text-sm">
+          <span id="owner-lock-icon">👑</span>
+          <span id="owner-btn-label">اونر</span>
         </button>
 
-        <button id="logout-btn" type="button" onclick="logoutRole()" class="hidden rounded-xl border border-red-500/40 bg-red-500/10 px-3 py-2 text-xs font-bold text-red-300 transition hover:bg-red-500 hover:text-white">
+        <button id="logout-btn" type="button" onclick="logoutOwner()" class="hidden rounded-xl border border-red-500/40 bg-red-500/10 px-3 py-2 text-xs font-bold text-red-300 transition hover:bg-red-500 hover:text-white">
           خروج
         </button>
       </div>
     </div>
   </header>
 
-  <!-- تنبيه وصول أوردر جديد -->
+  <!-- تنبيه وصول أوردر جديد بصوت بنزين عربية ريس وهي بتتحرك -->
   <div id="new-order-banner" class="hidden mx-auto mt-3 max-w-7xl px-4">
-    <div class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-emerald-400/50 bg-emerald-950/70 px-4 py-3 text-emerald-100 shadow-lg">
+    <div class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-400/50 bg-amber-950/70 px-4 py-3 text-amber-100 shadow-lg">
       <div class="flex items-center gap-2.5 text-sm font-bold">
-        <span class="text-xl">🔔</span>
+        <span class="text-xl">🏎️</span>
         <span id="new-order-banner-text">وصل طلب جديد الآن!</span>
       </div>
       <div class="flex items-center gap-2">
-        <button type="button" onclick="playNewCustomerSound('male')" class="rounded-lg bg-emerald-500/20 px-2.5 py-1 text-xs font-bold text-emerald-200 hover:bg-emerald-500/30">
-          🔊 تجربة صوت عميل جديد
+        <button type="button" onclick="playCarRevAndLaunchSound(customerGender)" class="rounded-lg bg-amber-500/25 px-2.5 py-1 text-xs font-bold text-amber-200 hover:bg-amber-500/40">
+          🔊 تجربة صوت ريس وانطلاق العربية
         </button>
-        <button type="button" onclick="document.getElementById('new-order-banner').classList.add('hidden')" class="text-xs text-emerald-300 hover:underline">
+        <button type="button" onclick="document.getElementById('new-order-banner').classList.add('hidden')" class="text-xs text-amber-300 hover:underline">
           إغلاق
         </button>
       </div>
@@ -120,7 +130,7 @@
   <!-- المحتوى الرئيسي -->
   <main class="mx-auto max-w-7xl space-y-8 px-4 py-6">
 
-    <!-- بطاقة القيادة وعلامة رادار GPS المرئية -->
+    <!-- بطاقة القيادة وخريطة موقع العميل بالضبط -->
     <section class="grid gap-4 rounded-3xl border border-gold/25 bg-charcoal/90 p-4 lg:grid-cols-12">
       <div class="space-y-3 lg:col-span-5 flex flex-col justify-between">
         <div class="rounded-2xl border border-white/10 bg-black/45 p-3.5">
@@ -139,16 +149,16 @@
         </div>
       </div>
 
-      <!-- علامة شكل وظهور GPS المرئية (رادار النطاق 15 كم) -->
+      <!-- خريطة تحديد موقع العميل بالضبط + نطاق 15 كم -->
       <div class="lg:col-span-7 rounded-2xl border border-sky-400/35 bg-gradient-to-br from-sky-950/35 via-black/60 to-charcoal p-4">
         <div class="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-2.5">
           <div class="flex items-center gap-2">
             <span id="gps-indicator-dot" class="inline-block h-3 w-3 rounded-full bg-amber-400 animate-pulse"></span>
-            <h2 class="text-sm font-black text-sky-300">علامة ونطاق GPS المباشر (نطاق الخدمة 15 كم)</h2>
+            <h2 class="text-sm font-black text-sky-300">خريطة موقع العميل بالضبط (نطاق الخدمة 15 كم)</h2>
           </div>
           <div class="flex items-center gap-2">
             <button type="button" onclick="captureGPS()" class="rounded-xl bg-sky-500/20 px-3 py-1 text-xs font-extrabold text-sky-200 hover:bg-sky-500/30">
-              📍 تحديد / تحديث GPS
+              📍 تحديد موقع العميل الآن
             </button>
             <a id="gps-map-link" href="#" target="_blank" rel="noopener noreferrer" class="hidden rounded-xl bg-gold/20 px-3 py-1 text-xs font-extrabold text-gold underline hover:bg-gold hover:text-black">
               خرائط Google ↗
@@ -156,92 +166,100 @@
           </div>
         </div>
 
-        <div class="mt-3 grid items-center gap-4 sm:grid-cols-12">
-          <div class="sm:col-span-5 flex flex-col items-center justify-center">
-            <div class="relative flex h-36 w-36 items-center justify-center rounded-full border-2 border-sky-400/40 bg-sky-950/30 shadow-inner">
-              <div class="h-24 w-24 rounded-full border border-dashed border-sky-400/35"></div>
-              <div class="h-12 w-12 rounded-full border border-sky-400/25"></div>
-              <div class="absolute h-3 w-3 rounded-full bg-gold ring-4 ring-gold/30" title="نقطة التمركز MPW"></div>
-              <div id="gps-radar-pin" class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transition-all duration-500">
-                <div class="flex h-6 w-6 items-center justify-center rounded-full border-2 border-white bg-emerald-500 text-[11px] font-black text-black shadow-lg">
-                  📍
-                </div>
-              </div>
-            </div>
-            <span class="mt-1.5 text-[10px] font-bold text-gray-400">المركز: ذهبي (MPW) • العميل: 📍</span>
-          </div>
+        <div class="mt-3 space-y-2.5">
+          <div id="customer-live-map" class="border border-sky-400/25 bg-black/70"></div>
 
-          <div class="sm:col-span-7 space-y-2">
-            <div class="h-2.5 w-full overflow-hidden rounded-full bg-black/80">
-              <div id="gps-range-bar" class="h-full w-1/6 rounded-full bg-amber-400 transition-all duration-300"></div>
-            </div>
-            <div id="gps-range-summary" class="text-xs font-bold leading-relaxed text-gray-200">
-              جاري قراءة موقع GPS...
-            </div>
-            <div id="gps-range-box" class="rounded-xl border border-white/10 bg-black/50 p-2.5 text-[11px] leading-relaxed text-gray-300">
-              اضغط «تحديد / تحديث GPS» أو اسمح بالوصول للموقع لإظهار الإحداثيات والمسافة داخل النطاق.
-            </div>
+          <div class="h-2 w-full overflow-hidden rounded-full bg-black/80">
+            <div id="gps-range-bar" class="h-full w-1/6 rounded-full bg-amber-400 transition-all duration-300"></div>
+          </div>
+          <div class="flex flex-wrap items-center justify-between gap-2 text-xs">
+            <span id="gps-range-summary" class="font-bold text-gray-200">جاري قراءة موقع GPS للعميل...</span>
+            <span id="gps-range-box" class="text-[11px] text-sky-300">بانتظار تحديد الإحداثيات الدقيقة...</span>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- متابعة حالة الطلب المباشرة للعميل -->
+    <!-- متابعة حالة الطلب المباشرة للعميل + نطق "هتشرب ابسط" عند الموافقة -->
     <section id="customer-order-tracker" class="rounded-3xl border border-emerald-400/30 bg-charcoal/90 p-4 sm:p-5">
       <div class="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3">
         <div>
           <h2 class="text-base font-black text-emerald-300">🚗 متابعة حالة أوردرك المباشرة (شاشة العميل)</h2>
-          <p class="text-xs text-gray-400">تظهر هنا حالة اعتماد طلبك فوراً بمجرد موافقة المسؤول أو الإدارة أو الباريستا</p>
+          <p class="text-xs text-gray-400">عند الموافقة على أوردرك يظهر التحديث فوراً وتنطق الرسالة الصوتية: «هتشرب ابسط»</p>
         </div>
-        <button type="button" onclick="syncFromCloudNow()" class="rounded-xl border border-white/15 bg-black/50 px-3 py-1.5 text-xs font-bold text-gray-200 hover:border-gold/50">
-          🔄 تحديث الحالة الآن
-        </button>
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="speakCustomerApprovalPhrase()" class="rounded-xl border border-emerald-400/40 bg-emerald-500/15 px-3 py-1.5 text-xs font-extrabold text-emerald-200 hover:bg-emerald-500/25">
+            🗣️ تشغيل صوت «هتشرب ابسط»
+          </button>
+          <button type="button" onclick="syncFromCloudNow()" class="rounded-xl border border-white/15 bg-black/50 px-3 py-1.5 text-xs font-bold text-gray-200 hover:border-gold/50">
+            🔄 تحديث الحالة الآن
+          </button>
+        </div>
       </div>
       <div id="customer-live-tracker-body" class="mt-3 text-xs text-gray-300">
         لم يتم إرسال طلب من هذا الجهاز بعد.
       </div>
     </section>
 
-    <!-- لوحة الإدارة والمسؤولين وقسمي الباريستا -->
-    <section id="staff-workspace" class="hidden space-y-6 rounded-3xl border border-gold/35 bg-charcoal p-4 sm:p-6 shadow-2xl">
+    <!-- لوحة اونر: تضم المدير العام والمسؤولين والباريستا وتحكم الإدارة -->
+    <section id="owner-workspace" class="hidden space-y-6 rounded-3xl border border-gold/40 bg-charcoal p-4 sm:p-6 shadow-2xl">
       <div class="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-4">
         <div>
           <div class="flex items-center gap-2">
-            <span class="rounded-lg bg-gold px-2.5 py-0.5 text-xs font-black text-black" id="active-role-badge">دور نشط</span>
-            <h2 class="text-xl font-extrabold text-white">لوحة العمليات الحية وربط العملاء بالمسؤول والباريستا</h2>
+            <span class="rounded-lg bg-gold px-2.5 py-0.5 text-xs font-black text-black">اونر (OWNER)</span>
+            <h2 class="text-xl font-extrabold text-white">لوحة الاونر — المدير العام والمسؤولون والباريستا</h2>
           </div>
           <p class="mt-1 text-xs text-gray-400">
-            المدير العام: <strong class="text-goldLight">محمود بورسعيد</strong> | المسؤولون: <strong class="text-gray-200">محمود حسن</strong> و <strong class="text-gray-200">رقيه محمود</strong>
+            المدير العام: <strong class="text-goldLight">محمود بورسعيد</strong> • المسؤولون: <strong class="text-gray-200">محمود حسن</strong> و <strong class="text-gray-200">رقيه محمود</strong> • باريستا 1 / باريستا 2
           </p>
         </div>
 
         <div class="flex flex-wrap gap-2">
-          <button type="button" onclick="switchStaffTab('all')" id="tab-all" class="staff-tab rounded-xl bg-gold px-3.5 py-2 text-xs font-extrabold text-black">
+          <button type="button" onclick="switchOwnerTab('all')" id="tab-all" class="owner-tab rounded-xl bg-gold px-3.5 py-2 text-xs font-extrabold text-black">
             الطلبات والمسؤولين
           </button>
-          <button type="button" onclick="switchStaffTab('barista1')" id="tab-barista1" class="staff-tab rounded-xl border border-white/15 bg-black/50 px-3.5 py-2 text-xs font-bold text-gray-200 hover:border-gold/50">
+          <button type="button" onclick="switchOwnerTab('barista1')" id="tab-barista1" class="owner-tab rounded-xl border border-white/15 bg-black/50 px-3.5 py-2 text-xs font-bold text-gray-200 hover:border-gold/50">
             ☕ باريستا 1 (<span id="count-barista1">0</span>)
           </button>
-          <button type="button" onclick="switchStaffTab('barista2')" id="tab-barista2" class="staff-tab rounded-xl border border-white/15 bg-black/50 px-3.5 py-2 text-xs font-bold text-gray-200 hover:border-gold/50">
+          <button type="button" onclick="switchOwnerTab('barista2')" id="tab-barista2" class="owner-tab rounded-xl border border-white/15 bg-black/50 px-3.5 py-2 text-xs font-bold text-gray-200 hover:border-gold/50">
             ☕ باريستا 2 (<span id="count-barista2">0</span>)
           </button>
-          <button type="button" onclick="switchStaffTab('admin_control')" id="tab-admin_control" class="staff-tab hidden rounded-xl border border-gold/40 bg-gold/10 px-3.5 py-2 text-xs font-extrabold text-gold hover:bg-gold hover:text-black">
-            🛠️ تحكم الإدارة (الأسعار والأصناف)
+          <button type="button" onclick="switchOwnerTab('admin_control')" id="tab-admin_control" class="owner-tab rounded-xl border border-gold/40 bg-gold/10 px-3.5 py-2 text-xs font-extrabold text-gold hover:bg-gold hover:text-black">
+            🛠️ تحكم المدير العام (المنيو والأسعار)
           </button>
-          <button type="button" onclick="switchStaffTab('settings')" id="tab-settings" class="staff-tab rounded-xl border border-white/15 bg-black/50 px-3.5 py-2 text-xs font-bold text-gray-200 hover:border-gold/50">
+          <button type="button" onclick="switchOwnerTab('settings')" id="tab-settings" class="owner-tab rounded-xl border border-white/15 bg-black/50 px-3.5 py-2 text-xs font-bold text-gray-200 hover:border-gold/50">
             ⚙️ إعدادات السحابة والطباعة
           </button>
+        </div>
+      </div>
+
+      <!-- بطاقات الأدوار داخل خانة اونر -->
+      <div class="grid gap-3 sm:grid-cols-3">
+        <div class="rounded-2xl border border-gold/30 bg-black/50 p-3.5">
+          <div class="text-[11px] font-bold text-goldLight">المدير العام</div>
+          <div class="mt-1 text-sm font-black text-white">محمود بورسعيد</div>
+          <div class="mt-1 text-[11px] text-gray-400">إشراف كامل + اعتماد الطلبات + إدارة الأسعار والأصناف</div>
+        </div>
+        <div class="rounded-2xl border border-sky-400/30 bg-black/50 p-3.5">
+          <div class="text-[11px] font-bold text-sky-300">المسؤولون عن الطلبات والربط</div>
+          <div class="mt-1 text-sm font-black text-white">محمود حسن • رقيه محمود</div>
+          <div class="mt-1 text-[11px] text-gray-400">مراجعة الطلبات، تحديد موقع العميل، والربط بالباريستا</div>
+        </div>
+        <div class="rounded-2xl border border-emerald-400/30 bg-black/50 p-3.5">
+          <div class="text-[11px] font-bold text-emerald-300">قسم التحضير والتسليم</div>
+          <div class="mt-1 text-sm font-black text-white">باريستا 1 • باريستا 2</div>
+          <div class="mt-1 text-[11px] text-gray-400">استلام الطلبات المعتمدة وتجهيزها وتسليمها للسيارة</div>
         </div>
       </div>
 
       <!-- إحصائيات سريعة -->
       <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <div class="rounded-2xl border border-white/10 bg-black/45 p-3.5">
-          <div class="text-xs text-gray-400">بانتظار موافقة المسؤول</div>
+          <div class="text-xs text-gray-400">بانتظار الموافقة</div>
           <div id="stat-pending" class="mt-1 text-2xl font-black text-amber-400">0</div>
         </div>
         <div class="rounded-2xl border border-white/10 bg-black/45 p-3.5">
-          <div class="text-xs text-gray-400">مرتبط بالباريستا / معتمد</div>
+          <div class="text-xs text-gray-400">معتمد لدى الباريستا</div>
           <div id="stat-approved" class="mt-1 text-2xl font-black text-sky-400">0</div>
         </div>
         <div class="rounded-2xl border border-white/10 bg-black/45 p-3.5">
@@ -249,17 +267,17 @@
           <div id="stat-completed" class="mt-1 text-2xl font-black text-emerald-400">0</div>
         </div>
         <div class="rounded-2xl border border-white/10 bg-black/45 p-3.5">
-          <div class="text-xs text-gray-400">عملاء جدد اليوم</div>
+          <div class="text-xs text-gray-400">إجمالي الطلبات</div>
           <div id="stat-new-customers" class="mt-1 text-2xl font-black text-gold">0</div>
         </div>
       </div>
 
-      <!-- لوحة التحكم الخاصة بالمدير العام -->
+      <!-- لوحة تحكم المدير العام -->
       <div id="admin-control-panel" class="hidden space-y-5 rounded-2xl border border-gold/40 bg-black/55 p-4 sm:p-5">
         <div class="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3">
           <div>
-            <h3 class="text-base font-black text-gold">لوحة تحكم المدير العام (محمود بورسعيد) — إدارة المنيو والتسعير</h3>
-            <p class="text-xs text-gray-400">أضف صنفاً جديداً، أو عدّل السعر والاسم، أو أزل أي صنف مباشرة وتتم مزامنته لحظياً.</p>
+            <h3 class="text-base font-black text-gold">تحكم المدير العام (محمود بورسعيد) — إدارة المنيو والتسعير</h3>
+            <p class="text-xs text-gray-400">أضف صنفاً جديداً، أو عدّل السعر، أو احذف صنفاً ويتم التحديث فوراً.</p>
           </div>
           <button type="button" onclick="resetMenuToDefault()" class="rounded-xl border border-amber-400/40 bg-amber-500/10 px-3 py-1.5 text-xs font-bold text-amber-300 hover:bg-amber-500/20">
             استعادة المنيو الافتراضي
@@ -294,15 +312,15 @@
         </div>
 
         <div class="flex flex-wrap items-center justify-between gap-2">
-          <span class="text-xs font-extrabold text-gray-200">قائمة الأصناف الحالية للتعديل أو الإزالة:</span>
+          <span class="text-xs font-extrabold text-gray-200">قائمة الأصناف الحالية:</span>
           <input id="admin-menu-search" oninput="renderAdminMenuManager()" type="text" placeholder="ابحث لتعديل سعر أو حذف صنف..." class="w-full rounded-xl border border-white/15 bg-charcoal px-3 py-1.5 text-xs text-white focus:border-gold focus:outline-none sm:w-64" />
         </div>
 
         <div id="admin-menu-list" class="max-h-96 space-y-2 overflow-y-auto pr-1"></div>
       </div>
 
-      <!-- قسم الإعدادات -->
-      <div id="staff-settings-panel" class="hidden space-y-4 rounded-2xl border border-gold/30 bg-black/50 p-4">
+      <!-- إعدادات السحابة والطباعة -->
+      <div id="owner-settings-panel" class="hidden space-y-4 rounded-2xl border border-gold/30 bg-black/50 p-4">
         <h3 class="text-base font-extrabold text-gold">إعدادات الربط السحابي (Firebase) وطباعة الكاش</h3>
         <p class="text-xs leading-relaxed text-gray-300">
           متصل مباشرة بقاعدة البيانات: <strong class="text-goldLight">https://mpw-limousine-coffee-default-rtdb.firebaseio.com</strong>
@@ -345,7 +363,7 @@
       <div id="orders-feed" class="grid gap-4 md:grid-cols-2"></div>
     </section>
 
-    <!-- قسم العميل: بيانات العميل + المنيو + السلة -->
+    <!-- قسم العميل: تسجيل الدخول بجيميل/فيسبوك + بيانات العميل + المنيو + السلة -->
     <div class="grid gap-6 lg:grid-cols-12">
 
       <!-- المنيو -->
@@ -353,7 +371,7 @@
         <div class="flex flex-wrap items-center justify-between gap-3 rounded-3xl border border-white/10 bg-charcoal p-4">
           <div>
             <h2 class="text-xl font-extrabold text-gold">منيو MPW Limousine Coffee</h2>
-            <p class="text-xs text-gray-400">اختر مشروباتك ومأكولاتك وسيتم توصيل الطلب إلى سيارتك عبر GPS</p>
+            <p class="text-xs text-gray-400">اضغط «ابعتهالو 😂» على الصنف المطلوب وسيتم تجهيزه وتوصيله إلى سيارتك</p>
           </div>
           <input id="menu-search" oninput="renderMenu()" type="text" placeholder="ابحث عن مشروب أو صنف..." class="w-full rounded-xl border border-white/15 bg-black/60 px-3.5 py-2 text-xs text-white placeholder-gray-500 focus:border-gold focus:outline-none sm:w-60" />
         </div>
@@ -362,14 +380,46 @@
         <div id="menu-grid" class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3"></div>
       </section>
 
-      <!-- نموذج الطلب وسلة العميل -->
+      <!-- نموذج الطلب وتسجيل العميل وسلته -->
       <aside class="lg:col-span-4">
         <div class="sticky top-20 space-y-4 rounded-3xl border border-gold/30 bg-charcoal p-5 shadow-xl">
-          <h3 class="text-lg font-extrabold text-gold">إتمام طلب السيارة</h3>
+          <h3 class="text-lg font-extrabold text-gold">تسجيل العميل وإتمام الطلب</h3>
+
+          <!-- تسجيل العميل أولاً عبر جيميل أو فيسبوك -->
+          <div class="space-y-2.5 rounded-2xl border border-gold/25 bg-black/55 p-3.5">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-black text-goldLight">1. تسجيل العميل (جيميل أو فيسبوك)</span>
+              <span id="social-auth-badge" class="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-bold text-gray-300">غير مسجل</span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+              <button type="button" onclick="signInWithProvider('google')" class="flex items-center justify-center gap-1.5 rounded-xl border border-red-400/40 bg-red-500/15 py-2 text-xs font-extrabold text-red-200 transition hover:bg-red-500/25">
+                <span>G</span>
+                <span>دخول بجيميل</span>
+              </button>
+              <button type="button" onclick="signInWithProvider('facebook')" class="flex items-center justify-center gap-1.5 rounded-xl border border-blue-400/40 bg-blue-500/15 py-2 text-xs font-extrabold text-blue-200 transition hover:bg-blue-500/25">
+                <span>f</span>
+                <span>دخول بفيسبوك</span>
+              </button>
+            </div>
+
+            <div id="social-login-box" class="hidden space-y-2 rounded-xl border border-white/10 bg-charcoal p-2.5">
+              <label id="social-input-label" class="block text-[11px] font-bold text-gray-300">أدخل حساب الجيميل أو الاسم:</label>
+              <input id="social-account-input" type="text" placeholder="example@gmail.com" class="w-full rounded-lg border border-white/15 bg-black/70 px-2.5 py-1.5 text-xs text-white focus:border-gold focus:outline-none" />
+              <div class="flex gap-2">
+                <button type="button" onclick="confirmSocialLogin()" class="flex-1 rounded-lg bg-gold py-1.5 text-xs font-black text-black hover:bg-goldLight">
+                  تأكيد التسجيل
+                </button>
+                <button type="button" onclick="cancelSocialLogin()" class="rounded-lg bg-white/10 px-2.5 py-1.5 text-xs font-bold text-gray-300">
+                  إلغاء
+                </button>
+              </div>
+            </div>
+          </div>
 
           <div class="space-y-3 rounded-2xl border border-white/10 bg-black/45 p-3.5">
             <div>
-              <label class="mb-1 block text-xs font-bold text-gray-300">اسم العميل / رقم الهاتف</label>
+              <label class="mb-1 block text-xs font-bold text-gray-300">اسم العميل / الحساب / رقم الهاتف</label>
               <input id="customer-name" type="text" placeholder="مثال: أستاذ أحمد - 010..." class="w-full rounded-xl border border-white/15 bg-charcoal px-3 py-2 text-xs text-white focus:border-gold focus:outline-none" />
             </div>
 
@@ -467,7 +517,7 @@
           </div>
 
           <div id="cart-items" class="max-h-64 space-y-2 overflow-y-auto rounded-2xl border border-white/10 bg-black/40 p-3 text-xs">
-            <p class="py-6 text-center text-gray-500">السلة فارغة حالياً — أضف أصنافاً من المنيو</p>
+            <p class="py-6 text-center text-gray-500">السلة فارغة حالياً — اضغط «ابعتهالو 😂» على أي صنف</p>
           </div>
 
           <div class="space-y-3 border-t border-white/10 pt-3">
@@ -487,28 +537,28 @@
     </div>
   </main>
 
-  <!-- نافذة تسجيل الدخول للصلاحيات -->
-  <div id="auth-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
+  <!-- نافذة باسورد خانة اونر: 301088poro -->
+  <div id="owner-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
     <div class="w-full max-w-md space-y-4 rounded-3xl border border-gold/40 bg-charcoal p-6 shadow-2xl">
       <div class="flex items-center justify-between">
-        <h3 class="text-lg font-extrabold text-gold">دخول فريق العمل</h3>
-        <button type="button" onclick="closeAuthModal()" class="text-sm text-gray-400 hover:text-white">✕</button>
+        <h3 class="text-lg font-extrabold text-gold">دخول خانة اونر (OWNER)</h3>
+        <button type="button" onclick="closeOwnerModal()" class="text-sm text-gray-400 hover:text-white">✕</button>
       </div>
 
       <p class="text-xs leading-relaxed text-gray-400">
-        المدير العام: <strong class="text-goldLight">محمود بورسعيد</strong> • المسؤولون: <strong class="text-gray-200">محمود حسن</strong> و <strong class="text-gray-200">رقيه محمود</strong>.
-        أدخل رقم الدخول الخاص بك لفتح لوحة الصلاحيات.
+        تضم لوحة <strong class="text-goldLight">اونر</strong> أجزاء <strong class="text-white">المدير العام</strong>، <strong class="text-white">المسؤولين</strong>، و<strong class="text-white">الباريستا</strong>.
+        أدخل كلمة المرور لفتح اللوحة.
       </p>
 
       <div>
-        <label class="mb-1 block text-xs font-bold text-gray-300">كود الدخول (PIN)</label>
-        <input id="pin-input" type="password" maxlength="8" placeholder="أدخل الكود..." class="w-full rounded-xl border border-white/15 bg-black/70 px-4 py-2.5 text-center text-base font-extrabold tracking-widest text-gold focus:border-gold focus:outline-none" />
+        <label class="mb-1 block text-xs font-bold text-gray-300">كلمة مرور اونر</label>
+        <input id="owner-password-input" type="password" placeholder="أدخل كلمة المرور..." class="w-full rounded-xl border border-white/15 bg-black/70 px-4 py-2.5 text-center text-sm font-extrabold tracking-wider text-gold focus:border-gold focus:outline-none" />
       </div>
 
-      <p id="pin-error" class="hidden text-center text-xs font-bold text-red-400">الكود غير صحيح، حاول مرة أخرى.</p>
+      <p id="owner-password-error" class="hidden text-center text-xs font-bold text-red-400">كلمة المرور غير صحيحة، حاول مرة أخرى.</p>
 
-      <button type="button" onclick="verifyPin()" class="w-full rounded-xl bg-gold py-2.5 text-sm font-black text-black hover:bg-goldLight">
-        دخول
+      <button type="button" onclick="verifyOwnerPassword()" class="w-full rounded-xl bg-gold py-2.5 text-sm font-black text-black hover:bg-goldLight">
+        فتح لوحة اونر
       </button>
     </div>
   </div>
@@ -517,6 +567,8 @@
   <div id="cashier-receipt-print"></div>
 
   <script>
+    const OWNER_PASSWORD = '301088poro';
+
     const CATEGORIES = [
       'الكل',
       'إسبريسو وقهوة ساخنة',
@@ -605,14 +657,6 @@
       price: Number(price)
     }));
 
-    const ROLE_PINS = {
-      '2026': { role: 'admin', label: 'المدير العام: محمود بورسعيد' },
-      '1010': { role: 'supervisor', label: 'مسؤول التشغيل: محمود حسن' },
-      '2020': { role: 'supervisor', label: 'مسؤولة التشغيل: رقيه محمود' },
-      '1111': { role: 'barista1', label: 'باريستا 1' },
-      '2222': { role: 'barista2', label: 'باريستا 2' }
-    };
-
     const TIER_LABELS = {
       '7vip': '7VIP (كارت أسود)',
       'vvip': 'VVIP (كارت أزرق)',
@@ -623,25 +667,30 @@
     const CENTER_COORDS = { lat: 31.2465, lng: 29.9735 };
     const MAX_RADIUS_KM = 15;
     const DEFAULT_DB_URL = 'https://mpw-limousine-coffee-default-rtdb.firebaseio.com';
-    const ORDERS_STORAGE_KEY = 'mpw_limousine_orders_live_v2';
-    const MENU_STORAGE_KEY = 'mpw_limousine_menu_live_v2';
-    const SETTINGS_STORAGE_KEY = 'mpw_limousine_settings_v1';
+    const ORDERS_STORAGE_KEY = 'mpw_limousine_orders_live_v3';
+    const MENU_STORAGE_KEY = 'mpw_limousine_menu_live_v3';
+    const SETTINGS_STORAGE_KEY = 'mpw_limousine_settings_v2';
     const LAST_CUSTOMER_ORDER_KEY = 'mpw_limousine_last_customer_order_id';
 
-    let currentRole = null;
-    let currentRoleLabel = '';
-    let activeStaffTab = 'all';
+    let isOwnerUnlocked = false;
+    let activeOwnerTab = 'all';
     let selectedCategory = 'الكل';
     let cart = [];
     let customerTier = '7vip';
     let customerGender = 'male';
+    let socialProvider = null;
     let currentGPS = null;
     let customMenu = loadCustomMenu();
     let orders = loadOrders();
     let knownOrderIds = new Set(orders.map((o) => o.id));
+    let spokenApprovedOrderIds = new Set();
     let appSettings = loadSettings();
     let lastCustomerOrderId = localStorage.getItem(LAST_CUSTOMER_ORDER_KEY) || '';
     let cloudPollTimer = null;
+
+    let leafletMap = null;
+    let customerMapMarker = null;
+    let centerMapMarker = null;
 
     function loadSettings() {
       try {
@@ -790,8 +839,18 @@
             renderCustomerLiveTracker();
 
             if (detectedNewOrder) {
-              playNewCustomerSound(detectedNewOrder.customerGender || 'male');
+              playCarRevAndLaunchSound(detectedNewOrder.customerGender || 'male');
               showNewOrderBanner(detectedNewOrder);
+            }
+
+            const myOrder = orders.find((o) => o.id === lastCustomerOrderId);
+            if (
+              myOrder &&
+              (myOrder.status === 'approved_barista1' || myOrder.status === 'approved_barista2') &&
+              !spokenApprovedOrderIds.has(myOrder.id)
+            ) {
+              spokenApprovedOrderIds.add(myOrder.id);
+              speakCustomerApprovalPhrase();
             }
           }
           setSyncBadge('متصل بالسحابة (Firebase Live)', 'ok');
@@ -812,31 +871,118 @@
       }
     }
 
+    // صوت إشعار تنبيه: بنزين عربية ريس وهي بتتحرك وتنطلق
     function enableSoundAlertManually() {
-      playNewCustomerSound('female');
-      setSyncBadge('صوت التنبيه مفعّل ومتصل', 'info');
+      playCarRevAndLaunchSound('male');
+      setSyncBadge('صوت بنزين الريس مفعّل', 'info');
     }
 
-    function playNewCustomerSound(gender = 'male') {
+    function playCarRevAndLaunchSound(gender = 'male') {
       try {
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
         if (!AudioCtx) return;
         const ctx = new AudioCtx();
         const now = ctx.currentTime;
-        const notes = gender === 'female' ? [1046.5, 1318.5, 1567.98] : [783.99, 1046.5, 1318.5];
 
-        notes.forEach((freq, i) => {
+        // نبض ريس المحرك + دعسة بنزين وتحرك السيارة للأمام
+        const revPulses = [
+          { start: 0.0, dur: 0.24, fStart: 75, fEnd: 230, gain: 0.32 },
+          { start: 0.28, dur: 0.26, fStart: 90, fEnd: 285, gain: 0.36 },
+          { start: 0.58, dur: 0.65, fStart: 105, fEnd: 340, gain: 0.40 }
+        ];
+
+        revPulses.forEach((p) => {
           const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc.type = 'triangle';
-          osc.frequency.setValueAtTime(freq, now + i * 0.14);
-          gain.gain.setValueAtTime(0.28, now + i * 0.14);
-          osc.connect(gain);
-          gain.connect(ctx.destination);
-          osc.start(now + i * 0.14);
-          osc.stop(now + i * 0.14 + 0.13);
+          const shaper = ctx.createWaveShaper();
+          const filter = ctx.createBiquadFilter();
+          const gainNode = ctx.createGain();
+
+          // تشويه خفيف لإعطاء طابع صوت شكمان/محرك ريس
+          const curve = new Float32Array(256);
+          for (let i = 0; i < 256; i++) {
+            const x = (i * 2) / 256 - 1;
+            curve[i] = ((3 + 18) * x * 20 * (Math.PI / 180)) / (Math.PI + 18 * Math.abs(x));
+          }
+          shaper.curve = curve;
+
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(p.fStart, now + p.start);
+          osc.frequency.exponentialRampToValueAtTime(p.fEnd, now + p.start + p.dur * 0.72);
+          osc.frequency.exponentialRampToValueAtTime(p.fStart * 1.25, now + p.start + p.dur);
+
+          filter.type = 'lowpass';
+          filter.frequency.setValueAtTime(gender === 'female' ? 950 : 780, now + p.start);
+
+          gainNode.gain.setValueAtTime(0.001, now + p.start);
+          gainNode.gain.linearRampToValueAtTime(p.gain, now + p.start + 0.05);
+          gainNode.gain.exponentialRampToValueAtTime(0.001, now + p.start + p.dur);
+
+          osc.connect(shaper);
+          shaper.connect(filter);
+          filter.connect(gainNode);
+          gainNode.connect(ctx.destination);
+
+          osc.start(now + p.start);
+          osc.stop(now + p.start + p.dur + 0.02);
         });
       } catch {}
+    }
+
+    // رسالة صوتية للعميل عند الموافقة على الأوردر: "هتشرب ابسط"
+    function speakCustomerApprovalPhrase() {
+      try {
+        if (!('speechSynthesis' in window)) return;
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance('هتشرب ابسط');
+        utter.lang = 'ar-EG';
+        utter.rate = 1.0;
+        utter.pitch = 1.05;
+        window.speechSynthesis.speak(utter);
+      } catch {}
+    }
+
+    // تسجيل العميل عبر جيميل أو فيسبوك
+    function signInWithProvider(provider) {
+      socialProvider = provider;
+      const box = document.getElementById('social-login-box');
+      const label = document.getElementById('social-input-label');
+      const input = document.getElementById('social-account-input');
+      if (!box || !label || !input) return;
+
+      if (provider === 'google') {
+        label.textContent = 'أدخل حساب الجيميل (Gmail) أو اسمك:';
+        input.placeholder = 'name@gmail.com';
+      } else {
+        label.textContent = 'أدخل حساب فيسبوك (Facebook) أو اسمك:';
+        input.placeholder = 'facebook.com/username أو اسمك';
+      }
+      box.classList.remove('hidden');
+      input.focus();
+    }
+
+    function cancelSocialLogin() {
+      socialProvider = null;
+      document.getElementById('social-login-box').classList.add('hidden');
+      document.getElementById('social-account-input').value = '';
+    }
+
+    function confirmSocialLogin() {
+      const input = document.getElementById('social-account-input');
+      const badge = document.getElementById('social-auth-badge');
+      const nameField = document.getElementById('customer-name');
+      const val = (input.value || '').trim();
+      if (!val) return;
+
+      const providerLabel = socialProvider === 'facebook' ? 'Facebook' : 'Gmail';
+      if (badge) {
+        badge.textContent = `${providerLabel}: ${val}`;
+        badge.className = 'rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-[10px] font-extrabold text-emerald-300';
+      }
+      if (nameField && !nameField.value.trim()) {
+        nameField.value = `${val} (${providerLabel})`;
+      }
+      document.getElementById('social-login-box').classList.add('hidden');
+      input.value = '';
     }
 
     function setCustomerTier(tier) {
@@ -875,13 +1021,45 @@
       return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     }
 
+    function initCustomerMap(lat = CENTER_COORDS.lat, lng = CENTER_COORDS.lng) {
+      const mapContainer = document.getElementById('customer-live-map');
+      if (!mapContainer || typeof L === 'undefined') return;
+
+      if (!leafletMap) {
+        leafletMap = L.map('customer-live-map').setView([lat, lng], 14);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; OpenStreetMap'
+        }).addTo(leafletMap);
+
+        centerMapMarker = L.circleMarker([CENTER_COORDS.lat, CENTER_COORDS.lng], {
+          radius: 7,
+          color: '#D4AF37',
+          fillColor: '#D4AF37',
+          fillOpacity: 0.9
+        })
+          .addTo(leafletMap)
+          .bindPopup('نقطة تمركز MPW');
+
+        customerMapMarker = L.marker([lat, lng])
+          .addTo(leafletMap)
+          .bindPopup('موقع العميل الحالي')
+          .openPopup();
+      } else {
+        leafletMap.setView([lat, lng], 15);
+        if (customerMapMarker) {
+          customerMapMarker.setLatLng([lat, lng]).setPopupContent('موقع العميل بالضبط').openPopup();
+        }
+      }
+    }
+
     function captureGPS() {
       const gpsStatus = document.getElementById('gps-status');
       const summaryEl = document.getElementById('gps-range-summary');
       const boxEl = document.getElementById('gps-range-box');
       const barEl = document.getElementById('gps-range-bar');
-      const pinEl = document.getElementById('gps-radar-pin');
       const linkEl = document.getElementById('gps-map-link');
+
+      initCustomerMap(CENTER_COORDS.lat, CENTER_COORDS.lng);
 
       if (!navigator.geolocation) {
         gpsStatus.textContent = 'المتصفح لا يدعم GPS';
@@ -889,7 +1067,7 @@
         return;
       }
 
-      gpsStatus.textContent = 'جاري تحديد الموقع...';
+      gpsStatus.textContent = 'جاري تحديد موقع العميل...';
       navigator.geolocation.getCurrentPosition(
         (pos) => {
           const { latitude, longitude } = pos.coords;
@@ -899,25 +1077,25 @@
           const inRange = distKm <= MAX_RADIUS_KM;
           const pct = Math.min(100, Math.max(10, Math.round((distKm / MAX_RADIUS_KM) * 100)));
 
-          gpsStatus.textContent = `تم التحديد (${currentGPS.distKm} كم)`;
+          gpsStatus.textContent = `موقع العميل محدد (${currentGPS.distKm} كم)`;
           summaryEl.textContent = inRange
-            ? `ضمن نطاق الخدمة (${currentGPS.distKm} كم من أصل ${MAX_RADIUS_KM} كم)`
-            : `خارج النطاق المعتاد (${currentGPS.distKm} كم من أصل ${MAX_RADIUS_KM} كم)`;
+            ? `موقع العميل ضمن النطاق (${currentGPS.distKm} كم من أصل ${MAX_RADIUS_KM} كم)`
+            : `موقع العميل على بُعد (${currentGPS.distKm} كم من أصل ${MAX_RADIUS_KM} كم)`;
 
-          boxEl.textContent = `الإحداثيات: ${latitude.toFixed(5)}, ${longitude.toFixed(5)} • المسافة: ${currentGPS.distKm} كم`;
+          boxEl.textContent = `إحداثيات العميل: ${latitude.toFixed(5)}, ${longitude.toFixed(5)} • المسافة: ${currentGPS.distKm} كم`;
           barEl.style.width = `${pct}%`;
           barEl.className = `h-full rounded-full transition-all duration-300 ${inRange ? 'bg-emerald-400' : 'bg-amber-400'}`;
 
-          const offsetPx = Math.min(54, Math.round((distKm / MAX_RADIUS_KM) * 54));
-          pinEl.style.transform = `translate(calc(-50% + ${offsetPx}px), calc(-50% - ${Math.round(offsetPx * 0.4)}px))`;
-
           linkEl.href = `https://www.google.com/maps?q=${latitude},${longitude}`;
           linkEl.classList.remove('hidden');
+
+          initCustomerMap(latitude, longitude);
         },
         () => {
           gpsStatus.textContent = 'تعذر الوصول للموقع';
-          summaryEl.textContent = 'يرجى السماح بصلاحية الموقع (GPS) لتحديد المسافة بدقة.';
-        }
+          summaryEl.textContent = 'يرجى السماح بصلاحية الموقع (GPS) لإظهار مكان العميل بالضبط على الخريطة.';
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
       );
     }
 
@@ -956,10 +1134,16 @@
               <span class="rounded-full bg-white/5 px-2.5 py-0.5 text-[10px] font-bold text-gray-400">${item.category}</span>
               <h4 class="mt-2 text-sm font-extrabold text-white">${item.name}</h4>
             </div>
-            <div class="mt-4 flex items-center justify-between">
+            <div class="mt-4 flex items-center justify-between gap-2">
               <span class="text-sm font-black text-gold">${Number(item.price).toFixed(2)} ج.م</span>
-              <button type="button" onclick="addToCart('${item.id}')" class="rounded-xl bg-gold/15 px-3 py-1.5 text-xs font-extrabold text-gold transition hover:bg-gold hover:text-black">
-                + أضف للسلة
+              <button type="button" onclick="addToCart('${item.id}')" class="inline-flex items-center gap-1.5 rounded-xl bg-gold/20 px-3 py-1.5 text-xs font-black text-gold transition hover:bg-gold hover:text-black">
+                <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+                  <rect x="6" y="4" width="12" height="16" rx="3" />
+                  <line x1="9" y1="8" x2="15" y2="8" />
+                  <line x1="9" y1="12" x2="15" y2="12" />
+                  <line x1="9" y1="16" x2="15" y2="16" />
+                </svg>
+                <span>ابعتهالو 😂</span>
               </button>
             </div>
           </div>
@@ -992,7 +1176,7 @@
       const totalEl = document.getElementById('cart-total');
 
       if (cart.length === 0) {
-        wrap.innerHTML = '<p class="py-6 text-center text-gray-500">السلة فارغة حالياً — أضف أصنافاً من المنيو</p>';
+        wrap.innerHTML = '<p class="py-6 text-center text-gray-500">السلة فارغة حالياً — اضغط «ابعتهالو 😂» على أي صنف</p>';
         totalEl.textContent = '0.00 ج.م';
         return;
       }
@@ -1026,13 +1210,13 @@
 
       const customerName = nameInput.value.trim();
       if (!customerName) {
-        feedback.textContent = 'من فضلك اكتب اسم العميل أو رقم الهاتف أولاً.';
+        feedback.textContent = 'من فضلك سجّل بياناتك أو اكتب اسم العميل أولاً.';
         feedback.className = 'rounded-xl bg-red-500/15 p-2.5 text-center text-xs font-bold text-red-300';
         return;
       }
 
       if (cart.length === 0) {
-        feedback.textContent = 'السلة فارغة! اختر صنفاً واحداً على الأقل من المنيو.';
+        feedback.textContent = 'السلة فارغة! اضغط «ابعتهالو 😂» على صنف واحد على الأقل.';
         feedback.className = 'rounded-xl bg-amber-500/15 p-2.5 text-center text-xs font-bold text-amber-300';
         return;
       }
@@ -1069,10 +1253,10 @@
       renderOrdersFeed();
       renderCustomerLiveTracker();
 
-      playNewCustomerSound(customerGender);
+      playCarRevAndLaunchSound(customerGender);
       showNewOrderBanner(newOrder);
 
-      feedback.textContent = `تم إرسال الأوردر (${newOrder.id}) — حالتك الحالية: بانتظار موافقة المسؤول / الإدارة / الباريستا.`;
+      feedback.textContent = `تم إرسال الأوردر (${newOrder.id}) — حالتك الحالية: بانتظار الموافقة.`;
       feedback.className = 'rounded-xl bg-emerald-500/15 p-2.5 text-center text-xs font-bold text-emerald-300';
 
       cart = [];
@@ -1095,8 +1279,8 @@
 
       const statusTextMap = {
         pending_approval: '⏳ بانتظار موافقة المسؤول أو الإدارة أو الباريستا',
-        approved_barista1: '✅ تمت الموافقة وتحويل الطلب إلى باريستا 1 — جاري التحضير',
-        approved_barista2: '✅ تمت الموافقة وتحويل الطلب إلى باريستا 2 — جاري التحضير',
+        approved_barista1: '✅ تمت الموافقة وتحويل الطلب إلى باريستا 1 — هتشرب ابسط',
+        approved_barista2: '✅ تمت الموافقة وتحويل الطلب إلى باريستا 2 — هتشرب ابسط',
         completed: '🎉 تم تجهيز وتسليم الأوردر لسيارتك',
         rejected: '❌ تعذّر اعتماد الطلب حالياً'
       };
@@ -1120,7 +1304,7 @@
     }
 
     function approveAndAssignOrder(orderId, baristaSlot = 'barista1') {
-      const approverName = currentRoleLabel || 'المسؤول / الإدارة / الباريستا';
+      const approverName = 'اونر / المدير العام: محمود بورسعيد • المسؤولون: محمود حسن ورقيه محمود';
       const baristaLabel = baristaSlot === 'barista2' ? 'باريستا 2' : 'باريستا 1';
       let updatedTarget = null;
 
@@ -1131,7 +1315,7 @@
           status: baristaSlot === 'barista2' ? 'approved_barista2' : 'approved_barista1',
           assignedBarista: baristaSlot,
           approvedBy: approverName,
-          customerNotice: `✅ تمت الموافقة على أوردرك بواسطة (${approverName}) وتم تحويله إلى (${baristaLabel}) وجارٍ التحضير لسيارتك.`
+          customerNotice: `✅ تمت الموافقة على أوردرك وتحويله إلى (${baristaLabel}) — هتشرب ابسط.`
         };
         return updatedTarget;
       });
@@ -1141,13 +1325,15 @@
       renderOrdersFeed();
       renderCustomerLiveTracker();
 
+      // تشغيل الرسالة الصوتية للعميل: "هتشرب ابسط"
+      speakCustomerApprovalPhrase();
+
       if (appSettings.autoPrintOnApprove && updatedTarget) {
         printCashierReceipt(orderId);
       }
     }
 
     function completeOrder(orderId) {
-      const actor = currentRoleLabel || 'الباريستا / المسؤول';
       let updatedTarget = null;
 
       orders = orders.map((o) => {
@@ -1155,7 +1341,7 @@
         updatedTarget = {
           ...o,
           status: 'completed',
-          customerNotice: `🎉 تم تجهيز وتسليم أوردرك بنجاح (${actor}). نتمنى لك رحلة سعيدة مع MPW Limousine Coffee.`
+          customerNotice: '🎉 تم تجهيز وتسليم أوردرك بنجاح. نتمنى لك رحلة سعيدة مع MPW Limousine Coffee.'
         };
         return updatedTarget;
       });
@@ -1167,7 +1353,6 @@
     }
 
     function rejectOrder(orderId) {
-      const actor = currentRoleLabel || 'المسؤول / الإدارة';
       let updatedTarget = null;
 
       orders = orders.map((o) => {
@@ -1175,8 +1360,8 @@
         updatedTarget = {
           ...o,
           status: 'rejected',
-          approvedBy: actor,
-          customerNotice: `❌ نعتذر، تعذّر اعتماد الطلب حالياً بواسطة (${actor}).`
+          approvedBy: 'اونر / الإدارة',
+          customerNotice: '❌ نعتذر، تعذّر اعتماد الطلب حالياً.'
         };
         return updatedTarget;
       });
@@ -1214,7 +1399,7 @@
         <div><strong>العضوية:</strong> ${TIER_LABELS[order.customerTier] || order.customerTier}</div>
         <div><strong>السيارة:</strong> ${order.carInfo}</div>
         <div><strong>الوقت:</strong> ${order.createdAt}</div>
-        ${order.approvedBy ? `<div><strong>المعتمد:</strong> ${order.approvedBy}</div>` : ''}
+        ${order.gps ? `<div><strong>GPS:</strong> ${order.gps.lat.toFixed(5)}, ${order.gps.lng.toFixed(5)} (${order.gps.distKm} كم)</div>` : ''}
         <hr style="border:none;border-top:1px dashed #000;margin:6px 0;" />
         ${itemsRows}
         <hr style="border:none;border-top:1px dashed #000;margin:6px 0;" />
@@ -1222,79 +1407,69 @@
           <span>الإجمالي:</span>
           <span>${Number(order.total).toFixed(2)} ج.م</span>
         </div>
-        <div style="text-align:center;margin-top:8px;font-size:11px;">شكراً لتفضلكم اختيار MPW Limousine Coffee</div>
+        <div style="text-align:center;margin-top:8px;font-size:11px;">هتشرب ابسط — MPW Limousine Coffee</div>
       `;
 
       window.print();
     }
 
-    function openAuthModal() {
-      document.getElementById('pin-error').classList.add('hidden');
-      document.getElementById('pin-input').value = '';
-      const modal = document.getElementById('auth-modal');
+    function openOwnerModal() {
+      if (isOwnerUnlocked) {
+        document.getElementById('owner-workspace').classList.toggle('hidden');
+        return;
+      }
+      document.getElementById('owner-password-error').classList.add('hidden');
+      document.getElementById('owner-password-input').value = '';
+      const modal = document.getElementById('owner-modal');
       modal.classList.remove('hidden');
       modal.classList.add('flex');
     }
 
-    function closeAuthModal() {
-      const modal = document.getElementById('auth-modal');
+    function closeOwnerModal() {
+      const modal = document.getElementById('owner-modal');
       modal.classList.add('hidden');
       modal.classList.remove('flex');
     }
 
-    function verifyPin() {
-      const pin = document.getElementById('pin-input').value.trim();
-      const matched = ROLE_PINS[pin];
-      if (!matched) {
-        document.getElementById('pin-error').classList.remove('hidden');
+    function verifyOwnerPassword() {
+      const pass = document.getElementById('owner-password-input').value.trim();
+      if (pass !== OWNER_PASSWORD) {
+        document.getElementById('owner-password-error').classList.remove('hidden');
         return;
       }
 
-      currentRole = matched.role;
-      currentRoleLabel = matched.label;
-
-      document.getElementById('auth-icon').textContent = '🔓';
-      document.getElementById('auth-label').textContent = matched.label;
-      document.getElementById('active-role-badge').textContent = matched.label;
+      isOwnerUnlocked = true;
+      document.getElementById('owner-lock-icon').textContent = '🔓';
+      document.getElementById('owner-btn-label').textContent = 'اونر (مفتوح)';
       document.getElementById('logout-btn').classList.remove('hidden');
-      document.getElementById('staff-workspace').classList.remove('hidden');
+      document.getElementById('owner-workspace').classList.remove('hidden');
 
-      if (currentRole === 'admin') {
-        document.getElementById('tab-admin_control').classList.remove('hidden');
-      } else {
-        document.getElementById('tab-admin_control').classList.add('hidden');
-      }
-
-      closeAuthModal();
+      closeOwnerModal();
       renderOrdersFeed();
       renderAdminMenuManager();
     }
 
-    function logoutRole() {
-      currentRole = null;
-      currentRoleLabel = '';
-      document.getElementById('auth-icon').textContent = '🔒';
-      document.getElementById('auth-label').textContent = 'دخول الإدارة / المسؤولين / الباريستا';
+    function logoutOwner() {
+      isOwnerUnlocked = false;
+      document.getElementById('owner-lock-icon').textContent = '👑';
+      document.getElementById('owner-btn-label').textContent = 'اونر';
       document.getElementById('logout-btn').classList.add('hidden');
-      document.getElementById('staff-workspace').classList.add('hidden');
+      document.getElementById('owner-workspace').classList.add('hidden');
     }
 
-    function switchStaffTab(tab) {
-      activeStaffTab = tab;
-      document.querySelectorAll('.staff-tab').forEach((btn) => {
+    function switchOwnerTab(tab) {
+      activeOwnerTab = tab;
+      document.querySelectorAll('.owner-tab').forEach((btn) => {
         btn.className =
-          'staff-tab rounded-xl border border-white/15 bg-black/50 px-3.5 py-2 text-xs font-bold text-gray-200 hover:border-gold/50';
+          'owner-tab rounded-xl border border-white/15 bg-black/50 px-3.5 py-2 text-xs font-bold text-gray-200 hover:border-gold/50';
       });
-      if (tab === 'admin_control') {
-        document.getElementById('tab-admin_control').className =
-          'staff-tab rounded-xl bg-gold px-3.5 py-2 text-xs font-extrabold text-black';
-      } else {
-        const activeBtn = document.getElementById(`tab-${tab}`);
-        if (activeBtn) activeBtn.className = 'staff-tab rounded-xl bg-gold px-3.5 py-2 text-xs font-extrabold text-black';
+      const activeBtn = document.getElementById(`tab-${tab}`);
+      if (activeBtn) {
+        activeBtn.className = 'owner-tab rounded-xl bg-gold px-3.5 py-2 text-xs font-extrabold text-black';
       }
 
       document.getElementById('admin-control-panel').classList.toggle('hidden', tab !== 'admin_control');
-      document.getElementById('staff-settings-panel').classList.toggle('hidden', tab !== 'settings');
+      document.getElementById('owner-settings-panel').classList.toggle('hidden', tab !== 'settings');
       document.getElementById('orders-feed').classList.toggle('hidden', tab === 'admin_control' || tab === 'settings');
 
       if (tab === 'admin_control') renderAdminMenuManager();
@@ -1319,8 +1494,8 @@
       if (!feed) return;
 
       const visibleOrders = orders.filter((o) => {
-        if (activeStaffTab === 'barista1') return o.assignedBarista === 'barista1';
-        if (activeStaffTab === 'barista2') return o.assignedBarista === 'barista2';
+        if (activeOwnerTab === 'barista1') return o.assignedBarista === 'barista1';
+        if (activeOwnerTab === 'barista2') return o.assignedBarista === 'barista2';
         return true;
       });
 
@@ -1333,8 +1508,8 @@
         .map((o) => {
           const badgeMap = {
             pending_approval: '<span class="rounded-full bg-amber-500/15 px-2.5 py-1 text-[11px] font-extrabold text-amber-300">بانتظار الموافقة</span>',
-            approved_barista1: `<span class="rounded-full bg-sky-500/15 px-2.5 py-1 text-[11px] font-extrabold text-sky-300">معتمد → باريستا 1 (${o.approvedBy || ''})</span>`,
-            approved_barista2: `<span class="rounded-full bg-indigo-500/15 px-2.5 py-1 text-[11px] font-extrabold text-indigo-300">معتمد → باريستا 2 (${o.approvedBy || ''})</span>`,
+            approved_barista1: '<span class="rounded-full bg-sky-500/15 px-2.5 py-1 text-[11px] font-extrabold text-sky-300">معتمد → باريستا 1</span>',
+            approved_barista2: '<span class="rounded-full bg-indigo-500/15 px-2.5 py-1 text-[11px] font-extrabold text-indigo-300">معتمد → باريستا 2</span>',
             completed: '<span class="rounded-full bg-emerald-500/15 px-2.5 py-1 text-[11px] font-extrabold text-emerald-300">تم التسليم</span>',
             rejected: '<span class="rounded-full bg-red-500/15 px-2.5 py-1 text-[11px] font-extrabold text-red-300">مرفوض</span>'
           };
@@ -1342,6 +1517,8 @@
           const itemsHtml = (o.items || [])
             .map((it) => `<li>${it.name} × ${it.qty} (${(it.price * it.qty).toFixed(2)} ج.م)</li>`)
             .join('');
+
+          const mapHref = o.gps ? `https://www.google.com/maps?q=${o.gps.lat},${o.gps.lng}` : '';
 
           return `
             <div class="space-y-3 rounded-2xl border border-white/10 bg-black/45 p-4">
@@ -1356,7 +1533,7 @@
 
               <div class="text-xs text-gray-300">
                 <strong>السيارة:</strong> ${o.carInfo} • <strong>الوقت:</strong> ${o.createdAt}
-                ${o.gps ? ` • <strong>المسافة:</strong> ${o.gps.distKm} كم` : ''}
+                ${o.gps ? ` • <strong>المسافة:</strong> ${o.gps.distKm} كم • <a href="${mapHref}" target="_blank" rel="noopener noreferrer" class="text-sky-300 underline">مكان العميل بالضبط ↗</a>` : ''}
               </div>
 
               <ul class="list-disc space-y-1 pr-5 text-xs text-gray-200">${itemsHtml}</ul>
