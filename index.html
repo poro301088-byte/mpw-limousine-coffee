@@ -752,9 +752,9 @@
 
     const CAFE_COORDS = { lat: 31.2465, lng: 29.9735 };
     const DEFAULT_DB_URL = 'https://mpw-limousine-coffee-default-rtdb.firebaseio.com';
-    const ORDERS_STORAGE_KEY = 'mpw_limousine_orders_live_v11';
-    const MENU_STORAGE_KEY = 'mpw_limousine_menu_live_v11';
-    const SETTINGS_STORAGE_KEY = 'mpw_limousine_settings_v11';
+    const ORDERS_STORAGE_KEY = 'mpw_limousine_orders_live_v13';
+    const MENU_STORAGE_KEY = 'mpw_limousine_menu_live_v13';
+    const SETTINGS_STORAGE_KEY = 'mpw_limousine_settings_v13';
     const DEVICE_GMAIL_STORAGE_KEY = 'mpw_device_bound_gmail';
     const LAST_CUSTOMER_ORDER_KEY = 'mpw_limousine_last_customer_order_id';
 
@@ -779,6 +779,7 @@
     let cloudPollTimer = null;
 
     let audioCtx = null;
+    let masterCompressor = null;
     let startupStopTimer = null;
     let brakeStopTimer = null;
     let startupSoundDone = false;
@@ -791,129 +792,216 @@
     let ownerCustomerMarker = null;
     let ownerRouteLine = null;
 
-    function getAudioContext() {
+    function createSaturationCurve(amount = 45) {
+      const nSamples = 44100;
+      const curve = new Float32Array(nSamples);
+      const deg = Math.PI / 180;
+      for (let i = 0; i < nSamples; ++i) {
+        const x = (i * 2) / nSamples - 1;
+        curve[i] = ((3 + amount) * x * 20 * deg) / (Math.PI + amount * Math.abs(x));
+      }
+      return curve;
+    }
+
+    function getAudioOutputNode() {
       const Ctx = window.AudioContext || window.webkitAudioContext;
       if (!Ctx) return null;
       if (!audioCtx) {
         audioCtx = new Ctx();
+        const shaper = audioCtx.createWaveShaper();
+        shaper.curve = createSaturationCurve(55);
+        shaper.oversample = '2x';
+
+        masterCompressor = audioCtx.createDynamicsCompressor();
+        masterCompressor.threshold.setValueAtTime(-12, audioCtx.currentTime);
+        masterCompressor.knee.setValueAtTime(14, audioCtx.currentTime);
+        masterCompressor.ratio.setValueAtTime(8, audioCtx.currentTime);
+        masterCompressor.attack.setValueAtTime(0.002, audioCtx.currentTime);
+        masterCompressor.release.setValueAtTime(0.12, audioCtx.currentTime);
+
+        shaper.connect(masterCompressor);
+        masterCompressor.connect(audioCtx.destination);
+        masterCompressor._inputShaper = shaper;
       }
       if (audioCtx.state === 'suspended') {
         audioCtx.resume().catch(() => {});
       }
-      return audioCtx;
+      return { ctx: audioCtx, out: masterCompressor._inputShaper || audioCtx.destination };
     }
 
-    // توليد صوت محرك رياضي واقعي لمدة 3 ثوانٍ بالضبط عند بداية التشغيل
+    // صوت محرك سيارة رياضي واقعي وعالٍ لمدة 3.0 ثانية بالضبط عند التشغيل
     function playStartupEngine3Sec() {
       if (startupStopTimer) clearTimeout(startupStopTimer);
 
-      const ctx = getAudioContext();
-      if (!ctx) return;
+      const nodeBundle = getAudioOutputNode();
+      if (!nodeBundle) return;
+      const { ctx, out } = nodeBundle;
 
       const now = ctx.currentTime;
       const duration = 3.0;
 
-      const osc1 = ctx.createOscillator();
-      const osc2 = ctx.createOscillator();
-      const filter = ctx.createBiquadFilter();
-      const gain = ctx.createGain();
+      const pulseOsc = ctx.createOscillator();
+      const pulseGain = ctx.createGain();
+      pulseOsc.type = 'square';
+      pulseOsc.frequency.setValueAtTime(24, now);
+      pulseOsc.frequency.exponentialRampToValueAtTime(68, now + 1.05);
+      pulseOsc.frequency.exponentialRampToValueAtTime(42, now + 1.75);
+      pulseOsc.frequency.exponentialRampToValueAtTime(86, now + 2.72);
+      pulseOsc.frequency.exponentialRampToValueAtTime(30, now + duration);
+      pulseGain.gain.setValueAtTime(0.45, now);
 
-      osc1.type = 'sawtooth';
-      osc2.type = 'triangle';
+      const exhaustOsc1 = ctx.createOscillator();
+      const exhaustOsc2 = ctx.createOscillator();
+      exhaustOsc1.type = 'sawtooth';
+      exhaustOsc2.type = 'sawtooth';
 
-      osc1.frequency.setValueAtTime(52, now);
-      osc1.frequency.exponentialRampToValueAtTime(165, now + 1.1);
-      osc1.frequency.exponentialRampToValueAtTime(110, now + 1.8);
-      osc1.frequency.exponentialRampToValueAtTime(210, now + 2.75);
-      osc1.frequency.exponentialRampToValueAtTime(75, now + duration);
+      exhaustOsc1.frequency.setValueAtTime(62, now);
+      exhaustOsc1.frequency.exponentialRampToValueAtTime(210, now + 1.05);
+      exhaustOsc1.frequency.exponentialRampToValueAtTime(132, now + 1.75);
+      exhaustOsc1.frequency.exponentialRampToValueAtTime(265, now + 2.72);
+      exhaustOsc1.frequency.exponentialRampToValueAtTime(74, now + duration);
 
-      osc2.frequency.setValueAtTime(104, now);
-      osc2.frequency.exponentialRampToValueAtTime(325, now + 1.1);
-      osc2.frequency.exponentialRampToValueAtTime(215, now + 1.8);
-      osc2.frequency.exponentialRampToValueAtTime(415, now + 2.75);
-      osc2.frequency.exponentialRampToValueAtTime(145, now + duration);
+      exhaustOsc2.frequency.setValueAtTime(93, now);
+      exhaustOsc2.frequency.exponentialRampToValueAtTime(315, now + 1.05);
+      exhaustOsc2.frequency.exponentialRampToValueAtTime(198, now + 1.75);
+      exhaustOsc2.frequency.exponentialRampToValueAtTime(398, now + 2.72);
+      exhaustOsc2.frequency.exponentialRampToValueAtTime(111, now + duration);
 
-      filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(420, now);
-      filter.frequency.exponentialRampToValueAtTime(1350, now + 2.5);
-      filter.frequency.exponentialRampToValueAtTime(350, now + duration);
+      const noiseSize = Math.floor(ctx.sampleRate * duration);
+      const noiseBuffer = ctx.createBuffer(1, noiseSize, ctx.sampleRate);
+      const noiseData = noiseBuffer.getChannelData(0);
+      let b0 = 0, b1 = 0, b2 = 0;
+      for (let i = 0; i < noiseSize; i++) {
+        const white = Math.random() * 2 - 1;
+        b0 = 0.997 * b0 + white * 0.029;
+        b1 = 0.985 * b1 + white * 0.032;
+        b2 = 0.950 * b2 + white * 0.048;
+        noiseData[i] = (b0 + b1 + b2 + white * 0.25) * 0.8;
+      }
 
-      gain.gain.setValueAtTime(0.01, now);
-      gain.gain.linearRampToValueAtTime(0.28, now + 0.25);
-      gain.gain.setValueAtTime(0.26, now + 2.6);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+      const noiseSrc = ctx.createBufferSource();
+      noiseSrc.buffer = noiseBuffer;
 
-      osc1.connect(filter);
-      osc2.connect(filter);
-      filter.connect(gain);
-      gain.connect(ctx.destination);
+      const exhaustFilter = ctx.createBiquadFilter();
+      exhaustFilter.type = 'lowpass';
+      exhaustFilter.frequency.setValueAtTime(520, now);
+      exhaustFilter.frequency.exponentialRampToValueAtTime(2400, now + 2.6);
+      exhaustFilter.frequency.exponentialRampToValueAtTime(480, now + duration);
+      exhaustFilter.Q.setValueAtTime(2.6, now);
 
-      osc1.start(now);
-      osc2.start(now);
-      osc1.stop(now + duration);
-      osc2.stop(now + duration);
+      const masterGain = ctx.createGain();
+      masterGain.gain.setValueAtTime(0.05, now);
+      masterGain.gain.linearRampToValueAtTime(0.95, now + 0.14);
+      masterGain.gain.setValueAtTime(0.95, now + 2.68);
+      masterGain.gain.exponentialRampToValueAtTime(0.003, now + duration);
+
+      pulseOsc.connect(pulseGain);
+      pulseGain.connect(exhaustFilter);
+      exhaustOsc1.connect(exhaustFilter);
+      exhaustOsc2.connect(exhaustFilter);
+      noiseSrc.connect(exhaustFilter);
+
+      exhaustFilter.connect(masterGain);
+      masterGain.connect(out);
+
+      pulseOsc.start(now);
+      exhaustOsc1.start(now);
+      exhaustOsc2.start(now);
+      noiseSrc.start(now);
+
+      pulseOsc.stop(now + duration);
+      exhaustOsc1.stop(now + duration);
+      exhaustOsc2.stop(now + duration);
+      noiseSrc.stop(now + duration);
 
       startupSoundDone = true;
       startupStopTimer = setTimeout(() => {
         try {
-          osc1.disconnect();
-          osc2.disconnect();
-          gain.disconnect();
+          pulseOsc.disconnect();
+          exhaustOsc1.disconnect();
+          exhaustOsc2.disconnect();
+          noiseSrc.disconnect();
+          masterGain.disconnect();
         } catch {}
       }, 3050);
     }
 
-    // توليد صوت فرامل وتوقف سيارة واقعي لمدة ثانيتين (2 ثانية) بالضبط عند إرسال الأوردر
+    // صوت فرامل وتوقف سيارة واقعي وعالٍ لمدة ثانيتين (2.0 ثانية) بالضبط عند إرسال الأوردر
     function playBrakeSound2Sec() {
       if (brakeStopTimer) clearTimeout(brakeStopTimer);
 
-      const ctx = getAudioContext();
-      if (!ctx) return;
+      const nodeBundle = getAudioOutputNode();
+      if (!nodeBundle) return;
+      const { ctx, out } = nodeBundle;
 
       const now = ctx.currentTime;
       const duration = 2.0;
 
-      // ضوضاء احتكاك الفرامل + صفير خفيف للتوقف
       const bufferSize = Math.floor(ctx.sampleRate * duration);
-      const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-      const data = noiseBuffer.getChannelData(0);
+      const frictionBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = frictionBuffer.getChannelData(0);
       for (let i = 0; i < bufferSize; i++) {
-        data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * 1.15));
+        const tNorm = i / bufferSize;
+        const envelope = Math.pow(1 - tNorm, 0.55) * (0.75 + 0.25 * Math.sin(i * 0.045));
+        data[i] = (Math.random() * 2 - 1) * envelope;
       }
 
-      const noiseSource = ctx.createBufferSource();
-      noiseSource.buffer = noiseBuffer;
+      const frictionSource = ctx.createBufferSource();
+      frictionSource.buffer = frictionBuffer;
 
-      const bandpass = ctx.createBiquadFilter();
-      bandpass.type = 'bandpass';
-      bandpass.frequency.setValueAtTime(1950, now);
-      bandpass.frequency.linearRampToValueAtTime(1150, now + duration);
-      bandpass.Q.setValueAtTime(4.5, now);
+      const frictionBand = ctx.createBiquadFilter();
+      frictionBand.type = 'bandpass';
+      frictionBand.frequency.setValueAtTime(2350, now);
+      frictionBand.frequency.exponentialRampToValueAtTime(1050, now + duration);
+      frictionBand.Q.setValueAtTime(5.2, now);
 
-      const screechOsc = ctx.createOscillator();
-      screechOsc.type = 'sawtooth';
-      screechOsc.frequency.setValueAtTime(1480, now);
-      screechOsc.frequency.exponentialRampToValueAtTime(620, now + duration);
+      const squeal1 = ctx.createOscillator();
+      const squeal2 = ctx.createOscillator();
+      squeal1.type = 'sawtooth';
+      squeal2.type = 'triangle';
+
+      squeal1.frequency.setValueAtTime(1780, now);
+      squeal1.frequency.exponentialRampToValueAtTime(640, now + 1.75);
+      squeal1.frequency.exponentialRampToValueAtTime(340, now + duration);
+
+      squeal2.frequency.setValueAtTime(2460, now);
+      squeal2.frequency.exponentialRampToValueAtTime(890, now + 1.75);
+      squeal2.frequency.exponentialRampToValueAtTime(480, now + duration);
+
+      const squealFilter = ctx.createBiquadFilter();
+      squealFilter.type = 'bandpass';
+      squealFilter.frequency.setValueAtTime(1850, now);
+      squealFilter.frequency.exponentialRampToValueAtTime(750, now + duration);
+      squealFilter.Q.setValueAtTime(3.0, now);
 
       const gain = ctx.createGain();
-      gain.gain.setValueAtTime(0.01, now);
-      gain.gain.linearRampToValueAtTime(0.32, now + 0.12);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+      gain.gain.setValueAtTime(0.05, now);
+      gain.gain.linearRampToValueAtTime(0.98, now + 0.06);
+      gain.gain.setValueAtTime(0.92, now + 1.55);
+      gain.gain.exponentialRampToValueAtTime(0.003, now + duration);
 
-      noiseSource.connect(bandpass);
-      screechOsc.connect(bandpass);
-      bandpass.connect(gain);
-      gain.connect(ctx.destination);
+      frictionSource.connect(frictionBand);
+      frictionBand.connect(gain);
 
-      noiseSource.start(now);
-      screechOsc.start(now);
-      noiseSource.stop(now + duration);
-      screechOsc.stop(now + duration);
+      squeal1.connect(squealFilter);
+      squeal2.connect(squealFilter);
+      squealFilter.connect(gain);
+
+      gain.connect(out);
+
+      frictionSource.start(now);
+      squeal1.start(now);
+      squeal2.start(now);
+
+      frictionSource.stop(now + duration);
+      squeal1.stop(now + duration);
+      squeal2.stop(now + duration);
 
       brakeStopTimer = setTimeout(() => {
         try {
-          noiseSource.disconnect();
-          screechOsc.disconnect();
+          frictionSource.disconnect();
+          squeal1.disconnect();
+          squeal2.disconnect();
           gain.disconnect();
         } catch {}
       }, 2050);
@@ -926,9 +1014,9 @@
     document.addEventListener(
       'pointerdown',
       () => {
-        const ctx = getAudioContext();
-        if (ctx && ctx.state === 'suspended') {
-          ctx.resume().then(() => {
+        const nodeBundle = getAudioOutputNode();
+        if (nodeBundle && nodeBundle.ctx.state === 'suspended') {
+          nodeBundle.ctx.resume().then(() => {
             if (!startupSoundDone) playStartupEngine3Sec();
           }).catch(() => {});
         } else if (!startupSoundDone) {
