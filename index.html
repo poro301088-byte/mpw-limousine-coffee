@@ -166,5 +166,1862 @@
           <input
             id="device-gmail-input"
             type="email"
-            placeholder="اكتب أو اعتمد حساب الجيميل على الجهاز (مثال: user@gmail.com)"
-            class="w-full rounded-xl border border-white/15 bg-black/70 px-3.5 py-2 text-xs text
+            placeholder="اعتمد أو اكتب حساب الجيميل على الجهاز (مثال: name@gmail.com)"
+            class="w-full rounded-xl border border-white/15 bg-black/70 px-3.5 py-2 text-xs text-white focus:border-emerald-400 focus:outline-none"
+          />
+          <div class="flex gap-2">
+            <button type="button" onclick="grantGmailPermissionAndBind()" class="flex-1 rounded-xl bg-emerald-500 py-2 text-xs font-black text-black hover:bg-emerald-400">
+              منح الأمر وربط الجيميل وفتح المشروبات ☕
+            </button>
+            <button type="button" onclick="cancelDeviceGmailConsent()" class="rounded-xl bg-white/10 px-3.5 py-2 text-xs font-bold text-gray-300">
+              إلغاء
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+          <button type="button" onclick="startSocialLogin('google')" class="flex items-center justify-center gap-2 rounded-xl border border-red-400/50 bg-red-500/15 py-2.5 text-xs font-extrabold text-red-200 transition hover:bg-red-500/25">
+            <span class="text-sm font-black">G</span>
+            <span>دخول عبر جيميل (Gmail)</span>
+          </button>
+          <button type="button" onclick="startSocialLogin('facebook')" class="flex items-center justify-center gap-2 rounded-xl border border-blue-400/50 bg-blue-500/15 py-2.5 text-xs font-extrabold text-blue-200 transition hover:bg-blue-500/25">
+            <span class="text-sm font-black">f</span>
+            <span>دخول عبر فيسبوك (Facebook)</span>
+          </button>
+        </div>
+
+        <div id="social-login-box" class="hidden space-y-2.5 rounded-xl border border-gold/30 bg-charcoal p-3">
+          <label id="social-input-label" class="block text-xs font-bold text-goldLight">أدخل حسابك أو اسمك:</label>
+          <input id="social-account-input" type="text" placeholder="name@gmail.com" class="w-full rounded-xl border border-white/15 bg-black/70 px-3.5 py-2 text-xs text-white focus:border-gold focus:outline-none" />
+          <div class="flex gap-2">
+            <button type="button" onclick="completeLoginAndOpenMenu()" class="flex-1 rounded-xl bg-gold py-2 text-xs font-black text-black hover:bg-goldLight">
+              تأكيد الدخول وفتح صفحة المشروبات ☕
+            </button>
+            <button type="button" onclick="cancelSocialLogin()" class="rounded-xl bg-white/10 px-3.5 py-2 text-xs font-bold text-gray-300">
+              إلغاء
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- بيانات العميل والسيارة وفئة العضوية -->
+      <div class="grid gap-4 sm:grid-cols-2">
+        <div>
+          <label class="mb-1 block text-xs font-bold text-gray-300">اسم العميل / رقم الهاتف</label>
+          <input id="customer-name" type="text" placeholder="مثال: أستاذ أحمد - 010..." class="w-full rounded-xl border border-white/15 bg-black/60 px-3.5 py-2.5 text-xs text-white focus:border-gold focus:outline-none" />
+        </div>
+
+        <div>
+          <label class="mb-1 block text-xs font-bold text-gray-300">بيانات السيارة / لونها / رقم اللوحة</label>
+          <input id="car-info" type="text" placeholder="مثال: مرسيدس سوداء - لوحة س أ 1234" class="w-full rounded-xl border border-white/15 bg-black/60 px-3.5 py-2.5 text-xs text-white focus:border-gold focus:outline-none" />
+        </div>
+      </div>
+
+      <!-- فئة العضوية (4 خانات) -->
+      <div>
+        <label class="mb-1.5 block text-xs font-bold text-gray-300">فئة العميل وبطاقة العضوية</label>
+        <div class="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+          <button type="button" id="tier-7vip-btn" onclick="setCustomerTier('7vip')" class="tier-btn overflow-hidden rounded-2xl border-2 border-gold bg-black p-1.5 text-right transition">
+            <div class="flex h-12 w-full flex-col justify-between rounded-xl border border-gold/50 bg-gradient-to-br from-zinc-900 via-black to-amber-950/60 p-2">
+              <div class="flex items-center justify-between text-[10px] font-black text-gold">
+                <span>MPW</span>
+                <span>7VIP</span>
+              </div>
+              <div class="text-[9px] font-bold text-amber-200/90">BLACK CARD</div>
+            </div>
+            <div class="mt-1 flex items-center justify-between px-0.5">
+              <span class="text-xs font-black text-gold">7VIP</span>
+              <span class="text-[10px] text-gray-300">أسود</span>
+            </div>
+          </button>
+
+          <button type="button" id="tier-vvip-btn" onclick="setCustomerTier('vvip')" class="tier-btn overflow-hidden rounded-2xl border border-white/15 bg-black p-1.5 text-right transition">
+            <div class="flex h-12 w-full flex-col justify-between rounded-xl border border-sky-400/50 bg-gradient-to-br from-blue-950 via-indigo-950 to-slate-950 p-2">
+              <div class="flex items-center justify-between text-[10px] font-black text-sky-300">
+                <span>MPW</span>
+                <span>VVIP</span>
+              </div>
+              <div class="text-[9px] font-bold text-goldLight">BLUE CARD</div>
+            </div>
+            <div class="mt-1 flex items-center justify-between px-0.5">
+              <span class="text-xs font-black text-sky-300">VVIP</span>
+              <span class="text-[10px] text-gray-300">أزرق</span>
+            </div>
+          </button>
+
+          <button type="button" id="tier-vip-btn" onclick="setCustomerTier('vip')" class="tier-btn overflow-hidden rounded-2xl border border-white/15 bg-black p-1.5 text-right transition">
+            <div class="flex h-12 w-full flex-col justify-between rounded-xl border border-amber-300 bg-gradient-to-br from-white via-stone-100 to-amber-100 p-2">
+              <div class="flex items-center justify-between text-[10px] font-black text-zinc-900">
+                <span>MPW</span>
+                <span class="rounded bg-amber-500/20 px-1 text-amber-800">VIP</span>
+              </div>
+              <div class="text-[9px] font-extrabold text-amber-800">WHITE CARD</div>
+            </div>
+            <div class="mt-1 flex items-center justify-between px-0.5">
+              <span class="text-xs font-black text-white">VIP</span>
+              <span class="text-[10px] text-gray-300">أبيض</span>
+            </div>
+          </button>
+
+          <button type="button" id="tier-none-btn" onclick="setCustomerTier('none')" class="tier-btn overflow-hidden rounded-2xl border border-white/15 bg-black/50 p-1.5 text-right transition">
+            <div class="flex h-12 w-full flex-col justify-between rounded-xl border border-dashed border-white/20 bg-black/60 p-2">
+              <div class="flex items-center justify-between text-[10px] font-bold text-gray-400">
+                <span>MPW</span>
+                <span>👤</span>
+              </div>
+              <div class="text-[9px] font-bold text-gray-400">NO CARD</div>
+            </div>
+            <div class="mt-1 flex items-center justify-between px-0.5">
+              <span class="text-xs font-black text-gray-200">غير مشترك</span>
+              <span class="text-[10px] text-gray-400">بلا كارت</span>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <!-- الصفة عند أول زيارة -->
+      <div class="grid grid-cols-2 gap-2.5">
+        <button type="button" id="gender-male-btn" onclick="setCustomerGender('male')" class="rounded-xl border border-gold bg-gold/20 py-2 text-xs font-extrabold text-gold">
+          عميل جديد
+        </button>
+        <button type="button" id="gender-female-btn" onclick="setCustomerGender('female')" class="rounded-xl border border-white/15 bg-black/50 py-2 text-xs font-bold text-gray-300">
+          عميلة جديدة
+        </button>
+      </div>
+
+      <p id="login-step-error" class="hidden rounded-xl bg-red-500/15 p-2.5 text-center text-xs font-bold text-red-300"></p>
+
+      <div class="flex flex-wrap gap-2.5">
+        <button type="button" onclick="proceedToDrinksPage()" class="flex-1 rounded-2xl bg-gradient-to-r from-gold to-amber-500 py-3 text-sm font-black text-black shadow-lg shadow-gold/20 transition hover:brightness-110">
+          متابعة إلى صفحة المشروبات والخريطة ☕
+        </button>
+        <button type="button" onclick="submitOrder()" class="rounded-2xl border border-emerald-400/50 bg-emerald-500/15 px-5 py-3 text-sm font-black text-emerald-200 transition hover:bg-emerald-500/25">
+          ابعتهالو 😉
+        </button>
+      </div>
+    </section>
+
+    <!-- المرحلة 2: صفحة المشروبات والخريطة ومربع تجميع الأوردرات أمام العميل -->
+    <div id="customer-drinks-and-map-page" class="hidden space-y-6">
+
+      <!-- شريط بيانات العميل المسجل + مربع صغير لتجميع الأوردرات أمام العميل -->
+      <div class="grid gap-4 lg:grid-cols-12">
+        <div class="flex flex-col justify-between space-y-3 rounded-2xl border border-emerald-400/35 bg-charcoal p-4 lg:col-span-6">
+          <div class="text-xs space-y-1">
+            <span class="rounded-md bg-emerald-500/20 px-2 py-0.5 font-extrabold text-emerald-300">حساب العميل</span>
+            <div id="logged-customer-display" class="pt-1 font-extrabold text-white"></div>
+            <div id="logged-car-display" class="text-gray-400"></div>
+          </div>
+          <div>
+            <button type="button" onclick="backToLoginStep()" class="rounded-xl border border-white/15 bg-black/50 px-3 py-1.5 text-xs font-bold text-gold hover:border-gold">
+              ✏️ تعديل بيانات الدخول والجيميل والسيارة
+            </button>
+          </div>
+        </div>
+
+        <!-- مربع صغير يجمع الأوردرات أمام العميل ليعلم ما طلب ويضيف أو يزيل -->
+        <div class="space-y-2.5 rounded-2xl border border-gold/40 bg-black/65 p-4 lg:col-span-6">
+          <div class="flex items-center justify-between border-b border-white/10 pb-2">
+            <h3 class="text-xs font-black text-gold">📦 أوردراتي المجمّعة (ما تم طلبه)</h3>
+            <span id="collected-orders-count" class="rounded-full bg-gold/20 px-2.5 py-0.5 text-[10px] font-black text-goldLight">0 أوردر</span>
+          </div>
+          <div id="collected-customer-orders-box" class="max-h-40 space-y-2 overflow-y-auto pr-1 text-xs">
+            <p class="py-2 text-center text-gray-500">لا توجد أوردرات مجمّعة بعد — أضف مشروباً أو أرسل أوردرك.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- خريطة تحديد مسار العميل على الطريق قبل الوصول إلينا -->
+      <section id="customer-route-section" class="space-y-3 rounded-3xl border border-sky-400/35 bg-charcoal p-4 sm:p-5 shadow-2xl">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h2 class="text-base font-extrabold text-sky-300">🗺️ خريطة المسار المباشر إلى MPW Limousine Coffee</h2>
+            <p class="text-xs text-gray-400">تحديد موقعك الحالي ورسم خط السير على الطريق قبل الوصول إلينا</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button type="button" onclick="captureGPSAndDrawRoute()" class="rounded-xl bg-sky-500/20 px-3.5 py-2 text-xs font-extrabold text-sky-200 hover:bg-sky-500/30">
+              📍 تحديث مساري على الطريق
+            </button>
+            <a id="gps-map-link" href="https://www.google.com/maps/dir/?api=1&destination=31.2465,29.9735" target="_blank" rel="noopener noreferrer" class="rounded-xl border border-gold/40 bg-gold/10 px-3 py-2 text-xs font-extrabold text-gold hover:bg-gold hover:text-black">
+              فتح الاتجاهات في Google Maps ↗
+            </a>
+          </div>
+        </div>
+
+        <div id="customer-route-map" class="border border-sky-400/30 bg-black/70"></div>
+
+        <div class="grid gap-2 rounded-2xl border border-white/10 bg-black/50 p-3 text-xs sm:grid-cols-3">
+          <div>
+            <span class="text-gray-400">حالة GPS:</span>
+            <strong id="gps-status" class="mr-1 text-emerald-300">جاري تحديد موقعك...</strong>
+          </div>
+          <div>
+            <span class="text-gray-400">المسافة على الطريق:</span>
+            <strong id="route-distance-text" class="mr-1 text-gold">—</strong>
+          </div>
+          <div>
+            <span class="text-gray-400">الوقت المتوقع للوصول:</span>
+            <strong id="route-duration-text" class="mr-1 text-sky-300">—</strong>
+          </div>
+        </div>
+      </section>
+
+      <!-- قائمة المشروبات والأصناف + سلة الطلب -->
+      <section id="drinks-menu-section" class="grid gap-5 rounded-3xl border border-gold/30 bg-charcoal p-5 shadow-2xl lg:grid-cols-12">
+        <div class="space-y-4 lg:col-span-8">
+          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3">
+            <div>
+              <h2 class="text-lg font-extrabold text-gold">قائمة المشروبات والأصناف</h2>
+              <p class="text-xs text-gray-400">استخدم دواسة البنزين أو زر «ابعتهالو 😉» بجانب كل مشروب</p>
+            </div>
+            <input
+              id="menu-search-input"
+              oninput="renderDrinksGrid()"
+              type="text"
+              placeholder="ابحث عن مشروب..."
+              class="w-full rounded-xl border border-white/15 bg-black/60 px-3.5 py-2 text-xs text-white focus:border-gold focus:outline-none sm:w-56"
+            />
+          </div>
+
+          <div id="menu-categories-bar" class="flex flex-wrap gap-2"></div>
+          <div id="drinks-grid" class="grid gap-2.5 sm:grid-cols-2"></div>
+        </div>
+
+        <!-- سلة الطلب الحالية -->
+        <aside class="flex flex-col justify-between space-y-4 rounded-2xl border border-gold/30 bg-black/50 p-4 lg:col-span-4">
+          <div class="space-y-3">
+            <div class="flex items-center justify-between border-b border-white/10 pb-2.5">
+              <h3 class="text-sm font-black text-goldLight">سلة المشروبات</h3>
+              <span id="cart-total" class="text-sm font-black text-gold">0.00 ج.م</span>
+            </div>
+
+            <div id="cart-items" class="max-h-72 space-y-2 overflow-y-auto pr-1 text-xs">
+              <p class="py-4 text-center text-gray-500">لم تختر مشروبات بعد — اضغط «🦶 دواسة بنزين» أو «ابعتهالو 😉».</p>
+            </div>
+          </div>
+
+          <div class="space-y-2.5 pt-2">
+            <button type="button" onclick="submitOrder()" class="w-full rounded-2xl bg-gradient-to-r from-gold to-amber-500 py-3 text-sm font-black text-black shadow-lg shadow-gold/20 transition hover:brightness-110">
+              ابعتهالو 😉
+            </button>
+            <p id="order-feedback" class="hidden rounded-xl bg-emerald-500/15 p-2.5 text-center text-xs font-bold text-emerald-300"></p>
+          </div>
+        </aside>
+      </section>
+
+      <!-- متابعة حالة الطلب للعميل + نطق "هتشرب ابسط" عند الموافقة -->
+      <section id="customer-order-tracker" class="rounded-3xl border border-emerald-400/30 bg-charcoal/90 p-4 sm:p-5">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3">
+          <div>
+            <h2 class="text-sm font-black text-emerald-300">حالة الأوردر المباشرة</h2>
+            <p class="text-[11px] text-gray-400">عند موافقة المسؤول أو الإدارة أو الباريستا تُنطق: «هتشرب ابسط»</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="speakCustomerApprovalPhrase()" class="rounded-xl border border-emerald-400/40 bg-emerald-500/15 px-3 py-1.5 text-xs font-extrabold text-emerald-200 hover:bg-emerald-500/25">
+              🗣️ هتشرب ابسط
+            </button>
+            <button type="button" onclick="syncFromCloudNow()" class="rounded-xl border border-white/15 bg-black/50 px-3 py-1.5 text-xs font-bold text-gray-200 hover:border-gold/50">
+              🔄 تحديث
+            </button>
+          </div>
+        </div>
+        <div id="customer-live-tracker-body" class="mt-3 text-xs text-gray-300">
+          لم يتم إرسال طلب من هذا الجهاز بعد.
+        </div>
+      </section>
+    </div>
+
+    <!-- لوحة الاونر المخفية بباسورد 301088poro -->
+    <section id="owner-hidden-content" class="hidden space-y-6 rounded-3xl border-2 border-gold/50 bg-charcoal p-4 sm:p-6 shadow-2xl">
+      <div class="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
+        <div>
+          <span class="rounded-lg bg-gold px-2.5 py-0.5 text-xs font-black text-black">اونر (OWNER)</span>
+          <h2 class="mt-1 text-lg font-extrabold text-white">لوحة الاونر — المدير العام، المسؤولون، الباريستا، الخريطة والمنيو</h2>
+        </div>
+
+        <div class="flex flex-wrap gap-2">
+          <button type="button" onclick="switchOwnerTab('all')" id="tab-all" class="owner-tab rounded-xl bg-gold px-3.5 py-2 text-xs font-extrabold text-black">
+            المدير العام والمسؤولون
+          </button>
+          <button type="button" onclick="switchOwnerTab('barista1')" id="tab-barista1" class="owner-tab rounded-xl border border-white/15 bg-black/50 px-3.5 py-2 text-xs font-bold text-gray-200 hover:border-gold/50">
+            ☕ باريستا 1 (<span id="count-barista1">0</span>)
+          </button>
+          <button type="button" onclick="switchOwnerTab('barista2')" id="tab-barista2" class="owner-tab rounded-xl border border-white/15 bg-black/50 px-3.5 py-2 text-xs font-bold text-gray-200 hover:border-gold/50">
+            ☕ باريستا 2 (<span id="count-barista2">0</span>)
+          </button>
+          <button type="button" onclick="switchOwnerTab('admin_control')" id="tab-admin_control" class="owner-tab rounded-xl border border-gold/40 bg-gold/10 px-3.5 py-2 text-xs font-extrabold text-gold hover:bg-gold hover:text-black">
+            🛠️ المنيو والأسعار
+          </button>
+          <button type="button" onclick="switchOwnerTab('settings')" id="tab-settings" class="owner-tab rounded-xl border border-white/15 bg-black/50 px-3.5 py-2 text-xs font-bold text-gray-200 hover:border-gold/50">
+            ⚙️ السحابة والطباعة
+          </button>
+        </div>
+      </div>
+
+      <!-- مهام المدير العام والمسؤولين والباريستا -->
+      <div class="grid gap-3 sm:grid-cols-3">
+        <div class="rounded-2xl border border-gold/30 bg-black/50 p-3.5 space-y-1">
+          <div class="text-[11px] font-bold text-goldLight">المدير العام — محمود بورسعيد</div>
+          <div class="text-xs font-extrabold text-white">الإشراف الكامل، اعتماد الطلبات، الأسعار والطباعة</div>
+        </div>
+        <div class="rounded-2xl border border-sky-400/30 bg-black/50 p-3.5 space-y-1">
+          <div class="text-[11px] font-bold text-sky-300">المسؤولون — محمود حسن • رقيه محمود</div>
+          <div class="text-xs font-extrabold text-white">استقبال بيانات العميل والسيارة وتحويل الطلب للباريستا</div>
+        </div>
+        <div class="rounded-2xl border border-emerald-400/30 bg-black/50 p-3.5 space-y-1">
+          <div class="text-[11px] font-bold text-emerald-300">الباريستا — باريستا 1 / باريستا 2</div>
+          <div class="text-xs font-extrabold text-white">استلام الطلب المعتمد، بدء التحضير، جاهز للسيارة وإتمام التسليم</div>
+        </div>
+      </div>
+
+      <!-- خريطة متابعة مسار العميل للاونر -->
+      <div class="rounded-2xl border border-sky-400/35 bg-black/55 p-4 space-y-2.5">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <h3 class="text-sm font-black text-sky-300">متابعة موقع ومسار العميل على الخريطة</h3>
+          <span id="owner-route-info" class="text-xs font-bold text-gold">—</span>
+        </div>
+        <div id="owner-live-map" class="border border-sky-400/25 bg-black/70"></div>
+      </div>
+
+      <!-- إحصائيات سريعة -->
+      <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div class="rounded-2xl border border-white/10 bg-black/45 p-3">
+          <div class="text-[11px] text-gray-400">بانتظار الموافقة</div>
+          <div id="stat-pending" class="mt-1 text-xl font-black text-amber-400">0</div>
+        </div>
+        <div class="rounded-2xl border border-white/10 bg-black/45 p-3">
+          <div class="text-[11px] text-gray-400">قيد التحضير لدى الباريستا</div>
+          <div id="stat-approved" class="mt-1 text-xl font-black text-sky-400">0</div>
+        </div>
+        <div class="rounded-2xl border border-white/10 bg-black/45 p-3">
+          <div class="text-[11px] text-gray-400">مكتمل التسليم</div>
+          <div id="stat-completed" class="mt-1 text-xl font-black text-emerald-400">0</div>
+        </div>
+        <div class="rounded-2xl border border-white/10 bg-black/45 p-3">
+          <div class="text-[11px] text-gray-400">إجمالي الطلبات</div>
+          <div id="stat-new-customers" class="mt-1 text-xl font-black text-gold">0</div>
+        </div>
+      </div>
+
+      <!-- إدارة المنيو والأسعار -->
+      <div id="admin-control-panel" class="hidden space-y-4 rounded-2xl border border-gold/40 bg-black/55 p-4">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3">
+          <h3 class="text-sm font-black text-gold">إدارة المنيو والأسعار</h3>
+          <button type="button" onclick="resetMenuToDefault()" class="rounded-xl border border-amber-400/40 bg-amber-500/10 px-3 py-1.5 text-xs font-bold text-amber-300 hover:bg-amber-500/20">
+            استعادة المنيو الافتراضي
+          </button>
+        </div>
+
+        <div class="grid gap-3 rounded-2xl border border-white/10 bg-charcoal p-3 sm:grid-cols-12">
+          <div class="sm:col-span-4">
+            <label class="mb-1 block text-[11px] font-bold text-gray-300">اسم المشروب / الصنف</label>
+            <input id="new-item-name" type="text" placeholder="مثال: سبانش لاتيه" class="w-full rounded-xl border border-white/15 bg-black/70 px-3 py-2 text-xs text-white focus:border-gold focus:outline-none" />
+          </div>
+          <div class="sm:col-span-4">
+            <label class="mb-1 block text-[11px] font-bold text-gray-300">الفئة</label>
+            <select id="new-item-category" class="w-full rounded-xl border border-white/15 bg-black/70 px-3 py-2 text-xs text-white focus:border-gold focus:outline-none">
+              <option value="إسبريسو وقهوة ساخنة">إسبريسو وقهوة ساخنة</option>
+              <option value="قهوة مختصة وتقطير">قهوة مختصة وتقطير</option>
+              <option value="مشروبات مثلجة وآيس كوفي">مشروبات مثلجة وآيس كوفي</option>
+              <option value="ماتشا وشاي ومشروبات دافئة">ماتشا وشاي ومشروبات دافئة</option>
+              <option value="سموزي وفريش ومشروبات طاقة">سموزي وفريش ومشروبات طاقة</option>
+              <option value="مخبوزات وحلويات وسناكس">مخبوزات وحلويات وسناكس</option>
+            </select>
+          </div>
+          <div class="sm:col-span-2">
+            <label class="mb-1 block text-[11px] font-bold text-gray-300">السعر (ج.م)</label>
+            <input id="new-item-price" type="number" min="1" step="0.5" placeholder="90" class="w-full rounded-xl border border-white/15 bg-black/70 px-3 py-2 text-xs text-white focus:border-gold focus:outline-none" />
+          </div>
+          <div class="flex items-end sm:col-span-2">
+            <button type="button" onclick="adminAddMenuItem()" class="w-full rounded-xl bg-emerald-500 py-2 text-xs font-black text-black hover:bg-emerald-400">
+              + إضافة
+            </button>
+          </div>
+        </div>
+
+        <input id="admin-menu-search" oninput="renderAdminMenuManager()" type="text" placeholder="ابحث في المنيو..." class="w-full rounded-xl border border-white/15 bg-charcoal px-3 py-1.5 text-xs text-white focus:border-gold focus:outline-none sm:w-64" />
+        <div id="admin-menu-list" class="max-h-80 space-y-2 overflow-y-auto pr-1"></div>
+      </div>
+
+      <!-- إعدادات السحابة والطباعة -->
+      <div id="owner-settings-panel" class="hidden space-y-4 rounded-2xl border border-gold/30 bg-black/50 p-4">
+        <h3 class="text-sm font-extrabold text-gold">إعدادات السحابة (Firebase) وطباعة الكاش</h3>
+        <div class="grid gap-3 sm:grid-cols-2">
+          <div>
+            <label class="mb-1 block text-xs font-bold text-gray-300">Database URL</label>
+            <input id="fb-db-url" type="text" class="w-full rounded-xl border border-white/15 bg-charcoal px-3 py-2 text-xs text-white focus:border-gold focus:outline-none" />
+          </div>
+          <div>
+            <label class="mb-1 block text-xs font-bold text-gray-300">API Key / Auth Secret</label>
+            <input id="fb-api-key" type="text" class="w-full rounded-xl border border-white/15 bg-charcoal px-3 py-2 text-xs text-white focus:border-gold focus:outline-none" />
+          </div>
+          <div class="sm:col-span-2">
+            <label class="flex cursor-pointer items-center gap-2 rounded-xl border border-white/15 bg-charcoal px-3 py-2.5 text-xs font-bold text-gray-200 w-full">
+              <input id="auto-print-on-approve" type="checkbox" class="h-4 w-4 accent-gold" />
+              <span>طباعة إيصال الكاش تلقائياً عند الموافقة</span>
+            </label>
+          </div>
+        </div>
+        <p id="settings-feedback" class="hidden rounded-xl bg-emerald-500/15 px-3 py-2 text-xs font-bold text-emerald-300"></p>
+        <div class="flex flex-wrap gap-2">
+          <button type="button" onclick="saveCloudAndPrintSettings()" class="rounded-xl bg-gold px-4 py-2 text-xs font-extrabold text-black hover:bg-goldLight">
+            حفظ الإعدادات
+          </button>
+          <button type="button" onclick="clearCloudSettings()" class="rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-xs font-bold text-gray-300 hover:bg-white/10">
+            استعادة الافتراضي
+          </button>
+        </div>
+      </div>
+
+      <!-- قائمة الطلبات الحية ومهام المدير العام والمسؤولين والباريستا -->
+      <div id="orders-feed" class="grid gap-4 md:grid-cols-2"></div>
+    </section>
+  </main>
+
+  <!-- نافذة باسورد خانة اونر: 301088poro -->
+  <div id="owner-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
+    <div class="w-full max-w-md space-y-4 rounded-3xl border border-gold/40 bg-charcoal p-6 shadow-2xl">
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-extrabold text-gold">دخول خانة اونر</h3>
+        <button type="button" onclick="closeOwnerModal()" class="text-sm text-gray-400 hover:text-white">✕</button>
+      </div>
+      <p class="text-xs text-gray-400">أدخل كلمة المرور لفتح لوحة الاونر ومهام المدير العام والمسؤولين والباريستا.</p>
+      <div>
+        <label class="mb-1 block text-xs font-bold text-gray-300">كلمة المرور</label>
+        <input id="owner-password-input" type="password" placeholder="أدخل كلمة المرور..." class="w-full rounded-xl border border-white/15 bg-black/70 px-4 py-2.5 text-center text-sm font-extrabold tracking-wider text-gold focus:border-gold focus:outline-none" />
+      </div>
+      <p id="owner-password-error" class="hidden text-center text-xs font-bold text-red-400">كلمة المرور غير صحيحة.</p>
+      <button type="button" onclick="verifyOwnerPassword()" class="w-full rounded-xl bg-gold py-2.5 text-sm font-black text-black hover:bg-goldLight">
+        دخول اونر
+      </button>
+    </div>
+  </div>
+
+  <!-- قالب إيصال الكاش الحراري للطباعة -->
+  <div id="cashier-receipt-print"></div>
+
+  <script>
+    const OWNER_PASSWORD = '301088poro';
+
+    const BASE_MENU_TUPLES = [
+      ['إسبريسو سنجل', 'إسبريسو وقهوة ساخنة', 45],
+      ['إسبريسو دبل', 'إسبريسو وقهوة ساخنة', 60],
+      ['إسبريسو ريستريتو', 'إسبريسو وقهوة ساخنة', 55],
+      ['إسبريسو لونجو', 'إسبريسو وقهوة ساخنة', 55],
+      ['أمريكانو ساخن', 'إسبريسو وقهوة ساخنة', 65],
+      ['كابتشينو كلاسيك', 'إسبريسو وقهوة ساخنة', 75],
+      ['كابتشينو كراميل', 'إسبريسو وقهوة ساخنة', 85],
+      ['كابتشينو بندق', 'إسبريسو وقهوة ساخنة', 85],
+      ['لاتيه ساخن', 'إسبريسو وقهوة ساخنة', 75],
+      ['سبانش لاتيه ساخن', 'إسبريسو وقهوة ساخنة', 90],
+      ['وايت موكا ساخن', 'إسبريسو وقهوة ساخنة', 90],
+      ['دارك موكا ساخن', 'إسبريسو وقهوة ساخنة', 85],
+      ['فلات وايت', 'إسبريسو وقهوة ساخنة', 80],
+      ['كورتادو ساخن', 'إسبريسو وقهوة ساخنة', 70],
+      ['بيكولو لاتيه', 'إسبريسو وقهوة ساخنة', 70],
+      ['ميكياتو ساخن', 'إسبريسو وقهوة ساخنة', 65],
+      ['قهوة تركي سادة', 'إسبريسو وقهوة ساخنة', 45],
+      ['قهوة تركي محوج', 'إسبريسو وقهوة ساخنة', 50],
+      ['قهوة تركي دبل', 'إسبريسو وقهوة ساخنة', 65],
+      ['قهوة فرنساوي بندق', 'إسبريسو وقهوة ساخنة', 65],
+      ['قهوة بالنوتيلا ساخنة', 'إسبريسو وقهوة ساخنة', 85],
+      ['V60 حار', 'قهوة مختصة وتقطير', 95],
+      ['V60 بارد', 'قهوة مختصة وتقطير', 100],
+      ['كيمكس حار', 'قهوة مختصة وتقطير', 105],
+      ['كيمكس بارد', 'قهوة مختصة وتقطير', 110],
+      ['إيروبريس مختصة', 'قهوة مختصة وتقطير', 95],
+      ['سايفون قهوة مختصة', 'قهوة مختصة وتقطير', 120],
+      ['كولد برو كلاسيك', 'قهوة مختصة وتقطير', 95],
+      ['كولد برو فانيلا', 'قهوة مختصة وتقطير', 105],
+      ['نيترو كولد برو', 'قهوة مختصة وتقطير', 115],
+      ['إثيوبي ييرغاتشيف V60', 'قهوة مختصة وتقطير', 110],
+      ['كولومبي هويلا V60', 'قهوة مختصة وتقطير', 110],
+      ['آيس أمريكانو', 'مشروبات مثلجة وآيس كوفي', 70],
+      ['آيس لاتيه', 'مشروبات مثلجة وآيس كوفي', 80],
+      ['آيس سبانش لاتيه', 'مشروبات مثلجة وآيس كوفي', 95],
+      ['آيس وايت موكا', 'مشروبات مثلجة وآيس كوفي', 95],
+      ['آيس كراميل ميكياتو', 'مشروبات مثلجة وآيس كوفي', 95],
+      ['آيس كورتادو بارد', 'مشروبات مثلجة وآيس كوفي', 75],
+      ['آيس موكا شوكولاتة', 'مشروبات مثلجة وآيس كوفي', 90],
+      ['فرابتشينو كراميل', 'مشروبات مثلجة وآيس كوفي', 105],
+      ['فرابتشينو أوريو', 'مشروبات مثلجة وآيس كوفي', 105],
+      ['فرابتشينو لوتس', 'مشروبات مثلجة وآيس كوفي', 110],
+      ['فرابتشينو نوتيلا', 'مشروبات مثلجة وآيس كوفي', 110],
+      ['ماتشا لاتيه ساخن', 'ماتشا وشاي ومشروبات دافئة', 95],
+      ['آيس ماتشا لاتيه', 'ماتشا وشاي ومشروبات دافئة', 100],
+      ['ماتشا فراولة بارد', 'ماتشا وشاي ومشروبات دافئة', 110],
+      ['شاي أحمر بالنعناع', 'ماتشا وشاي ومشروبات دافئة', 35],
+      ['شاي أخضر بالنعناع', 'ماتشا وشاي ومشروبات دافئة', 40],
+      ['شاي كرك بالهيل والزعفران', 'ماتشا وشاي ومشروبات دافئة', 60],
+      ['هوت شوكليت كلاسيك', 'ماتشا وشاي ومشروبات دافئة', 80],
+      ['هوت شوكليت مارشميلو', 'ماتشا وشاي ومشروبات دافئة', 95],
+      ['سحلب بالمكسرات', 'ماتشا وشاي ومشروبات دافئة', 75],
+      ['سموزي مانجو', 'سموزي وفريش ومشروبات طاقة', 85],
+      ['سموزي فراولة', 'سموزي وفريش ومشروبات طاقة', 85],
+      ['سموزي توت مشكل', 'سموزي وفريش ومشروبات طاقة', 95],
+      ['عصير برتقال فريش', 'سموزي وفريش ومشروبات طاقة', 65],
+      ['ليمون بالنعناع فريش', 'سموزي وفريش ومشروبات طاقة', 60],
+      ['موهيتو ليمون ونعناع', 'سموزي وفريش ومشروبات طاقة', 75],
+      ['موهيتو بلو لاجون', 'سموزي وفريش ومشروبات طاقة', 80],
+      ['باشن فروت موهيتو', 'سموزي وفريش ومشروبات طاقة', 85],
+      ['مشروب طاقة ليموزين خاص', 'سموزي وفريش ومشروبات طاقة', 90],
+      ['آيس ريد بول ليمون', 'سموزي وفريش ومشروبات طاقة', 95],
+      ['كرواسون زبدة فرنسي', 'مخبوزات وحلويات وسناكس', 55],
+      ['كرواسون شوكولاتة', 'مخبوزات وحلويات وسناكس', 65],
+      ['تشيز كيك كلاسيك', 'مخبوزات وحلويات وسناكس', 85],
+      ['براونيز شوكولاتة داكنة', 'مخبوزات وحلويات وسناكس', 75],
+      ['كوكيز شوكولاتة ساخنة', 'مخبوزات وحلويات وسناكس', 65],
+      ['تارت لوتس', 'مخبوزات وحلويات وسناكس', 80]
+    ];
+
+    const MENU_ITEMS = BASE_MENU_TUPLES.map(([name, category, price], idx) => ({
+      id: 'ITEM-' + (idx + 1),
+      name,
+      category,
+      price: Number(price)
+    }));
+
+    const TIER_LABELS = {
+      '7vip': '7VIP (كارت أسود)',
+      'vvip': 'VVIP (كارت أزرق)',
+      'vip': 'VIP (كارت أبيض)',
+      'none': 'غير مشترك (بلا كارت)'
+    };
+
+    const CAFE_COORDS = { lat: 31.2465, lng: 29.9735 };
+    const DEFAULT_DB_URL = 'https://mpw-limousine-coffee-default-rtdb.firebaseio.com';
+    const ORDERS_STORAGE_KEY = 'mpw_limousine_orders_live_v8';
+    const MENU_STORAGE_KEY = 'mpw_limousine_menu_live_v8';
+    const SETTINGS_STORAGE_KEY = 'mpw_limousine_settings_v8';
+    const DEVICE_GMAIL_STORAGE_KEY = 'mpw_device_bound_gmail';
+    const LAST_CUSTOMER_ORDER_KEY = 'mpw_limousine_last_customer_order_id';
+
+    let isOwnerUnlocked = false;
+    let activeOwnerTab = 'all';
+    let activeCategoryFilter = 'الكل';
+    let cart = [];
+    let customerTier = '7vip';
+    let customerGender = 'male';
+    let socialProvider = null;
+    let currentGPS = null;
+    let customMenu = loadCustomMenu();
+    let orders = loadOrders();
+    let knownOrderIds = new Set(orders.map((o) => o.id));
+    let spokenApprovedOrderIds = new Set();
+    let appSettings = loadSettings();
+    let boundDeviceGmail = localStorage.getItem(DEVICE_GMAIL_STORAGE_KEY) || '';
+    let lastCustomerOrderId = localStorage.getItem(LAST_CUSTOMER_ORDER_KEY) || '';
+    let cloudPollTimer = null;
+
+    let customerMap = null;
+    let customerMarker = null;
+    let customerRouteLine = null;
+
+    let ownerMap = null;
+    let ownerCustomerMarker = null;
+    let ownerRouteLine = null;
+
+    function loadSettings() {
+      try {
+        const raw = localStorage.getItem(SETTINGS_STORAGE_KEY);
+        return raw
+          ? JSON.parse(raw)
+          : {
+              dbUrl: DEFAULT_DB_URL,
+              apiKey: '',
+              autoPrintOnApprove: false
+            };
+      } catch {
+        return {
+          dbUrl: DEFAULT_DB_URL,
+          apiKey: '',
+          autoPrintOnApprove: false
+        };
+      }
+    }
+
+    function saveSettings() {
+      try {
+        localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(appSettings));
+      } catch {}
+    }
+
+    function loadCustomMenu() {
+      try {
+        const raw = localStorage.getItem(MENU_STORAGE_KEY);
+        return raw ? JSON.parse(raw) : [...MENU_ITEMS];
+      } catch {
+        return [...MENU_ITEMS];
+      }
+    }
+
+    function saveCustomMenu() {
+      try {
+        localStorage.setItem(MENU_STORAGE_KEY, JSON.stringify(customMenu));
+      } catch {}
+      pushMenuToCloud();
+    }
+
+    function loadOrders() {
+      try {
+        const raw = localStorage.getItem(ORDERS_STORAGE_KEY);
+        return raw ? JSON.parse(raw) : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function saveOrders() {
+      try {
+        localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(orders));
+      } catch {}
+    }
+
+    function playCarStartupAudio() {
+      const audioEl = document.getElementById('car-startup-audio');
+      if (!audioEl) return;
+      audioEl.currentTime = 0;
+      audioEl.volume = 0.85;
+      audioEl.play().catch(() => {});
+    }
+
+    // ربط التطبيق بحساب الجيميل المتواجد على الجهاز عند منح الأمر
+    async function requestDeviceGmailBinding() {
+      let suggestedEmail = boundDeviceGmail || '';
+      if (!suggestedEmail && navigator.credentials && typeof navigator.credentials.get === 'function') {
+        try {
+          const cred = await navigator.credentials.get({
+            password: true,
+            mediation: 'optional'
+          });
+          if (cred && cred.id) {
+            suggestedEmail = cred.id;
+          }
+        } catch {}
+      }
+
+      const consentBox = document.getElementById('device-gmail-consent-box');
+      const inputEl = document.getElementById('device-gmail-input');
+      if (inputEl && suggestedEmail) {
+        inputEl.value = suggestedEmail;
+      }
+      if (consentBox) {
+        consentBox.classList.remove('hidden');
+      }
+    }
+
+    function cancelDeviceGmailConsent() {
+      const consentBox = document.getElementById('device-gmail-consent-box');
+      if (consentBox) consentBox.classList.add('hidden');
+    }
+
+    function grantGmailPermissionAndBind() {
+      const inputEl = document.getElementById('device-gmail-input');
+      const nameField = document.getElementById('customer-name');
+      const badge = document.getElementById('social-auth-badge');
+      const emailVal = (inputEl?.value || '').trim();
+
+      const resolvedGmail = emailVal || 'device-gmail@mpw.local';
+      boundDeviceGmail = resolvedGmail;
+      try {
+        localStorage.setItem(DEVICE_GMAIL_STORAGE_KEY, resolvedGmail);
+      } catch {}
+
+      if (badge) {
+        badge.textContent = `مرتبط بالجيميل: ${resolvedGmail}`;
+        badge.className = 'rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-[10px] font-extrabold text-emerald-300';
+      }
+
+      if (nameField && !nameField.value.trim()) {
+        nameField.value = resolvedGmail;
+      }
+
+      cancelDeviceGmailConsent();
+      proceedToDrinksPage(true);
+    }
+
+    function buildFirebaseUrl(nodePath) {
+      const base = (appSettings.dbUrl || DEFAULT_DB_URL).trim().replace(/\/+$/, '');
+      const cleanPath = String(nodePath || '').replace(/^\/+/, '');
+      const authParam = appSettings.apiKey && !appSettings.apiKey.startsWith('AIza')
+        ? `?auth=${encodeURIComponent(appSettings.apiKey.trim())}`
+        : '';
+      return `${base}/${cleanPath}.json${authParam}`;
+    }
+
+    function setSyncBadge(text, mode = 'ok') {
+      const badge = document.getElementById('sync-status-badge');
+      if (!badge) return;
+      badge.textContent = text;
+      badge.classList.remove('hidden');
+      if (mode === 'ok') {
+        badge.className = 'rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-bold text-emerald-300';
+      } else {
+        badge.className = 'rounded-full border border-amber-500/40 bg-amber-500/10 px-2.5 py-1 text-[11px] font-bold text-amber-300';
+      }
+    }
+
+    async function pushOrderToCloud(orderObj) {
+      if (!orderObj || !orderObj.id) return;
+      try {
+        const res = await fetch(buildFirebaseUrl(`orders/${orderObj.id}`), {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(orderObj)
+        });
+        setSyncBadge(res.ok ? 'متصل' : 'محلي', res.ok ? 'ok' : 'warn');
+      } catch {
+        setSyncBadge('محلي', 'warn');
+      }
+    }
+
+    async function deleteOrderFromCloud(orderId) {
+      if (!orderId) return;
+      try {
+        await fetch(buildFirebaseUrl(`orders/${orderId}`), {
+          method: 'DELETE'
+        });
+      } catch {}
+    }
+
+    async function pushMenuToCloud() {
+      try {
+        await fetch(buildFirebaseUrl('menu'), {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(customMenu)
+        });
+      } catch {}
+    }
+
+    async function syncFromCloudNow() {
+      try {
+        const [ordersRes, menuRes] = await Promise.all([
+          fetch(buildFirebaseUrl('orders')),
+          fetch(buildFirebaseUrl('menu'))
+        ]);
+
+        if (menuRes.ok) {
+          const cloudMenu = await menuRes.json();
+          if (Array.isArray(cloudMenu) && cloudMenu.length > 0) {
+            customMenu = cloudMenu;
+            try {
+              localStorage.setItem(MENU_STORAGE_KEY, JSON.stringify(customMenu));
+            } catch {}
+            renderMenuCategories();
+            renderDrinksGrid();
+            renderAdminMenuManager();
+          }
+        }
+
+        if (ordersRes.ok) {
+          const cloudOrdersObj = await ordersRes.json();
+          if (cloudOrdersObj && typeof cloudOrdersObj === 'object') {
+            const list = Object.values(cloudOrdersObj).filter((o) => o && o.id);
+            list.sort((a, b) => (b.createdAtMs || 0) - (a.createdAtMs || 0));
+
+            let detectedNewOrder = null;
+            for (const ord of list) {
+              if (!knownOrderIds.has(ord.id)) {
+                knownOrderIds.add(ord.id);
+                if (!detectedNewOrder) detectedNewOrder = ord;
+              }
+            }
+
+            orders = list;
+            saveOrders();
+            renderOrdersFeed();
+            renderCustomerLiveTracker();
+            renderCollectedCustomerOrdersBox();
+
+            if (detectedNewOrder) {
+              playCarStartupAudio();
+              showNewOrderBanner(detectedNewOrder);
+            }
+
+            const myOrder = orders.find((o) => o.id === lastCustomerOrderId);
+            if (
+              myOrder &&
+              (myOrder.status === 'approved_barista1' || myOrder.status === 'approved_barista2') &&
+              !spokenApprovedOrderIds.has(myOrder.id)
+            ) {
+              spokenApprovedOrderIds.add(myOrder.id);
+              speakCustomerApprovalPhrase();
+            }
+          }
+          setSyncBadge('متصل', 'ok');
+        }
+      } catch {
+        setSyncBadge('محلي', 'warn');
+      }
+    }
+
+    function showNewOrderBanner(orderObj) {
+      const banner = document.getElementById('new-order-banner');
+      const bannerText = document.getElementById('new-order-banner-text');
+      if (banner && bannerText) {
+        bannerText.textContent = `وصل أوردر جديد (${orderObj.id}) من ${orderObj.customerName} (${orderObj.carInfo})`;
+        banner.classList.remove('hidden');
+      }
+    }
+
+    function speakCustomerApprovalPhrase() {
+      try {
+        if (!('speechSynthesis' in window)) return;
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance('هتشرب ابسط');
+        utter.lang = 'ar-EG';
+        utter.rate = 1.0;
+        utter.pitch = 1.05;
+        window.speechSynthesis.speak(utter);
+      } catch {}
+    }
+
+    function startSocialLogin(provider) {
+      socialProvider = provider;
+      const box = document.getElementById('social-login-box');
+      const label = document.getElementById('social-input-label');
+      const input = document.getElementById('social-account-input');
+      if (!box || !label || !input) return;
+
+      label.textContent = provider === 'facebook' ? 'أدخل حساب فيسبوك أو اسمك للدخول:' : 'أدخل حساب جيميل أو اسمك للدخول:';
+      input.placeholder = provider === 'facebook' ? 'facebook.com/username أو الاسم' : 'name@gmail.com أو الاسم';
+      box.classList.remove('hidden');
+      input.focus();
+    }
+
+    function cancelSocialLogin() {
+      socialProvider = null;
+      document.getElementById('social-login-box').classList.add('hidden');
+      document.getElementById('social-account-input').value = '';
+    }
+
+    function completeLoginAndOpenMenu() {
+      const input = document.getElementById('social-account-input');
+      const badge = document.getElementById('social-auth-badge');
+      const nameField = document.getElementById('customer-name');
+      const val = (input.value || '').trim();
+
+      const label = socialProvider === 'facebook' ? 'Facebook' : 'Gmail';
+      if (val) {
+        if (badge) {
+          badge.textContent = `${label}: ${val}`;
+          badge.className = 'rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-[10px] font-extrabold text-emerald-300';
+        }
+        if (nameField && !nameField.value.trim()) {
+          nameField.value = `${val} (${label})`;
+        }
+      }
+
+      document.getElementById('social-login-box').classList.add('hidden');
+      proceedToDrinksPage(true);
+    }
+
+    function proceedToDrinksPage(fromSocial = false) {
+      const nameField = document.getElementById('customer-name');
+      const carField = document.getElementById('car-info');
+      const errEl = document.getElementById('login-step-error');
+
+      let customerName = (nameField.value || '').trim();
+      if (!customerName && fromSocial) {
+        customerName = socialProvider === 'facebook' ? 'عميل فيسبوك' : (boundDeviceGmail || 'عميل جيميل');
+        nameField.value = customerName;
+      }
+
+      if (!customerName) {
+        errEl.textContent = 'من فضلك اربط حساب الجيميل أو سجّل دخولك بجيميل أو فيسبوك أو اكتب اسمك أولاً.';
+        errEl.classList.remove('hidden');
+        return;
+      }
+
+      errEl.classList.add('hidden');
+
+      const carText = (carField.value || '').trim() || 'سيارة العميل';
+      const gmailNote = boundDeviceGmail ? ` • ${boundDeviceGmail}` : '';
+      document.getElementById('logged-customer-display').textContent = `${customerName} (${TIER_LABELS[customerTier] || customerTier})${gmailNote}`;
+      document.getElementById('logged-car-display').textContent = `السيارة: ${carText}`;
+
+      document.getElementById('customer-login-step').classList.add('hidden');
+      document.getElementById('customer-drinks-and-map-page').classList.remove('hidden');
+
+      playCarStartupAudio();
+      renderCollectedCustomerOrdersBox();
+
+      setTimeout(() => {
+        initCustomerRouteMap();
+        captureGPSAndDrawRoute();
+      }, 120);
+    }
+
+    function backToLoginStep() {
+      document.getElementById('customer-drinks-and-map-page').classList.add('hidden');
+      document.getElementById('customer-login-step').classList.remove('hidden');
+    }
+
+    function setCustomerTier(tier) {
+      customerTier = tier;
+      document.querySelectorAll('.tier-btn').forEach((btn) => {
+        btn.classList.remove('border-2', 'border-gold');
+        btn.classList.add('border', 'border-white/15');
+      });
+      const activeBtn = document.getElementById(`tier-${tier}-btn`);
+      if (activeBtn) {
+        activeBtn.classList.remove('border', 'border-white/15');
+        activeBtn.classList.add('border-2', 'border-gold');
+      }
+    }
+
+    function setCustomerGender(gender) {
+      customerGender = gender;
+      const mBtn = document.getElementById('gender-male-btn');
+      const fBtn = document.getElementById('gender-female-btn');
+      if (gender === 'male') {
+        mBtn.className = 'rounded-xl border border-gold bg-gold/20 py-2 text-xs font-extrabold text-gold';
+        fBtn.className = 'rounded-xl border border-white/15 bg-black/50 py-2 text-xs font-bold text-gray-300';
+      } else {
+        fBtn.className = 'rounded-xl border border-gold bg-gold/20 py-2 text-xs font-extrabold text-gold';
+        mBtn.className = 'rounded-xl border border-white/15 bg-black/50 py-2 text-xs font-bold text-gray-300';
+      }
+    }
+
+    function haversineKm(lat1, lon1, lat2, lon2) {
+      const R = 6371;
+      const dLat = ((lat2 - lat1) * Math.PI) / 180;
+      const dLon = ((lon2 - lon1) * Math.PI) / 180;
+      const a =
+        Math.sin(dLat / 2) ** 2 +
+        Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLon / 2) ** 2;
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+
+    function initCustomerRouteMap() {
+      const container = document.getElementById('customer-route-map');
+      if (!container || typeof L === 'undefined') return;
+
+      if (!customerMap) {
+        customerMap = L.map('customer-route-map').setView([CAFE_COORDS.lat, CAFE_COORDS.lng], 14);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; OpenStreetMap'
+        }).addTo(customerMap);
+
+        L.circleMarker([CAFE_COORDS.lat, CAFE_COORDS.lng], {
+          radius: 9,
+          color: '#D4AF37',
+          fillColor: '#D4AF37',
+          fillOpacity: 1
+        })
+          .addTo(customerMap)
+          .bindPopup('📍 نقطة الوصول: MPW Limousine Coffee')
+          .openPopup();
+      } else {
+        customerMap.invalidateSize();
+      }
+    }
+
+    function initOwnerRouteMap() {
+      const container = document.getElementById('owner-live-map');
+      if (!container || typeof L === 'undefined') return;
+
+      if (!ownerMap) {
+        ownerMap = L.map('owner-live-map').setView([CAFE_COORDS.lat, CAFE_COORDS.lng], 14);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; OpenStreetMap'
+        }).addTo(ownerMap);
+
+        L.circleMarker([CAFE_COORDS.lat, CAFE_COORDS.lng], {
+          radius: 8,
+          color: '#D4AF37',
+          fillColor: '#D4AF37',
+          fillOpacity: 1
+        })
+          .addTo(ownerMap)
+          .bindPopup('MPW Limousine Coffee');
+      } else {
+        ownerMap.invalidateSize();
+      }
+    }
+
+    async function drawRoadRouteOnMaps(userLat, userLng) {
+      let routeCoords = [
+        [userLat, userLng],
+        [CAFE_COORDS.lat, CAFE_COORDS.lng]
+      ];
+      let distanceKm = haversineKm(userLat, userLng, CAFE_COORDS.lat, CAFE_COORDS.lng);
+      let durationMin = Math.max(1, Math.round(distanceKm * 2.2));
+
+      try {
+        const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${userLng},${userLat};${CAFE_COORDS.lng},${CAFE_COORDS.lat}?overview=full&geometries=geojson`;
+        const res = await fetch(osrmUrl);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.routes && data.routes[0]) {
+            const r = data.routes[0];
+            distanceKm = r.distance / 1000;
+            durationMin = Math.max(1, Math.round(r.duration / 60));
+            routeCoords = r.geometry.coordinates.map(([lng, lat]) => [lat, lng]);
+          }
+        }
+      } catch {}
+
+      currentGPS = {
+        lat: userLat,
+        lng: userLng,
+        distKm: Number(distanceKm.toFixed(2)),
+        durationMin
+      };
+
+      const statusEl = document.getElementById('gps-status');
+      const distEl = document.getElementById('route-distance-text');
+      const durEl = document.getElementById('route-duration-text');
+      const linkEl = document.getElementById('gps-map-link');
+
+      if (statusEl) statusEl.textContent = 'متصل ومُحدَّد على الخريطة';
+      if (distEl) distEl.textContent = `${currentGPS.distKm} كم`;
+      if (durEl) durEl.textContent = `${durationMin} دقيقة تقريباً`;
+      if (linkEl) {
+        linkEl.href = `https://www.google.com/maps/dir/?api=1&origin=${userLat},${userLng}&destination=${CAFE_COORDS.lat},${CAFE_COORDS.lng}&travelmode=driving`;
+      }
+
+      const ownerInfo = document.getElementById('owner-route-info');
+      if (ownerInfo) {
+        ownerInfo.textContent = `مسافة العميل على الطريق: ${currentGPS.distKm} كم (${durationMin} دقيقة)`;
+      }
+
+      if (customerMap) {
+        if (customerMarker) customerMap.removeLayer(customerMarker);
+        if (customerRouteLine) customerMap.removeLayer(customerRouteLine);
+
+        customerMarker = L.marker([userLat, userLng])
+          .addTo(customerMap)
+          .bindPopup('🚗 موقع سيارتك الحالي')
+          .openPopup();
+
+        customerRouteLine = L.polyline(routeCoords, {
+          color: '#38BDF8',
+          weight: 5,
+          opacity: 0.9
+        }).addTo(customerMap);
+
+        customerMap.fitBounds(customerRouteLine.getBounds(), { padding: [30, 30] });
+      }
+
+      if (ownerMap) {
+        if (ownerCustomerMarker) ownerMap.removeLayer(ownerCustomerMarker);
+        if (ownerRouteLine) ownerMap.removeLayer(ownerRouteLine);
+
+        ownerCustomerMarker = L.marker([userLat, userLng])
+          .addTo(ownerMap)
+          .bindPopup(`🚗 سيارة العميل (${currentGPS.distKm} كم)`);
+
+        ownerRouteLine = L.polyline(routeCoords, {
+          color: '#D4AF37',
+          weight: 5,
+          opacity: 0.9
+        }).addTo(ownerMap);
+
+        ownerMap.fitBounds(ownerRouteLine.getBounds(), { padding: [25, 25] });
+      }
+    }
+
+    function captureGPSAndDrawRoute() {
+      const gpsStatus = document.getElementById('gps-status');
+      if (!navigator.geolocation) {
+        if (gpsStatus) gpsStatus.textContent = 'GPS غير مدعوم';
+        return;
+      }
+
+      if (gpsStatus) gpsStatus.textContent = 'جاري تحديد موقعك ورسم المسار...';
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          drawRoadRouteOnMaps(pos.coords.latitude, pos.coords.longitude);
+        },
+        () => {
+          if (gpsStatus) gpsStatus.textContent = 'يرجى تفعيل GPS في المتصفح لرسم مسارك';
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
+      );
+    }
+
+    function renderMenuCategories() {
+      const bar = document.getElementById('menu-categories-bar');
+      if (!bar) return;
+      const cats = ['الكل', ...new Set(customMenu.map((m) => m.category))];
+      bar.innerHTML = cats
+        .map((c) => {
+          const active = activeCategoryFilter === c;
+          return `
+            <button
+              type="button"
+              onclick="selectMenuCategory('${c.replace(/'/g, "\\'")}')"
+              class="rounded-xl px-3 py-1.5 text-xs font-extrabold transition ${
+                active
+                  ? 'bg-gold text-black'
+                  : 'border border-white/15 bg-black/50 text-gray-300 hover:border-gold/50'
+              }"
+            >
+              ${c}
+            </button>
+          `;
+        })
+        .join('');
+    }
+
+    function selectMenuCategory(cat) {
+      activeCategoryFilter = cat;
+      renderMenuCategories();
+      renderDrinksGrid();
+    }
+
+    // بجانب كل مشروب: علامة دواسة بنزين بدلاً من + وزر ابعتهالو مع إيموشن يغمز
+    function renderDrinksGrid() {
+      const grid = document.getElementById('drinks-grid');
+      if (!grid) return;
+      const q = (document.getElementById('menu-search-input')?.value || '').trim().toLowerCase();
+
+      const filtered = customMenu.filter((m) => {
+        const matchCat = activeCategoryFilter === 'الكل' || m.category === activeCategoryFilter;
+        const matchSearch = !q || m.name.toLowerCase().includes(q) || m.category.toLowerCase().includes(q);
+        return matchCat && matchSearch;
+      });
+
+      if (filtered.length === 0) {
+        grid.innerHTML = '<div class="col-span-2 rounded-2xl border border-white/10 bg-black/40 p-6 text-center text-xs text-gray-400">لا توجد مشروبات مطابقة للبحث.</div>';
+        return;
+      }
+
+      grid.innerHTML = filtered
+        .map(
+          (item) => `
+          <div class="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-white/10 bg-black/45 p-3 transition hover:border-gold/40">
+            <div class="min-w-0">
+              <div class="truncate text-xs font-extrabold text-white">${item.name}</div>
+              <div class="text-[10px] text-gray-400">${item.category}</div>
+              <div class="mt-0.5 text-xs font-black text-gold">${Number(item.price).toFixed(2)} ج.م</div>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <button
+                type="button"
+                onclick="pressGasPedalDrink('${item.id}')"
+                title="دواسة بنزين"
+                class="rounded-xl border border-amber-400/40 bg-amber-500/15 px-2.5 py-1.5 text-[11px] font-black text-amber-200 transition hover:bg-amber-500/30"
+              >
+                🦶 دواسة بنزين
+              </button>
+              <button
+                type="button"
+                onclick="sendSingleDrinkDirectly('${item.id}')"
+                class="rounded-xl bg-gold/20 px-2.5 py-1.5 text-[11px] font-black text-gold transition hover:bg-gold hover:text-black"
+              >
+                ابعتهالو 😉
+              </button>
+            </div>
+          </div>
+        `
+        )
+        .join('');
+    }
+
+    function pressGasPedalDrink(itemId) {
+      playCarStartupAudio();
+      addToCart(itemId);
+    }
+
+    function sendSingleDrinkDirectly(itemId) {
+      playCarStartupAudio();
+      const item = customMenu.find((m) => m.id === itemId);
+      if (!item) return;
+
+      const existing = cart.find((c) => c.id === itemId);
+      if (existing) {
+        existing.qty += 1;
+      } else {
+        cart.push({ ...item, qty: 1 });
+      }
+      renderCart();
+
+      const nameInput = document.getElementById('customer-name');
+      if (nameInput && nameInput.value.trim()) {
+        submitOrder();
+      }
+    }
+
+    function addToCart(itemId) {
+      const item = customMenu.find((m) => m.id === itemId);
+      if (!item) return;
+      const existing = cart.find((c) => c.id === itemId);
+      if (existing) {
+        existing.qty += 1;
+      } else {
+        cart.push({ ...item, qty: 1 });
+      }
+      renderCart();
+    }
+
+    function updateCartQty(itemId, delta) {
+      cart = cart
+        .map((c) => (c.id === itemId ? { ...c, qty: c.qty + delta } : c))
+        .filter((c) => c.qty > 0);
+      renderCart();
+    }
+
+    function renderCart() {
+      const wrap = document.getElementById('cart-items');
+      const totalEl = document.getElementById('cart-total');
+
+      if (cart.length === 0) {
+        wrap.innerHTML = '<p class="py-4 text-center text-gray-500">لم تختر مشروبات بعد — اضغط «🦶 دواسة بنزين» أو «ابعتهالو 😉».</p>';
+        totalEl.textContent = '0.00 ج.م';
+        return;
+      }
+
+      const total = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+      totalEl.textContent = `${total.toFixed(2)} ج.م`;
+
+      wrap.innerHTML = cart
+        .map(
+          (item) => `
+          <div class="flex items-center justify-between gap-2 rounded-xl border border-white/10 bg-charcoal px-3 py-2">
+            <div>
+              <div class="font-extrabold text-white">${item.name}</div>
+              <div class="text-[11px] text-gold">${(item.price * item.qty).toFixed(2)} ج.م</div>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <button type="button" onclick="updateCartQty('${item.id}', -1)" class="h-6 w-6 rounded-lg bg-white/10 font-black text-white">-</button>
+              <span class="min-w-5 text-center font-bold">${item.qty}</span>
+              <button type="button" onclick="updateCartQty('${item.id}', 1)" class="h-6 w-6 rounded-lg bg-gold font-black text-black">+</button>
+            </div>
+          </div>
+        `
+        )
+        .join('');
+    }
+
+    function submitOrder() {
+      const nameInput = document.getElementById('customer-name');
+      const carInput = document.getElementById('car-info');
+      const feedback = document.getElementById('order-feedback');
+      const loginErr = document.getElementById('login-step-error');
+
+      const customerName = nameInput.value.trim();
+      if (!customerName) {
+        if (loginErr) {
+          loginErr.textContent = 'من فضلك اكتب اسم العميل أو اربط حساب الجيميل أولاً.';
+          loginErr.classList.remove('hidden');
+        }
+        return;
+      }
+
+      if (cart.length === 0) {
+        if (feedback) {
+          feedback.textContent = 'من فضلك اختر مشروباً واحداً على الأقل قبل الإرسال.';
+          feedback.className = 'rounded-xl bg-amber-500/15 p-2.5 text-center text-xs font-bold text-amber-300';
+        }
+        return;
+      }
+
+      const orderItems = [...cart];
+      const total = orderItems.reduce((sum, item) => sum + item.price * item.qty, 0);
+      const nowMs = Date.now();
+
+      const newOrder = {
+        id: 'ORD-' + nowMs.toString().slice(-6),
+        customerName,
+        customerEmail: boundDeviceGmail || '',
+        customerTier,
+        customerGender,
+        carInfo: carInput.value.trim() || 'سيارة العميل',
+        gps: currentGPS,
+        items: orderItems,
+        total,
+        status: 'pending_approval',
+        assignedBarista: null,
+        approvedBy: null,
+        customerNotice: '⏳ تم إرسال طلبك وهو الآن بانتظار موافقة الإدارة والمسؤولين.',
+        createdAtMs: nowMs,
+        createdAt: new Date(nowMs).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })
+      };
+
+      knownOrderIds.add(newOrder.id);
+      orders.unshift(newOrder);
+      saveOrders();
+      pushOrderToCloud(newOrder);
+
+      lastCustomerOrderId = newOrder.id;
+      try {
+        localStorage.setItem(LAST_CUSTOMER_ORDER_KEY, newOrder.id);
+      } catch {}
+
+      renderOrdersFeed();
+      renderCustomerLiveTracker();
+      renderCollectedCustomerOrdersBox();
+
+      playCarStartupAudio();
+      showNewOrderBanner(newOrder);
+
+      if (feedback) {
+        feedback.textContent = `تم إرسال الأوردر (${newOrder.id}) — حالتك الحالية: بانتظار الموافقة.`;
+        feedback.className = 'rounded-xl bg-emerald-500/15 p-2.5 text-center text-xs font-bold text-emerald-300';
+      }
+
+      cart = [];
+      renderCart();
+    }
+
+    // مربع صغير يجمع الأوردرات أمام العميل ليعلم ما طلب ويضيف أو يزيل
+    function renderCollectedCustomerOrdersBox() {
+      const box = document.getElementById('collected-customer-orders-box');
+      const countBadge = document.getElementById('collected-orders-count');
+      if (!box) return;
+
+      const currentName = (document.getElementById('customer-name')?.value || '').trim();
+      const myOrders = orders.filter((o) => {
+        if (currentName && o.customerName === currentName) return true;
+        if (boundDeviceGmail && o.customerEmail === boundDeviceGmail) return true;
+        return o.id === lastCustomerOrderId;
+      });
+
+      if (countBadge) {
+        countBadge.textContent = `${myOrders.length} أوردر`;
+      }
+
+      if (myOrders.length === 0) {
+        box.innerHTML = '<p class="py-2 text-center text-gray-500">لا توجد أوردرات مجمّعة بعد — أضف مشروباً أو أرسل أوردرك.</p>';
+        return;
+      }
+
+      box.innerHTML = myOrders
+        .map((ord) => {
+          const itemsSummary = (ord.items || [])
+            .map((it) => `${it.name} × ${it.qty}`)
+            .join('، ');
+
+          return `
+            <div class="flex items-start justify-between gap-2 rounded-xl border border-white/10 bg-charcoal p-2.5">
+              <div class="min-w-0 space-y-0.5">
+                <div class="flex items-center gap-2">
+                  <strong class="text-gold">${ord.id}</strong>
+                  <span class="text-[11px] font-bold text-gray-400">${ord.createdAt}</span>
+                </div>
+                <div class="truncate text-xs font-bold text-white">${itemsSummary}</div>
+                <div class="text-[11px] text-emerald-300">${Number(ord.total).toFixed(2)} ج.م</div>
+              </div>
+              <div class="flex shrink-0 flex-col gap-1">
+                <button
+                  type="button"
+                  onclick="addMoreFromOrderToCart('${ord.id}')"
+                  class="rounded-lg bg-gold/20 px-2 py-1 text-[10px] font-black text-gold hover:bg-gold hover:text-black"
+                >
+                  + إضافة
+                </button>
+                <button
+                  type="button"
+                  onclick="removeCustomerOrder('${ord.id}')"
+                  class="rounded-lg bg-red-500/20 px-2 py-1 text-[10px] font-black text-red-300 hover:bg-red-500 hover:text-white"
+                >
+                  إزالة
+                </button>
+              </div>
+            </div>
+          `;
+        })
+        .join('');
+    }
+
+    function addMoreFromOrderToCart(orderId) {
+      const target = orders.find((o) => o.id === orderId);
+      if (!target || !Array.isArray(target.items)) return;
+
+      target.items.forEach((it) => {
+        const existing = cart.find((c) => c.id === it.id);
+        if (existing) {
+          existing.qty += it.qty || 1;
+        } else {
+          cart.push({ ...it, qty: it.qty || 1 });
+        }
+      });
+      renderCart();
+    }
+
+    function removeCustomerOrder(orderId) {
+      orders = orders.filter((o) => o.id !== orderId);
+      knownOrderIds.delete(orderId);
+      if (lastCustomerOrderId === orderId) {
+        lastCustomerOrderId = orders[0]?.id || '';
+      }
+      saveOrders();
+      deleteOrderFromCloud(orderId);
+      renderCollectedCustomerOrdersBox();
+      renderCustomerLiveTracker();
+      renderOrdersFeed();
+    }
+
+    function renderCustomerLiveTracker() {
+      const box = document.getElementById('customer-live-tracker-body');
+      if (!box) return;
+
+      const targetOrder = orders.find((o) => o.id === lastCustomerOrderId) || orders[0] || null;
+      if (!targetOrder) {
+        box.innerHTML = 'لم يتم إرسال طلب من هذا الجهاز بعد.';
+        return;
+      }
+
+      const statusTextMap = {
+        pending_approval: '⏳ بانتظار الموافقة',
+        approved_barista1: '✅ معتمد لدى باريستا 1 — هتشرب ابسط',
+        approved_barista2: '✅ معتمد لدى باريستا 2 — هتشرب ابسط',
+        preparing: '☕ جاري التحضير لدى الباريستا — هتشرب ابسط',
+        ready_for_car: '🚗 جاهز للتوصيل للسيارة — هتشرب ابسط',
+        completed: '🎉 تم التسليم للسيارة',
+        rejected: '❌ تعذّر اعتماد الطلب'
+      };
+
+      box.innerHTML = `
+        <div class="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-white/10 bg-black/45 p-3.5">
+          <div class="space-y-1">
+            <div>
+              <strong class="text-gold">${targetOrder.id}</strong> —
+              <span class="font-extrabold text-white">${targetOrder.customerName}</span>
+              <span class="mr-2 rounded bg-white/10 px-2 py-0.5 text-[10px] font-bold text-goldLight">${TIER_LABELS[targetOrder.customerTier] || targetOrder.customerTier}</span>
+            </div>
+            <div class="text-emerald-200 font-bold">${targetOrder.customerNotice}</div>
+          </div>
+          <div class="text-left">
+            <div class="text-xs font-black text-sky-300">${statusTextMap[targetOrder.status] || targetOrder.status}</div>
+            <div class="mt-0.5 text-[11px] text-gray-400">الإجمالي: ${Number(targetOrder.total).toFixed(2)} ج.م • ${targetOrder.createdAt}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    function approveAndAssignOrder(orderId, baristaSlot = 'barista1') {
+      const baristaLabel = baristaSlot === 'barista2' ? 'باريستا 2' : 'باريستا 1';
+      let updatedTarget = null;
+
+      orders = orders.map((o) => {
+        if (o.id !== orderId) return o;
+        updatedTarget = {
+          ...o,
+          status: baristaSlot === 'barista2' ? 'approved_barista2' : 'approved_barista1',
+          assignedBarista: baristaSlot,
+          approvedBy: `الإدارة / المسؤول (${baristaLabel})`,
+          customerNotice: `✅ تمت الموافقة على أوردرك وتحويله إلى (${baristaLabel}) — هتشرب ابسط.`
+        };
+        return updatedTarget;
+      });
+
+      saveOrders();
+      if (updatedTarget) pushOrderToCloud(updatedTarget);
+      renderOrdersFeed();
+      renderCustomerLiveTracker();
+      renderCollectedCustomerOrdersBox();
+
+      speakCustomerApprovalPhrase();
+
+      if (appSettings.autoPrintOnApprove && updatedTarget) {
+        printCashierReceipt(orderId);
+      }
+    }
+
+    function updateBaristaStage(orderId, nextStage) {
+      const labels = {
+        preparing: {
+          status: 'preparing',
+          notice: '☕ الباريستا بدأ في تحضير مشروباتك الآن — هتشرب ابسط.'
+        },
+        ready_for_car: {
+          status: 'ready_for_car',
+          notice: '🚗 مشروباتك جاهزة ومتجهة للسيارة الآن — هتشرب ابسط.'
+        },
+        completed: {
+          status: 'completed',
+          notice: '🎉 تم تسليم الطلب للسيارة بنجاح.'
+        }
+      };
+
+      const cfg = labels[nextStage];
+      if (!cfg) return;
+
+      let updatedTarget = null;
+      orders = orders.map((o) => {
+        if (o.id !== orderId) return o;
+        updatedTarget = {
+          ...o,
+          status: cfg.status,
+          customerNotice: cfg.notice
+        };
+        return updatedTarget;
+      });
+
+      saveOrders();
+      if (updatedTarget) pushOrderToCloud(updatedTarget);
+      renderOrdersFeed();
+      renderCustomerLiveTracker();
+      renderCollectedCustomerOrdersBox();
+    }
+
+    function rejectOrder(orderId) {
+      let updatedTarget = null;
+      orders = orders.map((o) => {
+        if (o.id !== orderId) return o;
+        updatedTarget = {
+          ...o,
+          status: 'rejected',
+          customerNotice: '❌ نعتذر، تعذّر اعتماد الطلب حالياً.'
+        };
+        return updatedTarget;
+      });
+      saveOrders();
+      if (updatedTarget) pushOrderToCloud(updatedTarget);
+      renderOrdersFeed();
+      renderCustomerLiveTracker();
+      renderCollectedCustomerOrdersBox();
+    }
+
+    function printCashierReceipt(orderId) {
+      const order = orders.find((o) => o.id === orderId);
+      const printArea = document.getElementById('cashier-receipt-print');
+      if (!order || !printArea) return;
+
+      const itemsRows = (order.items || [])
+        .map((it) => `<div style="display:flex;justify-content:space-between;margin:3px 0;"><span>${it.name} × ${it.qty}</span><span>${(it.price * it.qty).toFixed(2)} ج.م</span></div>`)
+        .join('');
+
+      printArea.innerHTML = `
+        <div style="text-align:center;border-bottom:1px dashed #000;padding-bottom:6px;margin-bottom:6px;">
+          <div style="font-size:15px;font-weight:bold;">MPW LIMOUSINE COFFEE</div>
+          <div>إيصال كاش وتحضير (80mm)</div>
+        </div>
+        <div><strong>الطلب:</strong> ${order.id}</div>
+        <div><strong>العميل:</strong> ${order.customerName}</div>
+        <div><strong>العضوية:</strong> ${TIER_LABELS[order.customerTier] || order.customerTier}</div>
+        <div><strong>السيارة:</strong> ${order.carInfo}</div>
+        <div><strong>الوقت:</strong> ${order.createdAt}</div>
+        <hr style="border:none;border-top:1px dashed #000;margin:6px 0;" />
+        ${itemsRows}
+        <hr style="border:none;border-top:1px dashed #000;margin:6px 0;" />
+        <div style="display:flex;justify-content:space-between;font-weight:bold;">
+          <span>الإجمالي:</span>
+          <span>${Number(order.total).toFixed(2)} ج.م</span>
+        </div>
+        <div style="text-align:center;margin-top:8px;">هتشرب ابسط</div>
+      `;
+
+      window.print();
+    }
+
+    function openOwnerModal() {
+      if (isOwnerUnlocked) {
+        const sec = document.getElementById('owner-hidden-content');
+        sec.classList.toggle('hidden');
+        if (!sec.classList.contains('hidden')) {
+          setTimeout(() => {
+            initOwnerRouteMap();
+            if (currentGPS) drawRoadRouteOnMaps(currentGPS.lat, currentGPS.lng);
+          }, 100);
+        }
+        return;
+      }
+      document.getElementById('owner-password-error').classList.add('hidden');
+      document.getElementById('owner-password-input').value = '';
+      const modal = document.getElementById('owner-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeOwnerModal() {
+      const modal = document.getElementById('owner-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function verifyOwnerPassword() {
+      const pass = document.getElementById('owner-password-input').value.trim();
+      if (pass !== OWNER_PASSWORD) {
+        document.getElementById('owner-password-error').classList.remove('hidden');
+        return;
+      }
+
+      isOwnerUnlocked = true;
+      document.getElementById('owner-lock-icon').textContent = '🔓';
+      document.getElementById('owner-btn-label').textContent = 'اونر';
+      document.getElementById('logout-btn').classList.remove('hidden');
+      document.getElementById('owner-hidden-content').classList.remove('hidden');
+
+      closeOwnerModal();
+      renderOrdersFeed();
+      renderAdminMenuManager();
+
+      setTimeout(() => {
+        initOwnerRouteMap();
+        if (currentGPS) drawRoadRouteOnMaps(currentGPS.lat, currentGPS.lng);
+      }, 120);
+    }
+
+    function logoutOwner() {
+      isOwnerUnlocked = false;
+      document.getElementById('owner-lock-icon').textContent = '👑';
+      document.getElementById('owner-btn-label').textContent = 'اونر';
+      document.getElementById('logout-btn').classList.add('hidden');
+      document.getElementById('owner-hidden-content').classList.add('hidden');
+    }
+
+    function switchOwnerTab(tab) {
+      activeOwnerTab = tab;
+      document.querySelectorAll('.owner-tab').forEach((btn) => {
+        btn.className =
+          'owner-tab rounded-xl border border-white/15 bg-black/50 px-3.5 py-2 text-xs font-bold text-gray-200 hover:border-gold/50';
+      });
+      const activeBtn = document.getElementById(`tab-${tab}`);
+      if (activeBtn) {
+        activeBtn.className = 'owner-tab rounded-xl bg-gold px-3.5 py-2 text-xs font-extrabold text-black';
+      }
+
+      document.getElementById('admin-control-panel').classList.toggle('hidden', tab !== 'admin_control');
+      document.getElementById('owner-settings-panel').classList.toggle('hidden', tab !== 'settings');
+      document.getElementById('orders-feed').classList.toggle('hidden', tab === 'admin_control' || tab === 'settings');
+
+      if (tab === 'admin_control') renderAdminMenuManager();
+      renderOrdersFeed();
+    }
+
+    function renderOrdersFeed() {
+      const pendingCount = orders.filter((o) => o.status === 'pending_approval').length;
+      const activeBaristaCount = orders.filter((o) =>
+        ['approved_barista1', 'approved_barista2', 'preparing', 'ready_for_car'].includes(o.status)
+      ).length;
+      const completedCount = orders.filter((o) => o.status === 'completed').length;
+      const b1Count = orders.filter((o) => o.assignedBarista === 'barista1' && o.status !== 'completed').length;
+      const b2Count = orders.filter((o) => o.assignedBarista === 'barista2' && o.status !== 'completed').length;
+
+      document.getElementById('stat-pending').textContent = pendingCount;
+      document.getElementById('stat-approved').textContent = activeBaristaCount;
+      document.getElementById('stat-completed').textContent = completedCount;
+      document.getElementById('stat-new-customers').textContent = orders.length;
+      document.getElementById('count-barista1').textContent = b1Count;
+      document.getElementById('count-barista2').textContent = b2Count;
+
+      const feed = document.getElementById('orders-feed');
+      if (!feed) return;
+
+      const visibleOrders = orders.filter((o) => {
+        if (activeOwnerTab === 'barista1') return o.assignedBarista === 'barista1';
+        if (activeOwnerTab === 'barista2') return o.assignedBarista === 'barista2';
+        return true;
+      });
+
+      if (visibleOrders.length === 0) {
+        feed.innerHTML = '<div class="col-span-2 rounded-2xl border border-white/10 bg-black/40 p-6 text-center text-xs text-gray-400">لا توجد طلبات في هذا القسم حالياً.</div>';
+        return;
+      }
+
+      feed.innerHTML = visibleOrders
+        .map((o) => {
+          const badgeMap = {
+            pending_approval: '<span class="rounded-full bg-amber-500/15 px-2.5 py-1 text-[11px] font-extrabold text-amber-300">بانتظار الموافقة</span>',
+            approved_barista1: '<span class="rounded-full bg-sky-500/15 px-2.5 py-1 text-[11px] font-extrabold text-sky-300">معتمد → باريستا 1</span>',
+            approved_barista2: '<span class="rounded-full bg-indigo-500/15 px-2.5 py-1 text-[11px] font-extrabold text-indigo-300">معتمد → باريستا 2</span>',
+            preparing: '<span class="rounded-full bg-amber-400/15 px-2.5 py-1 text-[11px] font-extrabold text-amber-200">جاري التحضير</span>',
+            ready_for_car: '<span class="rounded-full bg-cyan-400/15 px-2.5 py-1 text-[11px] font-extrabold text-cyan-200">جاهز للسيارة</span>',
+            completed: '<span class="rounded-full bg-emerald-500/15 px-2.5 py-1 text-[11px] font-extrabold text-emerald-300">تم التسليم</span>',
+            rejected: '<span class="rounded-full bg-red-500/15 px-2.5 py-1 text-[11px] font-extrabold text-red-300">مرفوض</span>'
+          };
+
+          const itemsHtml = (o.items || [])
+            .map((it) => `<li>${it.name} × ${it.qty} (${(it.price * it.qty).toFixed(2)} ج.م)</li>`)
+            .join('');
+
+          const mapHref = o.gps
+            ? `https://www.google.com/maps/dir/?api=1&origin=${o.gps.lat},${o.gps.lng}&destination=${CAFE_COORDS.lat},${CAFE_COORDS.lng}&travelmode=driving`
+            : '';
+          const isBaristaStage = ['approved_barista1', 'approved_barista2', 'preparing', 'ready_for_car'].includes(o.status);
+
+          return `
+            <div class="space-y-3 rounded-2xl border border-white/10 bg-black/45 p-4">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <span class="text-sm font-black text-gold">${o.id}</span>
+                  <span class="mx-1.5 text-xs font-extrabold text-white">${o.customerName}</span>
+                  <span class="rounded-md bg-white/10 px-2 py-0.5 text-[10px] font-bold text-goldLight">${TIER_LABELS[o.customerTier] || (o.customerTier || '').toUpperCase()}</span>
+                </div>
+                ${badgeMap[o.status] || ''}
+              </div>
+
+              <div class="text-xs text-gray-300">
+                <strong>السيارة:</strong> ${o.carInfo} • <strong>الوقت:</strong> ${o.createdAt}
+                ${o.gps ? ` • <strong>المسافة:</strong> ${o.gps.distKm} كم • <a href="${mapHref}" target="_blank" rel="noopener noreferrer" class="text-sky-300 underline">مسار الطريق ↗</a>` : ''}
+              </div>
+
+              <ul class="list-disc space-y-1 pr-5 text-xs text-gray-200">${itemsHtml}</ul>
+
+              <div class="flex items-center justify-between border-t border-white/10 pt-2 text-xs font-extrabold">
+                <span class="text-gray-400">الإجمالي:</span>
+                <span class="text-gold">${Number(o.total).toFixed(2)} ج.م</span>
+              </div>
+
+              <div class="rounded-xl border border-emerald-500/25 bg-emerald-950/25 p-2.5 text-xs text-emerald-200">
+                <strong>حالة العميل:</strong> ${o.customerNotice}
+              </div>
+
+              <div class="flex flex-wrap gap-2 pt-1">
+                ${
+                  o.status === 'pending_approval'
+                    ? `
+                      <button type="button" onclick="approveAndAssignOrder('${o.id}', 'barista1')" class="rounded-xl bg-emerald-500 px-3 py-1.5 text-xs font-black text-black hover:bg-emerald-400">
+                        ✓ موافقة → باريستا 1
+                      </button>
+                      <button type="button" onclick="approveAndAssignOrder('${o.id}', 'barista2')" class="rounded-xl bg-sky-400 px-3 py-1.5 text-xs font-black text-black hover:bg-sky-300">
+                        ✓ موافقة → باريستا 2
+                      </button>
+                      <button type="button" onclick="rejectOrder('${o.id}')" class="rounded-xl bg-red-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-red-500">
+                        ✕ رفض
+                      </button>
+                    `
+                    : ''
+                }
+                ${
+                  isBaristaStage
+                    ? `
+                      <button type="button" onclick="updateBaristaStage('${o.id}', 'preparing')" class="rounded-xl border border-amber-400/40 bg-amber-500/15 px-3 py-1.5 text-xs font-extrabold text-amber-200 hover:bg-amber-500/25">
+                        ☕ بدء التحضير
+                      </button>
+                      <button type="button" onclick="updateBaristaStage('${o.id}', 'ready_for_car')" class="rounded-xl border border-cyan-400/40 bg-cyan-500/15 px-3 py-1.5 text-xs font-extrabold text-cyan-200 hover:bg-cyan-500/25">
+                        🚗 جاهز للسيارة
+                      </button>
+                      <button type="button" onclick="updateBaristaStage('${o.id}', 'completed')" class="rounded-xl bg-gold px-3 py-1.5 text-xs font-black text-black hover:bg-goldLight">
+                        ✔ تم التسليم
+                      </button>
+                    `
+                    : ''
+                }
+                <button type="button" onclick="printCashierReceipt('${o.id}')" class="rounded-xl border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-bold text-white hover:bg-white/20">
+                  🖨️ طباعة
+                </button>
+              </div>
+            </div>
+          `;
+        })
+        .join('');
+    }
+
+    function renderAdminMenuManager() {
+      const wrap = document.getElementById('admin-menu-list');
+      if (!wrap) return;
+      const q = (document.getElementById('admin-menu-search')?.value || '').trim().toLowerCase();
+      const list = customMenu.filter((m) => !q || m.name.toLowerCase().includes(q) || m.category.toLowerCase().includes(q));
+
+      wrap.innerHTML = list
+        .map(
+          (m) => `
+          <div class="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-white/10 bg-charcoal p-2.5 text-xs">
+            <div>
+              <strong class="text-white">${m.name}</strong>
+              <span class="mr-2 text-[11px] text-gray-400">(${m.category})</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <input type="number" step="0.5" min="1" value="${m.price}" onchange="adminUpdatePrice('${m.id}', this.value)" class="w-24 rounded-lg border border-white/15 bg-black/70 px-2 py-1 text-xs font-bold text-gold" />
+              <button type="button" onclick="adminDeleteMenuItem('${m.id}')" class="rounded-lg bg-red-500/20 px-2.5 py-1 font-bold text-red-300 hover:bg-red-500 hover:text-white">حذف</button>
+            </div>
+          </div>
+        `
+        )
+        .join('');
+    }
+
+    function adminAddMenuItem() {
+      const name = document.getElementById('new-item-name').value.trim();
+      const category = document.getElementById('new-item-category').value;
+      const price = parseFloat(document.getElementById('new-item-price').value);
+      if (!name || isNaN(price) || price <= 0) return;
+
+      customMenu.unshift({ id: 'CUSTOM-' + Date.now(), name, category, price });
+      saveCustomMenu();
+      renderMenuCategories();
+      renderDrinksGrid();
+      renderAdminMenuManager();
+      document.getElementById('new-item-name').value = '';
+      document.getElementById('new-item-price').value = '';
+    }
+
+    function adminUpdatePrice(id, val) {
+      const price = parseFloat(val);
+      if (isNaN(price) || price <= 0) return;
+      customMenu = customMenu.map((m) => (m.id === id ? { ...m, price } : m));
+      saveCustomMenu();
+      renderDrinksGrid();
+    }
+
+    function adminDeleteMenuItem(id) {
+      customMenu = customMenu.filter((m) => m.id !== id);
+      saveCustomMenu();
+      renderMenuCategories();
+      renderDrinksGrid();
+      renderAdminMenuManager();
+    }
+
+    function resetMenuToDefault() {
+      customMenu = [...MENU_ITEMS];
+      saveCustomMenu();
+      renderMenuCategories();
+      renderDrinksGrid();
+      renderAdminMenuManager();
+    }
+
+    function saveCloudAndPrintSettings() {
+      appSettings = {
+        dbUrl: (document.getElementById('fb-db-url').value || DEFAULT_DB_URL).trim(),
+        apiKey: document.getElementById('fb-api-key').value.trim(),
+        autoPrintOnApprove: Boolean(document.getElementById('auto-print-on-approve').checked)
+      };
+      saveSettings();
+
+      const fb = document.getElementById('settings-feedback');
+      if (fb) {
+        fb.textContent = 'تم حفظ الإعدادات بنجاح.';
+        fb.classList.remove('hidden');
+      }
+
+      syncFromCloudNow();
+    }
+
+    function clearCloudSettings() {
+      appSettings = {
+        dbUrl: DEFAULT_DB_URL,
+        apiKey: '',
+        autoPrintOnApprove: false
+      };
+      saveSettings();
+      document.getElementById('fb-db-url').value = DEFAULT_DB_URL;
+      document.getElementById('fb-api-key').value = '';
+      document.getElementById('auto-print-on-approve').checked = false;
+      syncFromCloudNow();
+    }
+
+    document.getElementById('fb-db-url').value = appSettings.dbUrl || DEFAULT_DB_URL;
+    document.getElementById('fb-api-key').value = appSettings.apiKey || '';
+    document.getElementById('auto-print-on-approve').checked = Boolean(appSettings.autoPrintOnApprove);
+
+    if (boundDeviceGmail) {
+      const badge = document.getElementById('social-auth-badge');
+      const nameField = document.getElementById('customer-name');
+      if (badge) {
+        badge.textContent = `مرتبط بالجيميل: ${boundDeviceGmail}`;
+        badge.className = 'rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-[10px] font-extrabold text-emerald-300';
+      }
+      if (nameField && !nameField.value.trim()) {
+        nameField.value = boundDeviceGmail;
+      }
+    }
+
+    renderMenuCategories();
+    renderDrinksGrid();
+    renderCart();
+    renderOrdersFeed();
+    renderCustomerLiveTracker();
+    renderCollectedCustomerOrdersBox();
+    syncFromCloudNow();
+
+    if (cloudPollTimer) clearInterval(cloudPollTimer);
+    cloudPollTimer = setInterval(syncFromCloudNow, 5000);
+  </script>
+</body>
+</html>
