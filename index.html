@@ -79,6 +79,19 @@
 </head>
 <body class="min-h-screen bg-obsidian text-gray-100 selection:bg-gold selection:text-black">
 
+  <!-- ملفات الأوديو الواقعية للبداية والفرامل -->
+  <audio
+    id="startup-race-audio"
+    preload="auto"
+    src="https://actions.google.com/sounds/v1/transportation/sports_car_revving.ogg"
+  ></audio>
+
+  <audio
+    id="brake-stop-audio"
+    preload="auto"
+    src="https://actions.google.com/sounds/v1/transportation/car_screech_brake.ogg"
+  ></audio>
+
   <!-- هيدر علوي -->
   <header class="sticky top-0 z-40 border-b border-gold/25 bg-charcoal/95 backdrop-blur">
     <div class="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-3">
@@ -430,40 +443,56 @@
         <div>
           <span class="rounded-lg bg-gold px-2.5 py-0.5 text-xs font-black text-black">اونر (OWNER)</span>
           <h2 class="mt-1 text-lg font-extrabold text-white">لوحة الاونر — المدير العام، المسؤولون، الباريستا، الخريطة والمنيو</h2>
+          <p id="active-staff-session-badge" class="mt-1 text-[11px] font-bold text-emerald-300">الصلاحية المفعّلة حالياً: المدير العام</p>
         </div>
 
         <div class="flex flex-wrap gap-2">
-          <button type="button" onclick="switchOwnerTab('all')" id="tab-all" class="owner-tab rounded-xl bg-gold px-3.5 py-2 text-xs font-extrabold text-black">
-            المدير العام والمسؤولون
+          <button type="button" onclick="requestStaffTab('all')" id="tab-all" class="owner-tab rounded-xl bg-gold px-3.5 py-2 text-xs font-extrabold text-black">
+            🔐 المدير العام والمسؤولون
           </button>
-          <button type="button" onclick="switchOwnerTab('barista1')" id="tab-barista1" class="owner-tab rounded-xl border border-white/15 bg-black/50 px-3.5 py-2 text-xs font-bold text-gray-200 hover:border-gold/50">
-            ☕ باريستا 1 (<span id="count-barista1">0</span>)
+          <button type="button" onclick="requestStaffTab('barista1')" id="tab-barista1" class="owner-tab rounded-xl border border-white/15 bg-black/50 px-3.5 py-2 text-xs font-bold text-gray-200 hover:border-gold/50">
+            🔐 باريستا 1 (<span id="count-barista1">0</span>)
           </button>
-          <button type="button" onclick="switchOwnerTab('barista2')" id="tab-barista2" class="owner-tab rounded-xl border border-white/15 bg-black/50 px-3.5 py-2 text-xs font-bold text-gray-200 hover:border-gold/50">
-            ☕ باريستا 2 (<span id="count-barista2">0</span>)
+          <button type="button" onclick="requestStaffTab('barista2')" id="tab-barista2" class="owner-tab rounded-xl border border-white/15 bg-black/50 px-3.5 py-2 text-xs font-bold text-gray-200 hover:border-gold/50">
+            🔐 باريستا 2 (<span id="count-barista2">0</span>)
           </button>
-          <button type="button" onclick="switchOwnerTab('admin_control')" id="tab-admin_control" class="owner-tab rounded-xl border border-gold/40 bg-gold/10 px-3.5 py-2 text-xs font-extrabold text-gold hover:bg-gold hover:text-black">
-            🛠️ المنيو والأسعار
+          <button type="button" onclick="requestStaffTab('admin_control')" id="tab-admin_control" class="owner-tab rounded-xl border border-gold/40 bg-gold/10 px-3.5 py-2 text-xs font-extrabold text-gold hover:bg-gold hover:text-black">
+            🔐 المنيو والأسعار
           </button>
-          <button type="button" onclick="switchOwnerTab('settings')" id="tab-settings" class="owner-tab rounded-xl border border-white/15 bg-black/50 px-3.5 py-2 text-xs font-bold text-gray-200 hover:border-gold/50">
-            ⚙️ السحابة والطباعة
+          <button type="button" onclick="requestStaffTab('settings')" id="tab-settings" class="owner-tab rounded-xl border border-white/15 bg-black/50 px-3.5 py-2 text-xs font-bold text-gray-200 hover:border-gold/50">
+            🔐 السحابة والطباعة والباسوردات
           </button>
         </div>
       </div>
 
-      <!-- مهام المدير العام والمسؤولين والباريستا -->
+      <!-- مهام المدير العام والمسؤولين والباريستا مع فتح بباسورد لكل مسؤول -->
       <div class="grid gap-3 sm:grid-cols-3">
-        <div class="rounded-2xl border border-gold/30 bg-black/50 p-3.5 space-y-1">
-          <div class="text-[11px] font-bold text-goldLight">المدير العام — محمود بورسعيد</div>
+        <button type="button" onclick="openStaffRoleModal('gm')" class="rounded-2xl border border-gold/30 bg-black/50 p-3.5 text-right space-y-1 transition hover:border-gold">
+          <div class="flex items-center justify-between text-[11px] font-bold text-goldLight">
+            <span>المدير العام — محمود بورسعيد</span>
+            <span>🔑 باسورد</span>
+          </div>
           <div class="text-xs font-extrabold text-white">قبول الأوردرات، إرسالها للبرينتر، الإشراف والأسعار</div>
-        </div>
-        <div class="rounded-2xl border border-sky-400/30 bg-black/50 p-3.5 space-y-1">
-          <div class="text-[11px] font-bold text-sky-300">المسؤولون — محمود حسن • رقيه محمود</div>
+        </button>
+
+        <button type="button" onclick="openStaffRoleModal('supervisor')" class="rounded-2xl border border-sky-400/30 bg-black/50 p-3.5 text-right space-y-1 transition hover:border-sky-400">
+          <div class="flex items-center justify-between text-[11px] font-bold text-sky-300">
+            <span>المسؤولون — محمود حسن • رقيه محمود</span>
+            <span>🔑 باسورد</span>
+          </div>
           <div class="text-xs font-extrabold text-white">استقبال الأوردرات، قبولها وإرسالها للبرينتر وتحويلها للباريستا</div>
-        </div>
-        <div class="rounded-2xl border border-emerald-400/30 bg-black/50 p-3.5 space-y-1">
+        </button>
+
+        <div class="rounded-2xl border border-emerald-400/30 bg-black/50 p-3.5 space-y-1.5">
           <div class="text-[11px] font-bold text-emerald-300">الباريستا — باريستا 1 / باريستا 2</div>
-          <div class="text-xs font-extrabold text-white">قبول الأوردر، إرساله للبرينتر، بدء التحضير والتسليم للسيارة</div>
+          <div class="flex flex-wrap gap-1.5">
+            <button type="button" onclick="openStaffRoleModal('barista1')" class="rounded-lg bg-emerald-500/20 px-2.5 py-1 text-[11px] font-black text-emerald-200 hover:bg-emerald-500 hover:text-black">
+              🔑 دخول باريستا 1
+            </button>
+            <button type="button" onclick="openStaffRoleModal('barista2')" class="rounded-lg bg-sky-500/20 px-2.5 py-1 text-[11px] font-black text-sky-200 hover:bg-sky-500 hover:text-black">
+              🔑 دخول باريستا 2
+            </button>
+          </div>
         </div>
       </div>
 
@@ -536,9 +565,9 @@
         <div id="admin-menu-list" class="max-h-80 space-y-2 overflow-y-auto pr-1"></div>
       </div>
 
-      <!-- إعدادات السحابة والطباعة -->
+      <!-- إعدادات السحابة والطباعة وباسوردات المسؤولين -->
       <div id="owner-settings-panel" class="hidden space-y-4 rounded-2xl border border-gold/30 bg-black/50 p-4">
-        <h3 class="text-sm font-extrabold text-gold">إعدادات السحابة (Firebase) وطباعة الكاش</h3>
+        <h3 class="text-sm font-extrabold text-gold">إعدادات السحابة (Firebase) والطباعة وباسوردات المسؤولين</h3>
         <div class="grid gap-3 sm:grid-cols-2">
           <div>
             <label class="mb-1 block text-xs font-bold text-gray-300">Database URL</label>
@@ -547,6 +576,22 @@
           <div>
             <label class="mb-1 block text-xs font-bold text-gray-300">API Key / Auth Secret</label>
             <input id="fb-api-key" type="text" class="w-full rounded-xl border border-white/15 bg-charcoal px-3 py-2 text-xs text-white focus:border-gold focus:outline-none" />
+          </div>
+          <div>
+            <label class="mb-1 block text-xs font-bold text-goldLight">باسورد المدير العام (محمود بورسعيد)</label>
+            <input id="pass-gm-input" type="text" class="w-full rounded-xl border border-white/15 bg-charcoal px-3 py-2 text-xs font-bold text-gold focus:border-gold focus:outline-none" />
+          </div>
+          <div>
+            <label class="mb-1 block text-xs font-bold text-sky-300">باسورد المسؤولين (محمود حسن • رقيه محمود)</label>
+            <input id="pass-sup-input" type="text" class="w-full rounded-xl border border-white/15 bg-charcoal px-3 py-2 text-xs font-bold text-sky-200 focus:border-sky-400 focus:outline-none" />
+          </div>
+          <div>
+            <label class="mb-1 block text-xs font-bold text-emerald-300">باسورد باريستا 1</label>
+            <input id="pass-b1-input" type="text" class="w-full rounded-xl border border-white/15 bg-charcoal px-3 py-2 text-xs font-bold text-emerald-200 focus:border-emerald-400 focus:outline-none" />
+          </div>
+          <div>
+            <label class="mb-1 block text-xs font-bold text-indigo-300">باسورد باريستا 2</label>
+            <input id="pass-b2-input" type="text" class="w-full rounded-xl border border-white/15 bg-charcoal px-3 py-2 text-xs font-bold text-indigo-200 focus:border-indigo-400 focus:outline-none" />
           </div>
           <div class="sm:col-span-2">
             <label class="flex cursor-pointer items-center gap-2 rounded-xl border border-white/15 bg-charcoal px-3 py-2.5 text-xs font-bold text-gray-200 w-full">
@@ -558,7 +603,7 @@
         <p id="settings-feedback" class="hidden rounded-xl bg-emerald-500/15 px-3 py-2 text-xs font-bold text-emerald-300"></p>
         <div class="flex flex-wrap gap-2">
           <button type="button" onclick="saveCloudAndPrintSettings()" class="rounded-xl bg-gold px-4 py-2 text-xs font-extrabold text-black hover:bg-goldLight">
-            حفظ الإعدادات
+            حفظ الإعدادات والباسوردات
           </button>
           <button type="button" onclick="clearCloudSettings()" class="rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-xs font-bold text-gray-300 hover:bg-white/10">
             استعادة الافتراضي
@@ -578,7 +623,7 @@
         <h3 class="text-lg font-extrabold text-gold">دخول خانة اونر</h3>
         <button type="button" onclick="closeOwnerModal()" class="text-sm text-gray-400 hover:text-white">✕</button>
       </div>
-      <p class="text-xs text-gray-400">أدخل كلمة المرور لفتح لوحة الاونر ومهام المدير العام والمسؤولين والباريستا.</p>
+      <p class="text-xs text-gray-400">أدخل كلمة المرور لفتح لوحة الاونر.</p>
       <div>
         <label class="mb-1 block text-xs font-bold text-gray-300">كلمة المرور</label>
         <input id="owner-password-input" type="password" placeholder="أدخل كلمة المرور..." class="w-full rounded-xl border border-white/15 bg-black/70 px-4 py-2.5 text-center text-sm font-extrabold tracking-wider text-gold focus:border-gold focus:outline-none" />
@@ -590,11 +635,44 @@
     </div>
   </div>
 
+  <!-- نافذة باسورد خاصة بكل مسؤول داخل قائمة الاونر -->
+  <div id="staff-role-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
+    <div class="w-full max-w-md space-y-4 rounded-3xl border border-sky-400/40 bg-charcoal p-6 shadow-2xl">
+      <div class="flex items-center justify-between">
+        <h3 id="staff-role-modal-title" class="text-base font-extrabold text-sky-300">دخول المسؤول</h3>
+        <button type="button" onclick="closeStaffRoleModal()" class="text-sm text-gray-400 hover:text-white">✕</button>
+      </div>
+      <p id="staff-role-modal-subtitle" class="text-xs text-gray-400">أدخل باسورد هذا المسؤول لفتح صلاحياته وقسمه.</p>
+      <div>
+        <label class="mb-1 block text-xs font-bold text-gray-300">باسورد المسؤول</label>
+        <input id="staff-role-password-input" type="password" placeholder="أدخل الباسورد..." class="w-full rounded-xl border border-white/15 bg-black/70 px-4 py-2.5 text-center text-sm font-extrabold tracking-wider text-gold focus:border-sky-400 focus:outline-none" />
+      </div>
+      <p id="staff-role-password-error" class="hidden text-center text-xs font-bold text-red-400">باسورد المسؤول غير صحيح.</p>
+      <button type="button" onclick="verifyStaffRolePassword()" class="w-full rounded-xl bg-sky-400 py-2.5 text-sm font-black text-black hover:bg-sky-300">
+        تأكيد الدخول
+      </button>
+    </div>
+  </div>
+
   <!-- قالب إيصال البرينتر الحراري -->
   <div id="cashier-receipt-print"></div>
 
   <script>
     const OWNER_PASSWORD = '301088poro';
+
+    const DEFAULT_STAFF_PASSWORDS = {
+      gm: 'gm2026',
+      supervisor: 'sup2026',
+      barista1: 'b12026',
+      barista2: 'b22026'
+    };
+
+    const STAFF_ROLE_LABELS = {
+      gm: 'المدير العام — محمود بورسعيد',
+      supervisor: 'المسؤولون — محمود حسن • رقيه محمود',
+      barista1: 'باريستا 1',
+      barista2: 'باريستا 2'
+    };
 
     const BASE_MENU_TUPLES = [
       ['إسبريسو سنجل', 'إسبريسو وقهوة ساخنة', 45],
@@ -683,13 +761,16 @@
 
     const CAFE_COORDS = { lat: 31.2465, lng: 29.9735 };
     const DEFAULT_DB_URL = 'https://mpw-limousine-coffee-default-rtdb.firebaseio.com';
-    const ORDERS_STORAGE_KEY = 'mpw_limousine_orders_live_v9';
-    const MENU_STORAGE_KEY = 'mpw_limousine_menu_live_v9';
-    const SETTINGS_STORAGE_KEY = 'mpw_limousine_settings_v9';
+    const ORDERS_STORAGE_KEY = 'mpw_limousine_orders_live_v10';
+    const MENU_STORAGE_KEY = 'mpw_limousine_menu_live_v10';
+    const SETTINGS_STORAGE_KEY = 'mpw_limousine_settings_v10';
     const DEVICE_GMAIL_STORAGE_KEY = 'mpw_device_bound_gmail';
     const LAST_CUSTOMER_ORDER_KEY = 'mpw_limousine_last_customer_order_id';
 
     let isOwnerUnlocked = false;
+    let activeStaffRole = 'gm';
+    let pendingStaffRoleForModal = 'gm';
+    let pendingStaffTabAfterAuth = null;
     let activeOwnerTab = 'all';
     let activeCategoryFilter = 'الكل';
     let cart = [];
@@ -706,8 +787,9 @@
     let lastCustomerOrderId = localStorage.getItem(LAST_CUSTOMER_ORDER_KEY) || '';
     let cloudPollTimer = null;
 
-    let audioCtx = null;
-    let raceSoundUnlocked = false;
+    let startupTimer = null;
+    let brakeTimer = null;
+    let startupAudioPlayed = false;
 
     let customerMap = null;
     let customerMarker = null;
@@ -717,148 +799,27 @@
     let ownerCustomerMarker = null;
     let ownerRouteLine = null;
 
-    function getAudioContext() {
-      const Ctx = window.AudioContext || window.webkitAudioContext;
-      if (!Ctx) return null;
-      if (!audioCtx) {
-        audioCtx = new Ctx();
-      }
-      if (audioCtx.state === 'suspended') {
-        audioCtx.resume().catch(() => {});
-      }
-      return audioCtx;
-    }
-
-    // صوت مميز لسيارات السباق مدته 3 ثوانٍ بالضبط عند فتح التطبيق
-    function playRacingCarSound3Sec() {
-      const ctx = getAudioContext();
-      if (!ctx) return false;
-      if (ctx.state !== 'running') return false;
-
-      const now = ctx.currentTime;
-      const duration = 3.0;
-
-      const osc1 = ctx.createOscillator();
-      const osc2 = ctx.createOscillator();
-      const subOsc = ctx.createOscillator();
-      const filter = ctx.createBiquadFilter();
-      const gain = ctx.createGain();
-
-      osc1.type = 'sawtooth';
-      osc2.type = 'sawtooth';
-      subOsc.type = 'triangle';
-
-      osc1.frequency.setValueAtTime(75, now);
-      osc1.frequency.exponentialRampToValueAtTime(240, now + 0.85);
-      osc1.frequency.exponentialRampToValueAtTime(145, now + 1.35);
-      osc1.frequency.exponentialRampToValueAtTime(310, now + 2.35);
-      osc1.frequency.exponentialRampToValueAtTime(190, now + duration);
-
-      osc2.frequency.setValueAtTime(150, now);
-      osc2.frequency.exponentialRampToValueAtTime(480, now + 0.85);
-      osc2.frequency.exponentialRampToValueAtTime(290, now + 1.35);
-      osc2.frequency.exponentialRampToValueAtTime(620, now + 2.35);
-      osc2.frequency.exponentialRampToValueAtTime(380, now + duration);
-
-      subOsc.frequency.setValueAtTime(52, now);
-      subOsc.frequency.linearRampToValueAtTime(125, now + 2.2);
-      subOsc.frequency.linearRampToValueAtTime(75, now + duration);
-
-      filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(550, now);
-      filter.frequency.exponentialRampToValueAtTime(2200, now + 1.1);
-      filter.frequency.exponentialRampToValueAtTime(2800, now + 2.3);
-      filter.frequency.exponentialRampToValueAtTime(900, now + duration);
-
-      gain.gain.setValueAtTime(0.01, now);
-      gain.gain.linearRampToValueAtTime(0.28, now + 0.15);
-      gain.gain.setValueAtTime(0.26, now + duration - 0.35);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
-
-      osc1.connect(filter);
-      osc2.connect(filter);
-      subOsc.connect(filter);
-      filter.connect(gain);
-      gain.connect(ctx.destination);
-
-      osc1.start(now);
-      osc2.start(now);
-      subOsc.start(now);
-
-      osc1.stop(now + duration);
-      osc2.stop(now + duration);
-      subOsc.stop(now + duration);
-
-      return true;
-    }
-
-    // صوت فرامل سيارة مدته ثانيتان (2 ثانية) بالضبط عند إرسال الأوردر
-    function playCarBrakeSound2Sec() {
-      const ctx = getAudioContext();
-      if (!ctx) return;
-
-      const now = ctx.currentTime;
-      const duration = 2.0;
-
-      // ضوضاء احتكاك الفرامل + صفير هبوط السرعة
-      const bufferSize = Math.floor(ctx.sampleRate * duration);
-      const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-      const data = noiseBuffer.getChannelData(0);
-      for (let i = 0; i < bufferSize; i++) {
-        data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize);
-      }
-
-      const noiseSource = ctx.createBufferSource();
-      noiseSource.buffer = noiseBuffer;
-
-      const bandpass = ctx.createBiquadFilter();
-      bandpass.type = 'bandpass';
-      bandpass.frequency.setValueAtTime(1650, now);
-      bandpass.frequency.exponentialRampToValueAtTime(580, now + duration);
-      bandpass.Q.value = 3.2;
-
-      const brakeGain = ctx.createGain();
-      brakeGain.gain.setValueAtTime(0.01, now);
-      brakeGain.gain.linearRampToValueAtTime(0.32, now + 0.08);
-      brakeGain.gain.exponentialRampToValueAtTime(0.001, now + duration);
-
-      noiseSource.connect(bandpass);
-      bandpass.connect(brakeGain);
-      brakeGain.connect(ctx.destination);
-
-      noiseSource.start(now);
-      noiseSource.stop(now + duration);
-    }
-
-    window.addEventListener('DOMContentLoaded', () => {
-      raceSoundUnlocked = playRacingCarSound3Sec();
-    });
-
-    document.addEventListener(
-      'pointerdown',
-      () => {
-        if (!raceSoundUnlocked) {
-          raceSoundUnlocked = playRacingCarSound3Sec();
-        }
-      },
-      { once: true }
-    );
-
     function loadSettings() {
       try {
         const raw = localStorage.getItem(SETTINGS_STORAGE_KEY);
-        return raw
-          ? JSON.parse(raw)
-          : {
-              dbUrl: DEFAULT_DB_URL,
-              apiKey: '',
-              autoPrintOnApprove: false
-            };
+        const parsed = raw ? JSON.parse(raw) : {};
+        return {
+          dbUrl: parsed.dbUrl || DEFAULT_DB_URL,
+          apiKey: parsed.apiKey || '',
+          autoPrintOnApprove: Boolean(parsed.autoPrintOnApprove),
+          staffPasswords: {
+            gm: parsed.staffPasswords?.gm || DEFAULT_STAFF_PASSWORDS.gm,
+            supervisor: parsed.staffPasswords?.supervisor || DEFAULT_STAFF_PASSWORDS.supervisor,
+            barista1: parsed.staffPasswords?.barista1 || DEFAULT_STAFF_PASSWORDS.barista1,
+            barista2: parsed.staffPasswords?.barista2 || DEFAULT_STAFF_PASSWORDS.barista2
+          }
+        };
       } catch {
         return {
           dbUrl: DEFAULT_DB_URL,
           apiKey: '',
-          autoPrintOnApprove: false
+          autoPrintOnApprove: false,
+          staffPasswords: { ...DEFAULT_STAFF_PASSWORDS }
         };
       }
     }
@@ -899,6 +860,61 @@
         localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(orders));
       } catch {}
     }
+
+    // تشغيل ملف الأوديو الواقعي لسيارات السباق وضبط مدته على 3 ثوانٍ عند فتح التطبيق
+    function playStartupRaceAudio3Sec() {
+      const audioEl = document.getElementById('startup-race-audio');
+      if (!audioEl) return;
+
+      if (startupTimer) clearTimeout(startupTimer);
+      audioEl.pause();
+      audioEl.currentTime = 0;
+      audioEl.volume = 0.9;
+
+      const prom = audioEl.play();
+      if (prom && typeof prom.then === 'function') {
+        prom
+          .then(() => {
+            startupAudioPlayed = true;
+            startupTimer = setTimeout(() => {
+              audioEl.pause();
+              audioEl.currentTime = 0;
+            }, 3000);
+          })
+          .catch(() => {});
+      }
+    }
+
+    // تشغيل ملف الأوديو الواقعي لفرامل السيارة وضبط مدته على ثانيتين (2 ثانية) عند إرسال الأوردر
+    function playBrakeAudio2Sec() {
+      const audioEl = document.getElementById('brake-stop-audio');
+      if (!audioEl) return;
+
+      if (brakeTimer) clearTimeout(brakeTimer);
+      audioEl.pause();
+      audioEl.currentTime = 0;
+      audioEl.volume = 0.95;
+
+      audioEl.play().catch(() => {});
+      brakeTimer = setTimeout(() => {
+        audioEl.pause();
+        audioEl.currentTime = 0;
+      }, 2000);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      playStartupRaceAudio3Sec();
+    });
+
+    document.addEventListener(
+      'pointerdown',
+      () => {
+        if (!startupAudioPlayed) {
+          playStartupRaceAudio3Sec();
+        }
+      },
+      { once: true }
+    );
 
     async function requestDeviceGmailBinding() {
       let suggestedEmail = boundDeviceGmail || '';
@@ -1384,7 +1400,6 @@
       renderDrinksGrid();
     }
 
-    // بجانب كل مشروب: زر "دوس بنزين اوردرك" فقط بدون "ابعتهالو"
     function renderDrinksGrid() {
       const grid = document.getElementById('drinks-grid');
       if (!grid) return;
@@ -1424,7 +1439,6 @@
     }
 
     function pressGasPedalDrink(itemId) {
-      playCarBrakeSound2Sec();
       addToCart(itemId);
     }
 
@@ -1502,8 +1516,8 @@
         return;
       }
 
-      // تشغيل صوت فرامل سيارة مدته ثانيتان (2 ثانية) عند إرسال الأوردر
-      playCarBrakeSound2Sec();
+      // تشغيل صوت الفرامل الواقعي لمدة ثانيتين (2 ثانية) عند إرسال الأوردر
+      playBrakeAudio2Sec();
 
       const orderItems = [...cart];
       const total = orderItems.reduce((sum, item) => sum + item.price * item.qty, 0);
@@ -1676,7 +1690,6 @@
       `;
     }
 
-    // قبول الأوردر من المدير العام أو المسؤولين أو الباريستا وإرساله للبرينتر
     function acceptOrderAndSendToPrinter(orderId, roleOrSlot = 'barista1') {
       const slotMap = {
         gm: { slot: 'barista1', actor: 'المدير العام (محمود بورسعيد) → باريستا 1' },
@@ -1831,10 +1844,12 @@
       }
 
       isOwnerUnlocked = true;
+      activeStaffRole = 'gm';
       document.getElementById('owner-lock-icon').textContent = '🔓';
       document.getElementById('owner-btn-label').textContent = 'اونر';
       document.getElementById('logout-btn').classList.remove('hidden');
       document.getElementById('owner-hidden-content').classList.remove('hidden');
+      updateActiveStaffBadge();
 
       closeOwnerModal();
       renderOrdersFeed();
@@ -1854,7 +1869,88 @@
       document.getElementById('owner-hidden-content').classList.add('hidden');
     }
 
-    function switchOwnerTab(tab) {
+    // نافذة الباسورد المستقلة لكل مسؤول داخل قائمة الاونر
+    function openStaffRoleModal(roleKey, targetTabAfterAuth = null) {
+      pendingStaffRoleForModal = roleKey;
+      pendingStaffTabAfterAuth = targetTabAfterAuth;
+
+      const titleEl = document.getElementById('staff-role-modal-title');
+      const subEl = document.getElementById('staff-role-modal-subtitle');
+      const errEl = document.getElementById('staff-role-password-error');
+      const inputEl = document.getElementById('staff-role-password-input');
+
+      if (titleEl) {
+        titleEl.textContent = `باسورد: ${STAFF_ROLE_LABELS[roleKey] || roleKey}`;
+      }
+      if (subEl) {
+        subEl.textContent = `أدخل باسورد (${STAFF_ROLE_LABELS[roleKey] || roleKey}) لفتح القسم والصلاحيات.`;
+      }
+      if (errEl) errEl.classList.add('hidden');
+      if (inputEl) {
+        inputEl.value = '';
+        inputEl.focus();
+      }
+
+      const modal = document.getElementById('staff-role-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeStaffRoleModal() {
+      const modal = document.getElementById('staff-role-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function verifyStaffRolePassword() {
+      const inputEl = document.getElementById('staff-role-password-input');
+      const errEl = document.getElementById('staff-role-password-error');
+      const entered = (inputEl?.value || '').trim();
+      const expected = appSettings.staffPasswords?.[pendingStaffRoleForModal] || DEFAULT_STAFF_PASSWORDS[pendingStaffRoleForModal];
+
+      if (entered !== expected) {
+        if (errEl) errEl.classList.remove('hidden');
+        return;
+      }
+
+      activeStaffRole = pendingStaffRoleForModal;
+      updateActiveStaffBadge();
+      closeStaffRoleModal();
+
+      const tabToOpen = pendingStaffTabAfterAuth || (
+        pendingStaffRoleForModal === 'barista1'
+          ? 'barista1'
+          : pendingStaffRoleForModal === 'barista2'
+            ? 'barista2'
+            : 'all'
+      );
+      applyOwnerTabDirectly(tabToOpen);
+    }
+
+    function updateActiveStaffBadge() {
+      const badge = document.getElementById('active-staff-session-badge');
+      if (badge) {
+        badge.textContent = `الصلاحية المفعّلة حالياً: ${STAFF_ROLE_LABELS[activeStaffRole] || activeStaffRole}`;
+      }
+    }
+
+    function requestStaffTab(tab) {
+      if (tab === 'barista1') {
+        openStaffRoleModal('barista1', 'barista1');
+        return;
+      }
+      if (tab === 'barista2') {
+        openStaffRoleModal('barista2', 'barista2');
+        return;
+      }
+      if (tab === 'admin_control' || tab === 'settings') {
+        openStaffRoleModal('gm', tab);
+        return;
+      }
+      openStaffRoleModal('supervisor', 'all');
+    }
+
+    function applyOwnerTabDirectly(tab) {
       activeOwnerTab = tab;
       document.querySelectorAll('.owner-tab').forEach((btn) => {
         btn.className =
@@ -2065,13 +2161,19 @@
       appSettings = {
         dbUrl: (document.getElementById('fb-db-url').value || DEFAULT_DB_URL).trim(),
         apiKey: document.getElementById('fb-api-key').value.trim(),
-        autoPrintOnApprove: Boolean(document.getElementById('auto-print-on-approve').checked)
+        autoPrintOnApprove: Boolean(document.getElementById('auto-print-on-approve').checked),
+        staffPasswords: {
+          gm: (document.getElementById('pass-gm-input')?.value || '').trim() || DEFAULT_STAFF_PASSWORDS.gm,
+          supervisor: (document.getElementById('pass-sup-input')?.value || '').trim() || DEFAULT_STAFF_PASSWORDS.supervisor,
+          barista1: (document.getElementById('pass-b1-input')?.value || '').trim() || DEFAULT_STAFF_PASSWORDS.barista1,
+          barista2: (document.getElementById('pass-b2-input')?.value || '').trim() || DEFAULT_STAFF_PASSWORDS.barista2
+        }
       };
       saveSettings();
 
       const fb = document.getElementById('settings-feedback');
       if (fb) {
-        fb.textContent = 'تم حفظ الإعدادات بنجاح.';
+        fb.textContent = 'تم حفظ الإعدادات وباسوردات المسؤولين بنجاح.';
         fb.classList.remove('hidden');
       }
 
@@ -2082,17 +2184,26 @@
       appSettings = {
         dbUrl: DEFAULT_DB_URL,
         apiKey: '',
-        autoPrintOnApprove: false
+        autoPrintOnApprove: false,
+        staffPasswords: { ...DEFAULT_STAFF_PASSWORDS }
       };
       saveSettings();
       document.getElementById('fb-db-url').value = DEFAULT_DB_URL;
       document.getElementById('fb-api-key').value = '';
+      document.getElementById('pass-gm-input').value = DEFAULT_STAFF_PASSWORDS.gm;
+      document.getElementById('pass-sup-input').value = DEFAULT_STAFF_PASSWORDS.supervisor;
+      document.getElementById('pass-b1-input').value = DEFAULT_STAFF_PASSWORDS.barista1;
+      document.getElementById('pass-b2-input').value = DEFAULT_STAFF_PASSWORDS.barista2;
       document.getElementById('auto-print-on-approve').checked = false;
       syncFromCloudNow();
     }
 
     document.getElementById('fb-db-url').value = appSettings.dbUrl || DEFAULT_DB_URL;
     document.getElementById('fb-api-key').value = appSettings.apiKey || '';
+    document.getElementById('pass-gm-input').value = appSettings.staffPasswords?.gm || DEFAULT_STAFF_PASSWORDS.gm;
+    document.getElementById('pass-sup-input').value = appSettings.staffPasswords?.supervisor || DEFAULT_STAFF_PASSWORDS.supervisor;
+    document.getElementById('pass-b1-input').value = appSettings.staffPasswords?.barista1 || DEFAULT_STAFF_PASSWORDS.barista1;
+    document.getElementById('pass-b2-input').value = appSettings.staffPasswords?.barista2 || DEFAULT_STAFF_PASSWORDS.barista2;
     document.getElementById('auto-print-on-approve').checked = Boolean(appSettings.autoPrintOnApprove);
 
     if (boundDeviceGmail) {
