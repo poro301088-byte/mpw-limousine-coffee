@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MPW Limousine Coffee | تسجيل العميل والطلبات</title>
+  <title>MPW Limousine Coffee | تسجيل العميل والمشروبات والمسار</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -34,8 +34,15 @@
       color: #F9FAFB;
     }
 
-    #customer-live-map {
-      height: 190px;
+    #customer-route-map {
+      height: 260px;
+      width: 100%;
+      border-radius: 16px;
+      z-index: 1;
+    }
+
+    #owner-live-map {
+      height: 220px;
       width: 100%;
       border-radius: 14px;
       z-index: 1;
@@ -72,7 +79,14 @@
 </head>
 <body class="min-h-screen bg-obsidian text-gray-100 selection:bg-gold selection:text-black">
 
-  <!-- هيدر علوي: يبدأ بالعميل ويحتوي على خانة اونر -->
+  <!-- ملف صوت تشغيل السيارة الحقيقي -->
+  <audio
+    id="car-startup-audio"
+    preload="auto"
+    src="https://actions.google.com/sounds/v1/transportation/sports_car_revving.ogg"
+  ></audio>
+
+  <!-- هيدر علوي -->
   <header class="sticky top-0 z-40 border-b border-gold/25 bg-charcoal/95 backdrop-blur">
     <div class="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-3">
       <div class="flex items-center gap-3">
@@ -81,13 +95,20 @@
         </div>
         <div>
           <h1 class="text-base font-extrabold text-gold sm:text-lg">MPW Limousine Coffee</h1>
-          <p class="text-[11px] text-gray-400">تسجيل بيانات العميل واختيار المشروبات</p>
+          <p class="text-[11px] text-gray-400">تسجيل العميل • قائمة المشروبات • مسار الوصول</p>
         </div>
       </div>
 
       <div class="flex flex-wrap items-center gap-2">
-        <button type="button" onclick="playCleanNotificationTone()" class="rounded-xl border border-emerald-400/40 bg-emerald-500/10 px-3 py-1.5 text-xs font-extrabold text-emerald-300 transition hover:bg-emerald-500/20">
-          🔔 نغمة تنبيه هادئة
+        <!-- علامة دواسة البنزين لتشغيل صوت السيارة -->
+        <button
+          type="button"
+          onclick="playCarStartupAudio()"
+          title="دواسة البنزين - صوت السيارة"
+          class="flex items-center gap-1.5 rounded-xl border border-amber-400/50 bg-amber-500/15 px-3 py-1.5 text-xs font-black text-amber-200 transition hover:bg-amber-500/25"
+        >
+          <span>🦶</span>
+          <span>دواسة البنزين</span>
         </button>
 
         <span id="sync-status-badge" class="hidden rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-bold text-emerald-300">
@@ -119,64 +140,62 @@
     </div>
   </div>
 
-  <!-- المحتوى الرئيسي: يبدأ بتسجيل العميل + قائمة المشروبات الظاهرة بوضوح -->
+  <!-- المحتوى الرئيسي -->
   <main class="mx-auto max-w-5xl space-y-6 px-4 py-6">
 
-    <!-- 1. تسجيل بيانات العميل (البداية الأساسية للبرنامج) -->
-    <section id="customer-registration-section" class="space-y-4 rounded-3xl border border-gold/35 bg-charcoal p-5 shadow-2xl">
+    <!-- المرحلة 1: شاشة تسجيل دخول العميل عبر جيميل أو فيسبوك -->
+    <section id="customer-login-step" class="space-y-5 rounded-3xl border border-gold/35 bg-charcoal p-5 sm:p-6 shadow-2xl">
       <div class="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3">
         <div>
-          <h2 class="text-lg font-extrabold text-gold">تسجيل بيانات العميل وطلب السيارة</h2>
-          <p class="text-xs text-gray-400">سجّل بياناتك واختر عضويتك وبيانات سيارتك ثم حدّد مشروباتك بالأسفل</p>
+          <span class="rounded-lg bg-gold/20 px-2.5 py-0.5 text-[11px] font-black text-gold">الخطوة 1 من 2</span>
+          <h2 class="mt-1 text-lg font-extrabold text-white">تسجيل دخول العميل لفتح قائمة المشروبات</h2>
+          <p class="text-xs text-gray-400">سجّل دخولك عبر جيميل أو فيسبوك وأكمل بيانات سيارتك للانتقال مباشرة إلى المشروبات والخريطة</p>
         </div>
 
-        <!-- مشغل صوت حقيقي (رابط أو ملف صوتي من جهازك بدلاً من التوليف الصناعي المزعج) -->
-        <div class="flex flex-wrap items-center gap-2">
-          <button type="button" onclick="toggleCustomEngineAudio()" class="rounded-xl border border-gold/40 bg-gold/10 px-3 py-1.5 text-xs font-extrabold text-gold hover:bg-gold hover:text-black">
-            ▶️ تشغيل الصوت المخصص
-          </button>
-          <label class="cursor-pointer rounded-xl border border-white/15 bg-black/60 px-3 py-1.5 text-xs font-bold text-gray-200 hover:border-gold/40">
-            📁 اختيار ملف صوتي
-            <input id="custom-audio-file" type="file" accept="audio/*" onchange="handleCustomAudioUpload(event)" class="hidden" />
-          </label>
-        </div>
+        <!-- زر دواسة البنزين في شاشة الدخول -->
+        <button
+          type="button"
+          onclick="playCarStartupAudio()"
+          class="flex items-center gap-1.5 rounded-xl border border-gold/40 bg-black/60 px-3.5 py-2 text-xs font-black text-gold hover:bg-gold hover:text-black"
+        >
+          <span>🦶</span>
+          <span>دواسة البنزين</span>
+        </button>
       </div>
 
-      <audio id="custom-sound-player" preload="none" class="hidden"></audio>
-
-      <!-- تسجيل سريع بجيميل أو فيسبوك -->
-      <div class="space-y-2.5 rounded-2xl border border-gold/20 bg-black/50 p-3.5">
+      <!-- أزرار الدخول بجيميل أو فيسبوك -->
+      <div class="space-y-3 rounded-2xl border border-gold/25 bg-black/55 p-4">
         <div class="flex items-center justify-between">
-          <span class="text-xs font-black text-goldLight">تسجيل سريع عبر جيميل أو فيسبوك</span>
-          <span id="social-auth-badge" class="rounded-full bg-white/10 px-2.5 py-0.5 text-[10px] font-bold text-gray-300">غير مسجل</span>
+          <span class="text-xs font-black text-goldLight">اختر وسيلة تسجيل الدخول</span>
+          <span id="social-auth-badge" class="rounded-full bg-white/10 px-2.5 py-0.5 text-[10px] font-bold text-gray-300">بانتظار التسجيل</span>
         </div>
 
-        <div class="grid grid-cols-2 gap-2">
-          <button type="button" onclick="signInWithProvider('google')" class="flex items-center justify-center gap-1.5 rounded-xl border border-red-400/40 bg-red-500/15 py-2 text-xs font-extrabold text-red-200 transition hover:bg-red-500/25">
-            <span>G</span>
-            <span>دخول بجيميل</span>
+        <div class="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+          <button type="button" onclick="startSocialLogin('google')" class="flex items-center justify-center gap-2 rounded-xl border border-red-400/50 bg-red-500/15 py-2.5 text-xs font-extrabold text-red-200 transition hover:bg-red-500/25">
+            <span class="text-sm font-black">G</span>
+            <span>تسجيل الدخول عبر جيميل (Gmail)</span>
           </button>
-          <button type="button" onclick="signInWithProvider('facebook')" class="flex items-center justify-center gap-1.5 rounded-xl border border-blue-400/40 bg-blue-500/15 py-2 text-xs font-extrabold text-blue-200 transition hover:bg-blue-500/25">
-            <span>f</span>
-            <span>دخول بفيسبوك</span>
+          <button type="button" onclick="startSocialLogin('facebook')" class="flex items-center justify-center gap-2 rounded-xl border border-blue-400/50 bg-blue-500/15 py-2.5 text-xs font-extrabold text-blue-200 transition hover:bg-blue-500/25">
+            <span class="text-sm font-black">f</span>
+            <span>تسجيل الدخول عبر فيسبوك (Facebook)</span>
           </button>
         </div>
 
-        <div id="social-login-box" class="hidden space-y-2 rounded-xl border border-white/10 bg-charcoal p-2.5">
-          <label id="social-input-label" class="block text-[11px] font-bold text-gray-300">أدخل الحساب:</label>
-          <input id="social-account-input" type="text" placeholder="name@gmail.com" class="w-full rounded-lg border border-white/15 bg-black/70 px-3 py-1.5 text-xs text-white focus:border-gold focus:outline-none" />
+        <div id="social-login-box" class="hidden space-y-2.5 rounded-xl border border-gold/30 bg-charcoal p-3">
+          <label id="social-input-label" class="block text-xs font-bold text-goldLight">أدخل حسابك أو اسمك:</label>
+          <input id="social-account-input" type="text" placeholder="name@gmail.com" class="w-full rounded-xl border border-white/15 bg-black/70 px-3.5 py-2 text-xs text-white focus:border-gold focus:outline-none" />
           <div class="flex gap-2">
-            <button type="button" onclick="confirmSocialLogin()" class="flex-1 rounded-lg bg-gold py-1.5 text-xs font-black text-black hover:bg-goldLight">
-              تأكيد
+            <button type="button" onclick="completeLoginAndOpenMenu()" class="flex-1 rounded-xl bg-gold py-2 text-xs font-black text-black hover:bg-goldLight">
+              تأكيد الدخول وفتح صفحة المشروبات ☕
             </button>
-            <button type="button" onclick="cancelSocialLogin()" class="rounded-lg bg-white/10 px-3 py-1.5 text-xs font-bold text-gray-300">
+            <button type="button" onclick="cancelSocialLogin()" class="rounded-xl bg-white/10 px-3.5 py-2 text-xs font-bold text-gray-300">
               إلغاء
             </button>
           </div>
         </div>
       </div>
 
-      <!-- الحقول الأساسية لتسجيل العميل -->
+      <!-- بيانات العميل والسيارة وفئة العضوية -->
       <div class="grid gap-4 sm:grid-cols-2">
         <div>
           <label class="mb-1 block text-xs font-bold text-gray-300">اسم العميل / رقم الهاتف</label>
@@ -184,12 +203,12 @@
         </div>
 
         <div>
-          <label class="mb-1 block text-xs font-bold text-gray-300">بيانات السيارة / ملاحظات التوصيل</label>
-          <input id="car-info" type="text" placeholder="مثال: ليموزين سوداء - بجوار الكورنيش" class="w-full rounded-xl border border-white/15 bg-black/60 px-3.5 py-2.5 text-xs text-white focus:border-gold focus:outline-none" />
+          <label class="mb-1 block text-xs font-bold text-gray-300">بيانات السيارة / لونها / رقم اللوحة</label>
+          <input id="car-info" type="text" placeholder="مثال: مرسيدس سوداء - لوحة س أ 1234" class="w-full rounded-xl border border-white/15 bg-black/60 px-3.5 py-2.5 text-xs text-white focus:border-gold focus:outline-none" />
         </div>
       </div>
 
-      <!-- فئة العميل وبطاقة العضوية (4 خانات) -->
+      <!-- فئة العضوية (4 خانات) -->
       <div>
         <label class="mb-1.5 block text-xs font-bold text-gray-300">فئة العميل وبطاقة العضوية</label>
         <div class="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
@@ -261,91 +280,149 @@
         </button>
       </div>
 
-      <!-- تحديد موقع GPS -->
-      <div class="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-white/10 bg-black/45 p-3">
-        <button type="button" onclick="captureGPS()" class="rounded-xl border border-sky-400/40 bg-sky-500/15 px-3.5 py-2 text-xs font-extrabold text-sky-200 hover:bg-sky-500/25">
-          📍 تحديد موقع GPS
+      <p id="login-step-error" class="hidden rounded-xl bg-red-500/15 p-2.5 text-center text-xs font-bold text-red-300"></p>
+
+      <div class="flex flex-wrap gap-2.5">
+        <button type="button" onclick="proceedToDrinksPage()" class="flex-1 rounded-2xl bg-gradient-to-r from-gold to-amber-500 py-3 text-sm font-black text-black shadow-lg shadow-gold/20 transition hover:brightness-110">
+          متابعة إلى صفحة المشروبات والخريطة ☕
         </button>
-        <span id="gps-status" class="text-xs text-gray-400">لم يُحدد الموقع بعد</span>
-        <a id="gps-map-link" href="#" target="_blank" rel="noopener noreferrer" class="hidden text-xs font-bold text-gold underline">
-          خرائط Google ↗
-        </a>
+        <button type="button" onclick="submitOrder()" class="rounded-2xl border border-emerald-400/50 bg-emerald-500/15 px-5 py-3 text-sm font-black text-emerald-200 transition hover:bg-emerald-500/25">
+          📤 ابعتهالو
+        </button>
       </div>
     </section>
 
-    <!-- 2. قائمة المشروبات والأصناف (ظاهرة بالكامل للعميل مع بحث وفئات وسلة) -->
-    <section id="drinks-menu-section" class="grid gap-5 rounded-3xl border border-gold/25 bg-charcoal p-5 shadow-2xl lg:grid-cols-12">
-      <div class="space-y-4 lg:col-span-8">
+    <!-- المرحلة 2: صفحة المشروبات والخريطة الحية للمسار -->
+    <div id="customer-drinks-and-map-page" class="hidden space-y-6">
+
+      <!-- شريط بيانات العميل المسجل + زر الرجوع لتعديل البيانات -->
+      <div class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-emerald-400/35 bg-charcoal px-4 py-3">
+        <div class="text-xs">
+          <span class="rounded-md bg-emerald-500/20 px-2 py-0.5 font-extrabold text-emerald-300">مرحباً بك</span>
+          <strong id="logged-customer-display" class="mr-2 text-white"></strong>
+          <span id="logged-car-display" class="mr-2 text-gray-400"></span>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onclick="playCarStartupAudio()"
+            class="flex items-center gap-1 rounded-xl border border-amber-400/40 bg-amber-500/15 px-3 py-1.5 text-xs font-black text-amber-200 hover:bg-amber-500/25"
+          >
+            <span>🦶</span>
+            <span>دواسة البنزين</span>
+          </button>
+          <button type="button" onclick="backToLoginStep()" class="rounded-xl border border-white/15 bg-black/50 px-3 py-1.5 text-xs font-bold text-gold hover:border-gold">
+            ✏️ تعديل بيانات الدخول والسيارة
+          </button>
+        </div>
+      </div>
+
+      <!-- خريطة تحديد مسار العميل على الطريق قبل الوصول إلينا -->
+      <section id="customer-route-section" class="space-y-3 rounded-3xl border border-sky-400/35 bg-charcoal p-4 sm:p-5 shadow-2xl">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h2 class="text-base font-extrabold text-sky-300">🗺️ خريطة المسار المباشر إلى MPW Limousine Coffee</h2>
+            <p class="text-xs text-gray-400">تحديد موقعك الحالي ورسم خط السير على الطريق قبل الوصول إلينا</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button type="button" onclick="captureGPSAndDrawRoute()" class="rounded-xl bg-sky-500/20 px-3.5 py-2 text-xs font-extrabold text-sky-200 hover:bg-sky-500/30">
+              📍 تحديث مساري على الطريق
+            </button>
+            <a id="gps-map-link" href="https://www.google.com/maps/dir/?api=1&destination=31.2465,29.9735" target="_blank" rel="noopener noreferrer" class="rounded-xl border border-gold/40 bg-gold/10 px-3 py-2 text-xs font-extrabold text-gold hover:bg-gold hover:text-black">
+              فتح الاتجاهات في Google Maps ↗
+            </a>
+          </div>
+        </div>
+
+        <div id="customer-route-map" class="border border-sky-400/30 bg-black/70"></div>
+
+        <div class="grid gap-2 rounded-2xl border border-white/10 bg-black/50 p-3 text-xs sm:grid-cols-3">
+          <div>
+            <span class="text-gray-400">حالة GPS:</span>
+            <strong id="gps-status" class="mr-1 text-emerald-300">جاري تحديد موقعك...</strong>
+          </div>
+          <div>
+            <span class="text-gray-400">المسافة على الطريق:</span>
+            <strong id="route-distance-text" class="mr-1 text-gold">—</strong>
+          </div>
+          <div>
+            <span class="text-gray-400">الوقت المتوقع للوصول:</span>
+            <strong id="route-duration-text" class="mr-1 text-sky-300">—</strong>
+          </div>
+        </div>
+      </section>
+
+      <!-- قائمة المشروبات والأصناف + سلة الطلب -->
+      <section id="drinks-menu-section" class="grid gap-5 rounded-3xl border border-gold/30 bg-charcoal p-5 shadow-2xl lg:grid-cols-12">
+        <div class="space-y-4 lg:col-span-8">
+          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3">
+            <div>
+              <h2 class="text-lg font-extrabold text-gold">قائمة المشروبات والأصناف</h2>
+              <p class="text-xs text-gray-400">اختر مشروبك المفضل لإضافته إلى السلة وإرساله فوراً</p>
+            </div>
+            <input
+              id="menu-search-input"
+              oninput="renderDrinksGrid()"
+              type="text"
+              placeholder="ابحث عن مشروب..."
+              class="w-full rounded-xl border border-white/15 bg-black/60 px-3.5 py-2 text-xs text-white focus:border-gold focus:outline-none sm:w-56"
+            />
+          </div>
+
+          <div id="menu-categories-bar" class="flex flex-wrap gap-2"></div>
+          <div id="drinks-grid" class="grid gap-2.5 sm:grid-cols-2"></div>
+        </div>
+
+        <!-- سلة الطلب -->
+        <aside class="flex flex-col justify-between space-y-4 rounded-2xl border border-gold/30 bg-black/50 p-4 lg:col-span-4">
+          <div class="space-y-3">
+            <div class="flex items-center justify-between border-b border-white/10 pb-2.5">
+              <h3 class="text-sm font-black text-goldLight">سلة المشروبات</h3>
+              <span id="cart-total" class="text-sm font-black text-gold">0.00 ج.م</span>
+            </div>
+
+            <div id="cart-items" class="max-h-72 space-y-2 overflow-y-auto pr-1 text-xs">
+              <p class="py-4 text-center text-gray-500">لم تختر مشروبات بعد — اضغط «+ إضافة» من القائمة.</p>
+            </div>
+          </div>
+
+          <div class="space-y-2.5 pt-2">
+            <button type="button" onclick="submitOrder()" class="w-full rounded-2xl bg-gradient-to-r from-gold to-amber-500 py-3 text-sm font-black text-black shadow-lg shadow-gold/20 transition hover:brightness-110">
+              📤 ابعتهالو
+            </button>
+            <p id="order-feedback" class="hidden rounded-xl bg-emerald-500/15 p-2.5 text-center text-xs font-bold text-emerald-300"></p>
+          </div>
+        </aside>
+      </section>
+
+      <!-- متابعة حالة الطلب للعميل + نطق "هتشرب ابسط" عند الموافقة -->
+      <section id="customer-order-tracker" class="rounded-3xl border border-emerald-400/30 bg-charcoal/90 p-4 sm:p-5">
         <div class="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3">
           <div>
-            <h2 class="text-lg font-extrabold text-gold">قائمة المشروبات والأصناف</h2>
-            <p class="text-xs text-gray-400">اختر مشروبك أو الصنف المطلوب لإضافته مباشرة إلى سلة الطلب</p>
+            <h2 class="text-sm font-black text-emerald-300">حالة الأوردر المباشرة</h2>
+            <p class="text-[11px] text-gray-400">عند موافقة المسؤول أو الإدارة أو الباريستا تُنطق: «هتشرب ابسط»</p>
           </div>
-          <input
-            id="menu-search-input"
-            oninput="renderDrinksGrid()"
-            type="text"
-            placeholder="ابحث عن مشروب..."
-            class="w-full rounded-xl border border-white/15 bg-black/60 px-3.5 py-2 text-xs text-white focus:border-gold focus:outline-none sm:w-56"
-          />
-        </div>
-
-        <!-- أزرار الفئات -->
-        <div id="menu-categories-bar" class="flex flex-wrap gap-2"></div>
-
-        <!-- شبكة المشروبات -->
-        <div id="drinks-grid" class="grid gap-2.5 sm:grid-cols-2"></div>
-      </div>
-
-      <!-- سلة الطلب والإرسال -->
-      <aside class="flex flex-col justify-between space-y-4 rounded-2xl border border-gold/30 bg-black/50 p-4 lg:col-span-4">
-        <div class="space-y-3">
-          <div class="flex items-center justify-between border-b border-white/10 pb-2.5">
-            <h3 class="text-sm font-black text-goldLight">سلة المشروبات</h3>
-            <span id="cart-total" class="text-sm font-black text-gold">0.00 ج.م</span>
-          </div>
-
-          <div id="cart-items" class="max-h-72 space-y-2 overflow-y-auto pr-1 text-xs">
-            <p class="py-4 text-center text-gray-500">لم تختر مشروبات بعد — اضغط «إضافة» من القائمة.</p>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="speakCustomerApprovalPhrase()" class="rounded-xl border border-emerald-400/40 bg-emerald-500/15 px-3 py-1.5 text-xs font-extrabold text-emerald-200 hover:bg-emerald-500/25">
+              🗣️ هتشرب ابسط
+            </button>
+            <button type="button" onclick="syncFromCloudNow()" class="rounded-xl border border-white/15 bg-black/50 px-3 py-1.5 text-xs font-bold text-gray-200 hover:border-gold/50">
+              🔄 تحديث
+            </button>
           </div>
         </div>
-
-        <div class="space-y-2.5 pt-2">
-          <button type="button" onclick="submitOrder()" class="w-full rounded-2xl bg-gradient-to-r from-gold to-amber-500 py-3 text-sm font-black text-black shadow-lg shadow-gold/20 transition hover:brightness-110">
-            إرسال الأوردر الآن 🚀
-          </button>
-          <p id="order-feedback" class="hidden rounded-xl bg-emerald-500/15 p-2.5 text-center text-xs font-bold text-emerald-300"></p>
+        <div id="customer-live-tracker-body" class="mt-3 text-xs text-gray-300">
+          لم يتم إرسال طلب من هذا الجهاز بعد.
         </div>
-      </aside>
-    </section>
+      </section>
+    </div>
 
-    <!-- متابعة حالة الطلب للعميل + نطق "هتشرب ابسط" عند الموافقة -->
-    <section id="customer-order-tracker" class="rounded-3xl border border-emerald-400/30 bg-charcoal/90 p-4 sm:p-5">
-      <div class="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3">
-        <div>
-          <h2 class="text-sm font-black text-emerald-300">حالة الأوردر المباشرة</h2>
-          <p class="text-[11px] text-gray-400">عند موافقة المسؤول أو الإدارة أو الباريستا تُنطق: «هتشرب ابسط»</p>
-        </div>
-        <div class="flex items-center gap-2">
-          <button type="button" onclick="speakCustomerApprovalPhrase()" class="rounded-xl border border-emerald-400/40 bg-emerald-500/15 px-3 py-1.5 text-xs font-extrabold text-emerald-200 hover:bg-emerald-500/25">
-            🗣️ هتشرب ابسط
-          </button>
-          <button type="button" onclick="syncFromCloudNow()" class="rounded-xl border border-white/15 bg-black/50 px-3 py-1.5 text-xs font-bold text-gray-200 hover:border-gold/50">
-            🔄 تحديث
-          </button>
-        </div>
-      </div>
-      <div id="customer-live-tracker-body" class="mt-3 text-xs text-gray-300">
-        لم يتم إرسال طلب من هذا الجهاز بعد.
-      </div>
-    </section>
-
-    <!-- 3. محتوى اونر: مخفي حتى فتحه بباسورد 301088poro مع بقاء مهام المدير العام والمسؤولين والباريستا كاملة -->
+    <!-- لوحة الاونر المخفية بباسورد 301088poro -->
     <section id="owner-hidden-content" class="hidden space-y-6 rounded-3xl border-2 border-gold/50 bg-charcoal p-4 sm:p-6 shadow-2xl">
       <div class="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
         <div>
           <span class="rounded-lg bg-gold px-2.5 py-0.5 text-xs font-black text-black">اونر (OWNER)</span>
-          <h2 class="mt-1 text-lg font-extrabold text-white">لوحة الاونر — القيادة، المسؤولون، الباريستا، الخريطة والمنيو</h2>
+          <h2 class="mt-1 text-lg font-extrabold text-white">لوحة الاونر — المدير العام، المسؤولون، الباريستا، الخريطة والمنيو</h2>
         </div>
 
         <div class="flex flex-wrap gap-2">
@@ -362,46 +439,34 @@
             🛠️ المنيو والأسعار
           </button>
           <button type="button" onclick="switchOwnerTab('settings')" id="tab-settings" class="owner-tab rounded-xl border border-white/15 bg-black/50 px-3.5 py-2 text-xs font-bold text-gray-200 hover:border-gold/50">
-            ⚙️ السحابة والصوت والطباعة
+            ⚙️ السحابة والطباعة
           </button>
         </div>
       </div>
 
-      <!-- مهام وأدوار المدير العام، المسؤولين، والباريستا -->
+      <!-- مهام المدير العام والمسؤولين والباريستا -->
       <div class="grid gap-3 sm:grid-cols-3">
         <div class="rounded-2xl border border-gold/30 bg-black/50 p-3.5 space-y-1">
           <div class="text-[11px] font-bold text-goldLight">المدير العام — محمود بورسعيد</div>
-          <div class="text-xs font-extrabold text-white">الإشراف العام، اعتماد الطلبات، الأسعار والطباعة</div>
+          <div class="text-xs font-extrabold text-white">الإشراف الكامل، اعتماد الطلبات، الأسعار والطباعة</div>
         </div>
         <div class="rounded-2xl border border-sky-400/30 bg-black/50 p-3.5 space-y-1">
           <div class="text-[11px] font-bold text-sky-300">المسؤولون — محمود حسن • رقيه محمود</div>
-          <div class="text-xs font-extrabold text-white">مراجعة بيانات العميل والسيارة وتحويل الطلب للباريستا</div>
+          <div class="text-xs font-extrabold text-white">استقبال بيانات العميل والسيارة وتحويل الطلب للباريستا</div>
         </div>
         <div class="rounded-2xl border border-emerald-400/30 bg-black/50 p-3.5 space-y-1">
           <div class="text-[11px] font-bold text-emerald-300">الباريستا — باريستا 1 / باريستا 2</div>
-          <div class="text-xs font-extrabold text-white">استلام الطلب المعتمد، بدء التحضير، جاهز للتسليم وإتمام التسليم</div>
+          <div class="text-xs font-extrabold text-white">استلام الطلب المعتمد، بدء التحضير، جاهز للسيارة وإتمام التسليم</div>
         </div>
       </div>
 
-      <!-- خريطة موقع العميل بالضبط داخل اونر -->
+      <!-- خريطة متابعة مسار العميل للاونر -->
       <div class="rounded-2xl border border-sky-400/35 bg-black/55 p-4 space-y-2.5">
         <div class="flex flex-wrap items-center justify-between gap-2">
-          <div class="flex items-center gap-2">
-            <span id="gps-indicator-dot" class="inline-block h-2.5 w-2.5 rounded-full bg-amber-400"></span>
-            <h3 class="text-sm font-black text-sky-300">موقع العميل على الخريطة (نطاق 15 كم)</h3>
-          </div>
-          <button type="button" onclick="captureGPS()" class="rounded-xl bg-sky-500/20 px-3 py-1 text-xs font-extrabold text-sky-200 hover:bg-sky-500/30">
-            📍 تحديث الموقع
-          </button>
+          <h3 class="text-sm font-black text-sky-300">متابعة موقع ومسار العميل على الخريطة</h3>
+          <span id="owner-route-info" class="text-xs font-bold text-gold">—</span>
         </div>
-        <div id="customer-live-map" class="border border-sky-400/25 bg-black/70"></div>
-        <div class="h-2 w-full overflow-hidden rounded-full bg-black/80">
-          <div id="gps-range-bar" class="h-full w-1/6 rounded-full bg-amber-400 transition-all duration-300"></div>
-        </div>
-        <div class="flex flex-wrap items-center justify-between gap-2 text-xs">
-          <span id="gps-range-summary" class="font-bold text-gray-200">بانتظار تحديد موقع العميل...</span>
-          <span id="gps-range-box" class="text-[11px] text-sky-300">—</span>
-        </div>
+        <div id="owner-live-map" class="border border-sky-400/25 bg-black/70"></div>
       </div>
 
       <!-- إحصائيات سريعة -->
@@ -424,7 +489,7 @@
         </div>
       </div>
 
-      <!-- إدارة المنيو والأسعار داخل اونر -->
+      <!-- إدارة المنيو والأسعار -->
       <div id="admin-control-panel" class="hidden space-y-4 rounded-2xl border border-gold/40 bg-black/55 p-4">
         <div class="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3">
           <h3 class="text-sm font-black text-gold">إدارة المنيو والأسعار</h3>
@@ -464,23 +529,19 @@
         <div id="admin-menu-list" class="max-h-80 space-y-2 overflow-y-auto pr-1"></div>
       </div>
 
-      <!-- إعدادات السحابة والصوت والطباعة داخل اونر -->
+      <!-- إعدادات السحابة والطباعة -->
       <div id="owner-settings-panel" class="hidden space-y-4 rounded-2xl border border-gold/30 bg-black/50 p-4">
-        <h3 class="text-sm font-extrabold text-gold">إعدادات السحابة (Firebase)، رابط الصوت وطباعة الكاش</h3>
+        <h3 class="text-sm font-extrabold text-gold">إعدادات السحابة (Firebase) وطباعة الكاش</h3>
         <div class="grid gap-3 sm:grid-cols-2">
           <div>
             <label class="mb-1 block text-xs font-bold text-gray-300">Database URL</label>
             <input id="fb-db-url" type="text" class="w-full rounded-xl border border-white/15 bg-charcoal px-3 py-2 text-xs text-white focus:border-gold focus:outline-none" />
           </div>
           <div>
-            <label class="mb-1 block text-xs font-bold text-gray-300">رابط ملف صوتي مخصص (MP3 / WAV)</label>
-            <input id="custom-audio-url" type="text" placeholder="https://example.com/sound.mp3" class="w-full rounded-xl border border-white/15 bg-charcoal px-3 py-2 text-xs text-white focus:border-gold focus:outline-none" />
-          </div>
-          <div>
             <label class="mb-1 block text-xs font-bold text-gray-300">API Key / Auth Secret</label>
             <input id="fb-api-key" type="text" class="w-full rounded-xl border border-white/15 bg-charcoal px-3 py-2 text-xs text-white focus:border-gold focus:outline-none" />
           </div>
-          <div class="flex items-end">
+          <div class="sm:col-span-2">
             <label class="flex cursor-pointer items-center gap-2 rounded-xl border border-white/15 bg-charcoal px-3 py-2.5 text-xs font-bold text-gray-200 w-full">
               <input id="auto-print-on-approve" type="checkbox" class="h-4 w-4 accent-gold" />
               <span>طباعة إيصال الكاش تلقائياً عند الموافقة</span>
@@ -613,12 +674,11 @@
       'none': 'غير مشترك (بلا كارت)'
     };
 
-    const CENTER_COORDS = { lat: 31.2465, lng: 29.9735 };
-    const MAX_RADIUS_KM = 15;
+    const CAFE_COORDS = { lat: 31.2465, lng: 29.9735 };
     const DEFAULT_DB_URL = 'https://mpw-limousine-coffee-default-rtdb.firebaseio.com';
-    const ORDERS_STORAGE_KEY = 'mpw_limousine_orders_live_v5';
-    const MENU_STORAGE_KEY = 'mpw_limousine_menu_live_v5';
-    const SETTINGS_STORAGE_KEY = 'mpw_limousine_settings_v5';
+    const ORDERS_STORAGE_KEY = 'mpw_limousine_orders_live_v7';
+    const MENU_STORAGE_KEY = 'mpw_limousine_menu_live_v7';
+    const SETTINGS_STORAGE_KEY = 'mpw_limousine_settings_v7';
     const LAST_CUSTOMER_ORDER_KEY = 'mpw_limousine_last_customer_order_id';
 
     let isOwnerUnlocked = false;
@@ -636,9 +696,15 @@
     let appSettings = loadSettings();
     let lastCustomerOrderId = localStorage.getItem(LAST_CUSTOMER_ORDER_KEY) || '';
     let cloudPollTimer = null;
+    let carSoundPlayedOnce = false;
 
-    let leafletMap = null;
-    let customerMapMarker = null;
+    let customerMap = null;
+    let customerMarker = null;
+    let customerRouteLine = null;
+
+    let ownerMap = null;
+    let ownerCustomerMarker = null;
+    let ownerRouteLine = null;
 
     function loadSettings() {
       try {
@@ -648,14 +714,12 @@
           : {
               dbUrl: DEFAULT_DB_URL,
               apiKey: '',
-              customAudioUrl: '',
               autoPrintOnApprove: false
             };
       } catch {
         return {
           dbUrl: DEFAULT_DB_URL,
           apiKey: '',
-          customAudioUrl: '',
           autoPrintOnApprove: false
         };
       }
@@ -697,6 +761,29 @@
         localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(orders));
       } catch {}
     }
+
+    function playCarStartupAudio() {
+      const audioEl = document.getElementById('car-startup-audio');
+      if (!audioEl) return;
+      audioEl.currentTime = 0;
+      audioEl.volume = 0.85;
+      audioEl.play().catch(() => {});
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      playCarStartupAudio();
+    });
+
+    document.addEventListener(
+      'pointerdown',
+      () => {
+        if (!carSoundPlayedOnce) {
+          carSoundPlayedOnce = true;
+          playCarStartupAudio();
+        }
+      },
+      { once: true }
+    );
 
     function buildFirebaseUrl(nodePath) {
       const base = (appSettings.dbUrl || DEFAULT_DB_URL).trim().replace(/\/+$/, '');
@@ -783,7 +870,7 @@
             renderCustomerLiveTracker();
 
             if (detectedNewOrder) {
-              playCleanNotificationTone();
+              playCarStartupAudio();
               showNewOrderBanner(detectedNewOrder);
             }
 
@@ -813,60 +900,6 @@
       }
     }
 
-    // تشغيل ملف صوتي حقيقي مرفوع أو رابط صوتي مخصص (بدون توليف صناعي مزعج)
-    function handleCustomAudioUpload(event) {
-      const file = event.target.files && event.target.files[0];
-      if (!file) return;
-      const player = document.getElementById('custom-sound-player');
-      if (!player) return;
-      const blobUrl = URL.createObjectURL(file);
-      player.src = blobUrl;
-      player.play().catch(() => {});
-    }
-
-    function toggleCustomEngineAudio() {
-      const player = document.getElementById('custom-sound-player');
-      if (!player) return;
-      const url = (document.getElementById('custom-audio-url')?.value || appSettings.customAudioUrl || '').trim();
-      if (url && player.src !== url) {
-        player.src = url;
-      }
-      if (!player.src) {
-        document.getElementById('custom-audio-file')?.click();
-        return;
-      }
-      if (player.paused) {
-        player.play().catch(() => {});
-      } else {
-        player.pause();
-      }
-    }
-
-    // نغمة تنبيه هادئة ونقية عند وصول أوردر جديد
-    function playCleanNotificationTone() {
-      try {
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        if (!AudioCtx) return;
-        const ctx = new AudioCtx();
-        const now = ctx.currentTime;
-
-        [523.25, 659.25].forEach((freq, i) => {
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(freq, now + i * 0.14);
-          gain.gain.setValueAtTime(0.001, now + i * 0.14);
-          gain.gain.linearRampToValueAtTime(0.14, now + i * 0.14 + 0.03);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.14 + 0.25);
-          osc.connect(gain);
-          gain.connect(ctx.destination);
-          osc.start(now + i * 0.14);
-          osc.stop(now + i * 0.14 + 0.26);
-        });
-      } catch {}
-    }
-
-    // رسالة صوتية للعميل عند الموافقة: "هتشرب ابسط"
     function speakCustomerApprovalPhrase() {
       try {
         if (!('speechSynthesis' in window)) return;
@@ -879,16 +912,15 @@
       } catch {}
     }
 
-    // تسجيل العميل عبر جيميل أو فيسبوك
-    function signInWithProvider(provider) {
+    function startSocialLogin(provider) {
       socialProvider = provider;
       const box = document.getElementById('social-login-box');
       const label = document.getElementById('social-input-label');
       const input = document.getElementById('social-account-input');
       if (!box || !label || !input) return;
 
-      label.textContent = provider === 'facebook' ? 'أدخل حساب فيسبوك أو اسمك:' : 'أدخل حساب جيميل أو اسمك:';
-      input.placeholder = provider === 'facebook' ? 'facebook.com/username' : 'name@gmail.com';
+      label.textContent = provider === 'facebook' ? 'أدخل حساب فيسبوك أو اسمك للدخول:' : 'أدخل حساب جيميل أو اسمك للدخول:';
+      input.placeholder = provider === 'facebook' ? 'facebook.com/username أو الاسم' : 'name@gmail.com أو الاسم';
       box.classList.remove('hidden');
       input.focus();
     }
@@ -899,23 +931,64 @@
       document.getElementById('social-account-input').value = '';
     }
 
-    function confirmSocialLogin() {
+    function completeLoginAndOpenMenu() {
       const input = document.getElementById('social-account-input');
       const badge = document.getElementById('social-auth-badge');
       const nameField = document.getElementById('customer-name');
       const val = (input.value || '').trim();
-      if (!val) return;
 
       const label = socialProvider === 'facebook' ? 'Facebook' : 'Gmail';
-      if (badge) {
-        badge.textContent = `${label}: ${val}`;
-        badge.className = 'rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-[10px] font-extrabold text-emerald-300';
+      if (val) {
+        if (badge) {
+          badge.textContent = `${label}: ${val}`;
+          badge.className = 'rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-[10px] font-extrabold text-emerald-300';
+        }
+        if (nameField && !nameField.value.trim()) {
+          nameField.value = `${val} (${label})`;
+        }
       }
-      if (nameField && !nameField.value.trim()) {
-        nameField.value = `${val} (${label})`;
-      }
+
       document.getElementById('social-login-box').classList.add('hidden');
-      input.value = '';
+      proceedToDrinksPage(true);
+    }
+
+    function proceedToDrinksPage(fromSocial = false) {
+      const nameField = document.getElementById('customer-name');
+      const carField = document.getElementById('car-info');
+      const errEl = document.getElementById('login-step-error');
+
+      let customerName = (nameField.value || '').trim();
+      if (!customerName && fromSocial) {
+        customerName = socialProvider === 'facebook' ? 'عميل فيسبوك' : 'عميل جيميل';
+        nameField.value = customerName;
+      }
+
+      if (!customerName) {
+        errEl.textContent = 'من فضلك سجّل دخولك بجيميل أو فيسبوك أو اكتب اسمك أولاً لفتح قائمة المشروبات.';
+        errEl.classList.remove('hidden');
+        return;
+      }
+
+      errEl.classList.add('hidden');
+
+      const carText = (carField.value || '').trim() || 'سيارة العميل';
+      document.getElementById('logged-customer-display').textContent = `${customerName} (${TIER_LABELS[customerTier] || customerTier})`;
+      document.getElementById('logged-car-display').textContent = `• ${carText}`;
+
+      document.getElementById('customer-login-step').classList.add('hidden');
+      document.getElementById('customer-drinks-and-map-page').classList.remove('hidden');
+
+      playCarStartupAudio();
+
+      setTimeout(() => {
+        initCustomerRouteMap();
+        captureGPSAndDrawRoute();
+      }, 120);
+    }
+
+    function backToLoginStep() {
+      document.getElementById('customer-drinks-and-map-page').classList.add('hidden');
+      document.getElementById('customer-login-step').classList.remove('hidden');
     }
 
     function setCustomerTier(tier) {
@@ -954,84 +1027,149 @@
       return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     }
 
-    function initCustomerMap(lat = CENTER_COORDS.lat, lng = CENTER_COORDS.lng) {
-      const mapContainer = document.getElementById('customer-live-map');
-      if (!mapContainer || typeof L === 'undefined') return;
+    function initCustomerRouteMap() {
+      const container = document.getElementById('customer-route-map');
+      if (!container || typeof L === 'undefined') return;
 
-      if (!leafletMap) {
-        leafletMap = L.map('customer-live-map').setView([lat, lng], 14);
+      if (!customerMap) {
+        customerMap = L.map('customer-route-map').setView([CAFE_COORDS.lat, CAFE_COORDS.lng], 14);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
           attribution: '&copy; OpenStreetMap'
-        }).addTo(leafletMap);
+        }).addTo(customerMap);
 
-        L.circleMarker([CENTER_COORDS.lat, CENTER_COORDS.lng], {
-          radius: 7,
+        L.circleMarker([CAFE_COORDS.lat, CAFE_COORDS.lng], {
+          radius: 9,
           color: '#D4AF37',
           fillColor: '#D4AF37',
-          fillOpacity: 0.9
+          fillOpacity: 1
         })
-          .addTo(leafletMap)
-          .bindPopup('نقطة تمركز MPW');
-
-        customerMapMarker = L.marker([lat, lng])
-          .addTo(leafletMap)
-          .bindPopup('موقع العميل الحالي')
+          .addTo(customerMap)
+          .bindPopup('📍 نقطة الوصول: MPW Limousine Coffee')
           .openPopup();
       } else {
-        leafletMap.invalidateSize();
-        leafletMap.setView([lat, lng], 15);
-        if (customerMapMarker) {
-          customerMapMarker.setLatLng([lat, lng]).setPopupContent('موقع العميل بالضبط').openPopup();
-        }
+        customerMap.invalidateSize();
       }
     }
 
-    function captureGPS() {
-      const gpsStatus = document.getElementById('gps-status');
-      const summaryEl = document.getElementById('gps-range-summary');
-      const boxEl = document.getElementById('gps-range-box');
-      const barEl = document.getElementById('gps-range-bar');
+    function initOwnerRouteMap() {
+      const container = document.getElementById('owner-live-map');
+      if (!container || typeof L === 'undefined') return;
+
+      if (!ownerMap) {
+        ownerMap = L.map('owner-live-map').setView([CAFE_COORDS.lat, CAFE_COORDS.lng], 14);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; OpenStreetMap'
+        }).addTo(ownerMap);
+
+        L.circleMarker([CAFE_COORDS.lat, CAFE_COORDS.lng], {
+          radius: 8,
+          color: '#D4AF37',
+          fillColor: '#D4AF37',
+          fillOpacity: 1
+        })
+          .addTo(ownerMap)
+          .bindPopup('MPW Limousine Coffee');
+      } else {
+        ownerMap.invalidateSize();
+      }
+    }
+
+    async function drawRoadRouteOnMaps(userLat, userLng) {
+      let routeCoords = [
+        [userLat, userLng],
+        [CAFE_COORDS.lat, CAFE_COORDS.lng]
+      ];
+      let distanceKm = haversineKm(userLat, userLng, CAFE_COORDS.lat, CAFE_COORDS.lng);
+      let durationMin = Math.max(1, Math.round(distanceKm * 2.2));
+
+      try {
+        const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${userLng},${userLat};${CAFE_COORDS.lng},${CAFE_COORDS.lat}?overview=full&geometries=geojson`;
+        const res = await fetch(osrmUrl);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.routes && data.routes[0]) {
+            const r = data.routes[0];
+            distanceKm = r.distance / 1000;
+            durationMin = Math.max(1, Math.round(r.duration / 60));
+            routeCoords = r.geometry.coordinates.map(([lng, lat]) => [lat, lng]);
+          }
+        }
+      } catch {}
+
+      currentGPS = {
+        lat: userLat,
+        lng: userLng,
+        distKm: Number(distanceKm.toFixed(2)),
+        durationMin
+      };
+
+      const statusEl = document.getElementById('gps-status');
+      const distEl = document.getElementById('route-distance-text');
+      const durEl = document.getElementById('route-duration-text');
       const linkEl = document.getElementById('gps-map-link');
 
+      if (statusEl) statusEl.textContent = 'متصل ومُحدَّد على الخريطة';
+      if (distEl) distEl.textContent = `${currentGPS.distKm} كم`;
+      if (durEl) durEl.textContent = `${durationMin} دقيقة تقريباً`;
+      if (linkEl) {
+        linkEl.href = `https://www.google.com/maps/dir/?api=1&origin=${userLat},${userLng}&destination=${CAFE_COORDS.lat},${CAFE_COORDS.lng}&travelmode=driving`;
+      }
+
+      const ownerInfo = document.getElementById('owner-route-info');
+      if (ownerInfo) {
+        ownerInfo.textContent = `مسافة العميل على الطريق: ${currentGPS.distKm} كم (${durationMin} دقيقة)`;
+      }
+
+      if (customerMap) {
+        if (customerMarker) customerMap.removeLayer(customerMarker);
+        if (customerRouteLine) customerMap.removeLayer(customerRouteLine);
+
+        customerMarker = L.marker([userLat, userLng])
+          .addTo(customerMap)
+          .bindPopup('🚗 موقع سيارتك الحالي')
+          .openPopup();
+
+        customerRouteLine = L.polyline(routeCoords, {
+          color: '#38BDF8',
+          weight: 5,
+          opacity: 0.9
+        }).addTo(customerMap);
+
+        customerMap.fitBounds(customerRouteLine.getBounds(), { padding: [30, 30] });
+      }
+
+      if (ownerMap) {
+        if (ownerCustomerMarker) ownerMap.removeLayer(ownerCustomerMarker);
+        if (ownerRouteLine) ownerMap.removeLayer(ownerRouteLine);
+
+        ownerCustomerMarker = L.marker([userLat, userLng])
+          .addTo(ownerMap)
+          .bindPopup(`🚗 سيارة العميل (${currentGPS.distKm} كم)`);
+
+        ownerRouteLine = L.polyline(routeCoords, {
+          color: '#D4AF37',
+          weight: 5,
+          opacity: 0.9
+        }).addTo(ownerMap);
+
+        ownerMap.fitBounds(ownerRouteLine.getBounds(), { padding: [25, 25] });
+      }
+    }
+
+    function captureGPSAndDrawRoute() {
+      const gpsStatus = document.getElementById('gps-status');
       if (!navigator.geolocation) {
-        gpsStatus.textContent = 'GPS غير مدعوم';
+        if (gpsStatus) gpsStatus.textContent = 'GPS غير مدعوم';
         return;
       }
 
-      gpsStatus.textContent = 'جاري تحديد الموقع...';
+      if (gpsStatus) gpsStatus.textContent = 'جاري تحديد موقعك ورسم المسار...';
       navigator.geolocation.getCurrentPosition(
         (pos) => {
-          const { latitude, longitude } = pos.coords;
-          const distKm = haversineKm(CENTER_COORDS.lat, CENTER_COORDS.lng, latitude, longitude);
-          currentGPS = { lat: latitude, lng: longitude, distKm: Number(distKm.toFixed(2)) };
-
-          const inRange = distKm <= MAX_RADIUS_KM;
-          const pct = Math.min(100, Math.max(10, Math.round((distKm / MAX_RADIUS_KM) * 100)));
-
-          gpsStatus.textContent = `تم تحديد الموقع (${currentGPS.distKm} كم)`;
-          if (summaryEl) {
-            summaryEl.textContent = inRange
-              ? `ضمن النطاق (${currentGPS.distKm} كم من أصل ${MAX_RADIUS_KM} كم)`
-              : `على بُعد (${currentGPS.distKm} كم من أصل ${MAX_RADIUS_KM} كم)`;
-          }
-          if (boxEl) {
-            boxEl.textContent = `${latitude.toFixed(5)}, ${longitude.toFixed(5)} • ${currentGPS.distKm} كم`;
-          }
-          if (barEl) {
-            barEl.style.width = `${pct}%`;
-            barEl.className = `h-full rounded-full transition-all duration-300 ${inRange ? 'bg-emerald-400' : 'bg-amber-400'}`;
-          }
-          if (linkEl) {
-            linkEl.href = `https://www.google.com/maps?q=${latitude},${longitude}`;
-            linkEl.classList.remove('hidden');
-          }
-
-          if (isOwnerUnlocked) {
-            initCustomerMap(latitude, longitude);
-          }
+          drawRoadRouteOnMaps(pos.coords.latitude, pos.coords.longitude);
         },
         () => {
-          gpsStatus.textContent = 'تعذر تحديد الموقع';
+          if (gpsStatus) gpsStatus.textContent = 'يرجى تفعيل GPS في المتصفح لرسم مسارك';
         },
         { enableHighAccuracy: true, timeout: 10000 }
       );
@@ -1125,7 +1263,7 @@
       const totalEl = document.getElementById('cart-total');
 
       if (cart.length === 0) {
-        wrap.innerHTML = '<p class="py-4 text-center text-gray-500">لم تختر مشروبات بعد — اضغط «إضافة» من القائمة.</p>';
+        wrap.innerHTML = '<p class="py-4 text-center text-gray-500">لم تختر مشروبات بعد — اضغط «+ إضافة» من القائمة.</p>';
         totalEl.textContent = '0.00 ج.م';
         return;
       }
@@ -1156,17 +1294,22 @@
       const nameInput = document.getElementById('customer-name');
       const carInput = document.getElementById('car-info');
       const feedback = document.getElementById('order-feedback');
+      const loginErr = document.getElementById('login-step-error');
 
       const customerName = nameInput.value.trim();
       if (!customerName) {
-        feedback.textContent = 'من فضلك اكتب اسم العميل أو رقم الهاتف أولاً.';
-        feedback.className = 'rounded-xl bg-red-500/15 p-2.5 text-center text-xs font-bold text-red-300';
+        if (loginErr) {
+          loginErr.textContent = 'من فضلك اكتب اسم العميل أو رقم الهاتف أولاً.';
+          loginErr.classList.remove('hidden');
+        }
         return;
       }
 
       if (cart.length === 0) {
-        feedback.textContent = 'من فضلك اختر مشروباً واحداً على الأقل من القائمة قبل إرسال الأوردر.';
-        feedback.className = 'rounded-xl bg-amber-500/15 p-2.5 text-center text-xs font-bold text-amber-300';
+        if (feedback) {
+          feedback.textContent = 'من فضلك اختر مشروباً واحداً على الأقل من القائمة قبل الإرسال.';
+          feedback.className = 'rounded-xl bg-amber-500/15 p-2.5 text-center text-xs font-bold text-amber-300';
+        }
         return;
       }
 
@@ -1204,16 +1347,16 @@
       renderOrdersFeed();
       renderCustomerLiveTracker();
 
-      playCleanNotificationTone();
+      playCarStartupAudio();
       showNewOrderBanner(newOrder);
 
-      feedback.textContent = `تم إرسال الطلب (${newOrder.id}) — حالتك الحالية: بانتظار الموافقة.`;
-      feedback.className = 'rounded-xl bg-emerald-500/15 p-2.5 text-center text-xs font-bold text-emerald-300';
+      if (feedback) {
+        feedback.textContent = `تم إرسال الطلب (${newOrder.id}) — حالتك الحالية: بانتظار الموافقة.`;
+        feedback.className = 'rounded-xl bg-emerald-500/15 p-2.5 text-center text-xs font-bold text-emerald-300';
+      }
 
       cart = [];
       renderCart();
-      nameInput.value = '';
-      carInput.value = '';
     }
 
     function renderCustomerLiveTracker() {
@@ -1254,7 +1397,6 @@
       `;
     }
 
-    // مهام المدير العام والمسؤولين والباريستا على الطلبات
     function approveAndAssignOrder(orderId, baristaSlot = 'barista1') {
       const baristaLabel = baristaSlot === 'barista2' ? 'باريستا 2' : 'باريستا 1';
       let updatedTarget = null;
@@ -1373,8 +1515,10 @@
         const sec = document.getElementById('owner-hidden-content');
         sec.classList.toggle('hidden');
         if (!sec.classList.contains('hidden')) {
-          const coords = currentGPS || CENTER_COORDS;
-          setTimeout(() => initCustomerMap(coords.lat, coords.lng), 80);
+          setTimeout(() => {
+            initOwnerRouteMap();
+            if (currentGPS) drawRoadRouteOnMaps(currentGPS.lat, currentGPS.lng);
+          }, 100);
         }
         return;
       }
@@ -1408,8 +1552,10 @@
       renderOrdersFeed();
       renderAdminMenuManager();
 
-      const coords = currentGPS || CENTER_COORDS;
-      setTimeout(() => initCustomerMap(coords.lat, coords.lng), 100);
+      setTimeout(() => {
+        initOwnerRouteMap();
+        if (currentGPS) drawRoadRouteOnMaps(currentGPS.lat, currentGPS.lng);
+      }, 120);
     }
 
     function logoutOwner() {
@@ -1485,7 +1631,9 @@
             .map((it) => `<li>${it.name} × ${it.qty} (${(it.price * it.qty).toFixed(2)} ج.م)</li>`)
             .join('');
 
-          const mapHref = o.gps ? `https://www.google.com/maps?q=${o.gps.lat},${o.gps.lng}` : '';
+          const mapHref = o.gps
+            ? `https://www.google.com/maps/dir/?api=1&origin=${o.gps.lat},${o.gps.lng}&destination=${CAFE_COORDS.lat},${CAFE_COORDS.lng}&travelmode=driving`
+            : '';
           const isBaristaStage = ['approved_barista1', 'approved_barista2', 'preparing', 'ready_for_car'].includes(o.status);
 
           return `
@@ -1501,7 +1649,7 @@
 
               <div class="text-xs text-gray-300">
                 <strong>السيارة:</strong> ${o.carInfo} • <strong>الوقت:</strong> ${o.createdAt}
-                ${o.gps ? ` • <strong>المسافة:</strong> ${o.gps.distKm} كم • <a href="${mapHref}" target="_blank" rel="noopener noreferrer" class="text-sky-300 underline">الخريطة ↗</a>` : ''}
+                ${o.gps ? ` • <strong>المسافة:</strong> ${o.gps.distKm} كم • <a href="${mapHref}" target="_blank" rel="noopener noreferrer" class="text-sky-300 underline">مسار الطريق ↗</a>` : ''}
               </div>
 
               <ul class="list-disc space-y-1 pr-5 text-xs text-gray-200">${itemsHtml}</ul>
@@ -1620,19 +1768,12 @@
     }
 
     function saveCloudAndPrintSettings() {
-      const audioUrl = (document.getElementById('custom-audio-url').value || '').trim();
       appSettings = {
         dbUrl: (document.getElementById('fb-db-url').value || DEFAULT_DB_URL).trim(),
         apiKey: document.getElementById('fb-api-key').value.trim(),
-        customAudioUrl: audioUrl,
         autoPrintOnApprove: Boolean(document.getElementById('auto-print-on-approve').checked)
       };
       saveSettings();
-
-      if (audioUrl) {
-        const player = document.getElementById('custom-sound-player');
-        if (player) player.src = audioUrl;
-      }
 
       const fb = document.getElementById('settings-feedback');
       if (fb) {
@@ -1647,31 +1788,24 @@
       appSettings = {
         dbUrl: DEFAULT_DB_URL,
         apiKey: '',
-        customAudioUrl: '',
         autoPrintOnApprove: false
       };
       saveSettings();
       document.getElementById('fb-db-url').value = DEFAULT_DB_URL;
       document.getElementById('fb-api-key').value = '';
-      document.getElementById('custom-audio-url').value = '';
       document.getElementById('auto-print-on-approve').checked = false;
       syncFromCloudNow();
     }
 
     document.getElementById('fb-db-url').value = appSettings.dbUrl || DEFAULT_DB_URL;
     document.getElementById('fb-api-key').value = appSettings.apiKey || '';
-    document.getElementById('custom-audio-url').value = appSettings.customAudioUrl || '';
     document.getElementById('auto-print-on-approve').checked = Boolean(appSettings.autoPrintOnApprove);
-    if (appSettings.customAudioUrl) {
-      document.getElementById('custom-sound-player').src = appSettings.customAudioUrl;
-    }
 
     renderMenuCategories();
     renderDrinksGrid();
     renderCart();
     renderOrdersFeed();
     renderCustomerLiveTracker();
-    captureGPS();
     syncFromCloudNow();
 
     if (cloudPollTimer) clearInterval(cloudPollTimer);
