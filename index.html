@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MPW Limousine Coffee — نظام الطلبات والباريستا والإدارة</title>
+  <title>MPW Limousine Coffee — طلبات السيارات والمنيو والأونر</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -13,9 +13,10 @@
         extend: {
           colors: {
             gold: '#D4AF37',
-            goldLight: '#F3D778',
+            goldLight: '#F3D06B',
             obsidian: '#0B0B0D',
-            charcoal: '#151519'
+            charcoal: '#141418',
+            surface: '#1C1C22'
           }
         }
       }
@@ -23,58 +24,51 @@
   </script>
   <style>
     body {
-      font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Tahoma, Arial, sans-serif;
       background-color: #0B0B0D;
-      color: #F9FAFB;
+      color: #F5F5F7;
     }
-    .leaflet-container {
-      background: #14171d;
-      font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif;
+    #customer-route-map, #owner-live-map {
+      height: 250px;
+      width: 100%;
+      border-radius: 16px;
       z-index: 1;
     }
     #cashier-receipt-print {
       display: none;
     }
     @media print {
-      body * {
-        visibility: hidden;
-      }
-      #cashier-receipt-print,
-      #cashier-receipt-print * {
-        visibility: visible;
+      body > *:not(#cashier-receipt-print) {
+        display: none !important;
       }
       #cashier-receipt-print {
-        display: block;
-        position: fixed;
-        top: 0;
-        left: 0;
+        display: block !important;
         width: 80mm;
+        margin: 0 auto;
         padding: 10px;
         background: #ffffff;
         color: #000000;
-        font-family: monospace;
+        font-family: Tahoma, Arial, sans-serif;
         font-size: 12px;
-        line-height: 1.45;
       }
     }
   </style>
 </head>
 <body class="min-h-screen bg-obsidian text-gray-100">
-
   <!-- الشريط العلوي -->
-  <header class="sticky top-0 z-30 border-b border-gold/25 bg-obsidian/95 backdrop-blur-md">
-    <div class="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-3">
+  <header class="sticky top-0 z-30 border-b border-gold/25 bg-charcoal/95 backdrop-blur-md">
+    <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3">
       <div class="flex items-center gap-3">
-        <div class="flex h-11 w-11 items-center justify-center rounded-2xl border border-gold/40 bg-charcoal text-lg font-black text-gold shadow-lg">
+        <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-gold to-amber-600 text-lg font-black text-black shadow-lg">
           MPW
         </div>
         <div>
-          <h1 class="text-base font-extrabold tracking-wide text-gold sm:text-lg">MPW Limousine Coffee</h1>
-          <p class="text-[11px] text-gray-400">طلب مباشر من السيارة • كروت 7VIP / VVIP / VIP • الباريستا والإدارة</p>
+          <h1 class="text-base font-extrabold tracking-wide text-gold sm:text-lg">MPW LIMOUSINE COFFEE</h1>
+          <p class="text-[11px] text-gray-400">طلب السيارات الفوري • تتبع المسار والباريستا • لوحة الاونر</p>
         </div>
       </div>
 
-      <div class="flex items-center gap-2">
+      <div class="flex flex-wrap items-center gap-2">
         <span id="sync-status-badge" class="hidden rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-bold text-emerald-300">
           متصل
         </span>
@@ -90,7 +84,7 @@
           id="logout-btn"
           type="button"
           onclick="logoutOwner()"
-          class="hidden rounded-xl border border-red-500/40 bg-red-500/10 px-3 py-2 text-xs font-bold text-red-300 hover:bg-red-500/20"
+          class="hidden rounded-xl border border-red-500/40 bg-red-500/10 px-3 py-2 text-xs font-bold text-red-300 transition hover:bg-red-500 hover:text-white"
         >
           خروج
         </button>
@@ -98,141 +92,135 @@
     </div>
   </header>
 
-  <main class="mx-auto max-w-7xl space-y-6 px-4 py-6">
+  <!-- بنر تنبيه وصول أوردر جديد -->
+  <div id="new-order-banner" class="mx-auto mt-3 hidden max-w-6xl px-4">
+    <div class="flex items-center justify-between gap-3 rounded-2xl border border-emerald-400/50 bg-emerald-950/70 px-4 py-3 text-xs font-extrabold text-emerald-200 shadow-lg">
+      <span id="new-order-banner-text">وصل أوردر جديد!</span>
+      <button type="button" onclick="document.getElementById('new-order-banner').classList.add('hidden')" class="rounded-lg bg-white/10 px-2 py-1 text-[11px] text-white hover:bg-white/20">
+        إخفاء
+      </button>
+    </div>
+  </div>
 
-    <!-- الخطوة الأولى: صفحة تسجيل العميل والكروت -->
-    <section id="customer-login-step" class="space-y-6 rounded-3xl border border-gold/25 bg-charcoal p-5 shadow-2xl sm:p-6">
-      <div class="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
+  <main class="mx-auto max-w-6xl space-y-6 px-4 py-6">
+    <!-- المرحلة الأولى: دخول العميل واختيار نوع الكارت -->
+    <section id="customer-login-step" class="space-y-5 rounded-3xl border border-gold/25 bg-surface p-5 shadow-xl sm:p-6">
+      <div class="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3">
         <div>
-          <h2 class="text-lg font-black text-gold sm:text-xl">تسجيل العميل واختيار الكارت</h2>
-          <p class="text-xs text-gray-400">يحتفظ البرنامج ببياناتك تلقائياً بعد التسجيل أو الربط ولا يشترط تكرار تسجيل الدخول في كل زيارة.</p>
+          <h2 class="text-base font-extrabold text-gold sm:text-lg">تسجيل دخول العميل واختيار الكارت</h2>
+          <p class="text-xs text-gray-400">سجّل بياناتك أو اختر كارت العضوية أولاً، ثم انتقل لصفحة المشروبات والخريطة والطلب.</p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
-          <span id="saved-profile-badge" class="hidden rounded-xl border border-emerald-500/40 bg-emerald-500/15 px-3 py-1 text-[11px] font-extrabold text-emerald-300"></span>
+          <span id="saved-profile-badge" class="hidden rounded-full border border-emerald-400/40 bg-emerald-500/15 px-3 py-1 text-[11px] font-extrabold text-emerald-300">
+            محفوظ تلقائياً
+          </span>
           <button
             id="quick-resume-btn"
             type="button"
             onclick="resumeSavedCustomerSession()"
-            class="hidden rounded-xl bg-emerald-500 px-3.5 py-1.5 text-xs font-black text-black transition hover:bg-emerald-400"
+            class="hidden rounded-xl bg-gold px-3 py-1.5 text-[11px] font-black text-black transition hover:bg-goldLight"
           >
-            متابعة بحسابي المحفوظ ←
+            دخول سريع بحسابي المحفوظ ←
           </button>
           <span id="social-auth-badge" class="rounded-full bg-white/10 px-3 py-1 text-[11px] font-bold text-gray-300">
-            حساب العميل
+            وضع ضيف
           </span>
         </div>
       </div>
 
-      <!-- أزرار الربط السريع بالجيميل وفيسبوك -->
-      <div class="space-y-3 rounded-2xl border border-white/10 bg-black/40 p-4">
-        <div class="flex flex-wrap items-center justify-between gap-2">
-          <span class="text-xs font-extrabold text-gray-200">ربط سريع وتسجيل فوري:</span>
-          <div class="flex flex-wrap gap-2">
-            <button
-              type="button"
-              onclick="requestDeviceGmailBinding()"
-              class="rounded-xl border border-gold/50 bg-gold/15 px-3.5 py-2 text-xs font-extrabold text-gold transition hover:bg-gold hover:text-black"
-            >
-              📧 ربط حساب الجيميل
-            </button>
-            <button
-              type="button"
-              onclick="startSocialLogin('google')"
-              class="rounded-xl border border-white/15 bg-white/10 px-3.5 py-2 text-xs font-extrabold text-white transition hover:bg-white hover:text-black"
-            >
-              G دخول جيميل
-            </button>
-            <button
-              type="button"
-              onclick="startSocialLogin('facebook')"
-              class="rounded-xl border border-sky-400/40 bg-sky-500/15 px-3.5 py-2 text-xs font-extrabold text-sky-200 transition hover:bg-sky-400 hover:text-black"
-            >
-              f دخول فيسبوك
-            </button>
-          </div>
-        </div>
+      <!-- أزرار الدخول السريع بالجيميل أو فيسبوك -->
+      <div class="grid gap-2.5 sm:grid-cols-2">
+        <button
+          type="button"
+          onclick="requestDeviceGmailBinding()"
+          class="flex items-center justify-center gap-2 rounded-2xl border border-white/15 bg-black/55 px-4 py-3 text-xs font-extrabold text-white transition hover:border-gold/60 hover:bg-black/80"
+        >
+          <span class="flex h-5 w-5 items-center justify-center rounded-full bg-white text-[11px] font-black text-red-600">G</span>
+          <span>ربط / تسجيل دخول عبر Gmail (حساب الجهاز)</span>
+        </button>
+        <button
+          type="button"
+          onclick="startSocialLogin('facebook')"
+          class="flex items-center justify-center gap-2 rounded-2xl border border-blue-500/35 bg-blue-600/15 px-4 py-3 text-xs font-extrabold text-blue-200 transition hover:border-blue-400 hover:bg-blue-600/25"
+        >
+          <span class="flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-[11px] font-black text-white">f</span>
+          <span>تسجيل دخول عبر فيسبوك (Facebook)</span>
+        </button>
+      </div>
 
-        <!-- صندوق تأكيد ربط الجيميل -->
-        <div id="device-gmail-consent-box" class="hidden space-y-2.5 rounded-2xl border border-gold/40 bg-charcoal p-3.5">
-          <div class="text-xs font-extrabold text-gold">تأكيد ربط حساب الجيميل والاحتفاظ بالبيانات</div>
-          <p class="text-[11px] text-gray-300">سيتم حفظ بياناتك وكارتك على هذا الجهاز لسهولة الطلب السريع دون تكرار الدخول.</p>
-          <input
-            id="device-gmail-input"
-            type="email"
-            placeholder="example@gmail.com"
-            class="w-full rounded-xl border border-white/15 bg-black/70 px-3 py-2 text-xs text-white focus:border-gold focus:outline-none"
-          />
-          <div class="flex flex-wrap gap-2">
-            <button
-              type="button"
-              onclick="grantGmailPermissionAndBind()"
-              class="rounded-xl bg-gold px-4 py-2 text-xs font-black text-black hover:bg-goldLight"
-            >
-              تأكيد الربط وحفظ البيانات
-            </button>
-            <button
-              type="button"
-              onclick="cancelDeviceGmailConsent()"
-              class="rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-xs font-bold text-gray-300 hover:bg-white/10"
-            >
-              إلغاء
-            </button>
-          </div>
+      <!-- مربع تأكيد إذن ربط الجيميل من الجهاز -->
+      <div id="device-gmail-consent-box" class="hidden space-y-3 rounded-2xl border border-emerald-400/40 bg-emerald-950/25 p-4">
+        <div class="text-xs font-extrabold text-emerald-200">
+          إذن ربط حساب الجيميل الموجود على جهازك:
         </div>
-
-        <!-- صندوق إدخال حساب جيميل أو فيسبوك -->
-        <div id="social-login-box" class="hidden space-y-2.5 rounded-2xl border border-sky-400/35 bg-charcoal p-3.5">
-          <label id="social-input-label" for="social-account-input" class="block text-xs font-extrabold text-sky-300">
-            أدخل الحساب للدخول:
-          </label>
-          <input
-            id="social-account-input"
-            type="text"
-            class="w-full rounded-xl border border-white/15 bg-black/70 px-3 py-2 text-xs text-white focus:border-sky-400 focus:outline-none"
-          />
-          <div class="flex flex-wrap gap-2">
-            <button
-              type="button"
-              onclick="completeLoginAndOpenMenu()"
-              class="rounded-xl bg-sky-400 px-4 py-2 text-xs font-black text-black hover:bg-sky-300"
-            >
-              حفظ والدخول للقائمة
-            </button>
-            <button
-              type="button"
-              onclick="cancelSocialLogin()"
-              class="rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-xs font-bold text-gray-300 hover:bg-white/10"
-            >
-              إلغاء
-            </button>
-          </div>
+        <p class="text-[11px] text-gray-300">
+          أكّد أو أدخل بريد الجيميل الخاص بجهازك لربطه بحسابك وحفظ بياناتك ورصيد الكارت تلقائياً:
+        </p>
+        <input
+          id="device-gmail-input"
+          type="email"
+          placeholder="example@gmail.com"
+          class="w-full rounded-xl border border-white/15 bg-charcoal px-3.5 py-2.5 text-xs text-white focus:border-emerald-400 focus:outline-none"
+        />
+        <div class="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onclick="grantGmailPermissionAndBind()"
+            class="rounded-xl bg-emerald-400 px-4 py-2 text-xs font-black text-black hover:bg-emerald-300"
+          >
+            سماح وربط الجيميل والمتابعة
+          </button>
+          <button
+            type="button"
+            onclick="cancelDeviceGmailConsent()"
+            class="rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-xs font-bold text-gray-300 hover:bg-white/10"
+          >
+            إلغاء
+          </button>
         </div>
       </div>
 
-      <!-- بيانات العميل والنوع والسيارة -->
-      <div class="grid gap-4 sm:grid-cols-3">
+      <!-- مربع إدخال حساب السوشيال عند الضغط على جيميل أو فيسبوك -->
+      <div id="social-login-box" class="hidden space-y-3 rounded-2xl border border-gold/40 bg-black/60 p-4">
+        <label id="social-input-label" class="block text-xs font-extrabold text-gold">أدخل بيانات الحساب:</label>
+        <div class="flex flex-col gap-2 sm:flex-row">
+          <input
+            id="social-account-input"
+            type="text"
+            placeholder="name@gmail.com أو اسم الحساب"
+            class="flex-1 rounded-xl border border-white/15 bg-charcoal px-3.5 py-2.5 text-xs text-white focus:border-gold focus:outline-none"
+          />
+          <button
+            type="button"
+            onclick="completeLoginAndOpenMenu()"
+            class="rounded-xl bg-gold px-4 py-2.5 text-xs font-black text-black hover:bg-goldLight"
+          >
+            تأكيد الدخول وفتح المنيو
+          </button>
+          <button
+            type="button"
+            onclick="cancelSocialLogin()"
+            class="rounded-xl border border-white/15 bg-white/5 px-3 py-2.5 text-xs font-bold text-gray-300 hover:bg-white/10"
+          >
+            إلغاء
+          </button>
+        </div>
+      </div>
+
+      <!-- الاسم والنوع والسيارة -->
+      <div class="grid gap-3 sm:grid-cols-3">
         <div>
-          <label for="customer-name" class="mb-1 block text-xs font-bold text-gray-300">اسم العميل *</label>
+          <label class="mb-1 block text-xs font-bold text-gray-300">اسم العميل</label>
           <input
             id="customer-name"
             type="text"
             oninput="persistCustomerProfileFromInputs()"
             placeholder="اكتب اسمك..."
-            class="w-full rounded-xl border border-white/15 bg-black/60 px-3.5 py-2.5 text-sm text-white focus:border-gold focus:outline-none"
+            class="w-full rounded-xl border border-white/15 bg-charcoal px-3.5 py-2.5 text-xs text-white focus:border-gold focus:outline-none"
           />
         </div>
         <div>
-          <label for="car-info" class="mb-1 block text-xs font-bold text-gray-300">نوع ولون السيارة ورقمها</label>
-          <input
-            id="car-info"
-            type="text"
-            oninput="persistCustomerProfileFromInputs()"
-            placeholder="مثال: مرسيدس سوداء — س ب ر 777"
-            class="w-full rounded-xl border border-white/15 bg-black/60 px-3.5 py-2.5 text-sm text-white focus:border-gold focus:outline-none"
-          />
-        </div>
-        <div>
-          <span class="mb-1 block text-xs font-bold text-gray-300">النوع</span>
+          <label class="mb-1 block text-xs font-bold text-gray-300">النوع</label>
           <div class="grid grid-cols-2 gap-2">
             <button
               id="gender-male-btn"
@@ -252,186 +240,219 @@
             </button>
           </div>
         </div>
+        <div>
+          <label class="mb-1 block text-xs font-bold text-gray-300">نوع ولون ورقم السيارة</label>
+          <input
+            id="car-info"
+            type="text"
+            oninput="persistCustomerProfileFromInputs()"
+            placeholder="مثال: مرسيدس سوداء - 777"
+            class="w-full rounded-xl border border-white/15 bg-charcoal px-3.5 py-2.5 text-xs text-white focus:border-gold focus:outline-none"
+          />
+        </div>
       </div>
 
-      <!-- كروت العضوية والرصيد المجاني -->
-      <div class="space-y-3">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-extrabold text-goldLight">اختر كارت العضوية:</span>
-          <span id="card-box-badge" class="rounded-lg bg-gold/15 px-2.5 py-1 text-[11px] font-black text-gold">
-            خانه الكارت — 7VIP (كارت أسود)
-          </span>
-        </div>
-
-        <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <!-- كروت العضوية الـ 3 + بدون كارت -->
+      <div>
+        <label class="mb-2 block text-xs font-bold text-gray-300">اختر كارت العضوية</label>
+        <div class="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
           <button
             id="tier-7vip-btn"
             type="button"
             onclick="setCustomerTier('7vip')"
-            class="tier-btn rounded-2xl border-2 border-gold bg-black/60 p-3.5 text-right transition hover:border-gold"
+            class="tier-btn rounded-2xl border-2 border-gold bg-gradient-to-br from-zinc-900 via-black to-amber-950/60 p-3 text-right transition"
           >
-            <div class="text-sm font-black text-gold">7VIP — كارت أسود</div>
-            <div class="mt-1 text-[11px] text-gray-300">رصيد مجاني: 3000 ج.م</div>
+            <div class="text-xs font-black text-gold">7VIP</div>
+            <div class="text-[11px] font-bold text-amber-200">كارت أسود • 3000 ج.م</div>
           </button>
-
           <button
             id="tier-vvip-btn"
             type="button"
             onclick="setCustomerTier('vvip')"
-            class="tier-btn rounded-2xl border border-white/15 bg-black/60 p-3.5 text-right transition hover:border-sky-400"
+            class="tier-btn rounded-2xl border border-white/15 bg-gradient-to-br from-blue-950 via-slate-900 to-black p-3 text-right transition"
           >
-            <div class="text-sm font-black text-sky-300">VVIP — كارت أزرق</div>
-            <div class="mt-1 text-[11px] text-gray-300">رصيد مجاني: 2000 ج.م</div>
+            <div class="text-xs font-black text-sky-300">VVIP</div>
+            <div class="text-[11px] font-bold text-sky-200">كارت أزرق • 2000 ج.م</div>
           </button>
-
           <button
             id="tier-vip-btn"
             type="button"
             onclick="setCustomerTier('vip')"
-            class="tier-btn rounded-2xl border border-white/15 bg-black/60 p-3.5 text-right transition hover:border-white"
+            class="tier-btn rounded-2xl border border-white/15 bg-gradient-to-br from-zinc-100 via-white to-stone-200 p-3 text-right text-black transition"
           >
-            <div class="text-sm font-black text-white">VIP — كارت أبيض</div>
-            <div class="mt-1 text-[11px] text-gray-300">رصيد مجاني: 1000 ج.م</div>
+            <div class="text-xs font-black text-zinc-900">VIP</div>
+            <div class="text-[11px] font-bold text-zinc-700">كارت أبيض • 1000 ج.م</div>
           </button>
-
           <button
             id="tier-none-btn"
             type="button"
             onclick="setCustomerTier('none')"
-            class="tier-btn rounded-2xl border border-white/15 bg-black/60 p-3.5 text-right transition hover:border-amber-400"
+            class="tier-btn rounded-2xl border border-white/15 bg-black/50 p-3 text-right transition"
           >
-            <div class="text-sm font-black text-amber-300">غير مشترك</div>
-            <div class="mt-1 text-[11px] text-gray-300">دفع مباشر بدون رصيد كارت</div>
+            <div class="text-xs font-black text-gray-200">بدون كارت</div>
+            <div class="text-[11px] text-gray-400">حساب عادي • 0 ج.م</div>
           </button>
         </div>
-
-        <!-- ملخص رصيد الكارت -->
-        <div class="grid gap-3 rounded-2xl border border-gold/25 bg-black/45 p-3.5 text-xs sm:grid-cols-4">
-          <div>
-            <span class="block text-gray-400">إجمالي رصيد الكارت</span>
-            <strong id="card-allowance-display" class="text-sm font-black text-white">3000.00 ج.م</strong>
-          </div>
-          <div>
-            <span class="block text-gray-400">مغطى من السلة الحالية</span>
-            <strong id="card-cart-free-used-display" class="text-sm font-black text-emerald-300">0.00 ج.م</strong>
-          </div>
-          <div>
-            <span class="block text-gray-400">المتبقي في الكارت</span>
-            <strong id="card-remaining-balance-display" class="text-sm font-black text-sky-300">3000.00 ج.م</strong>
-          </div>
-          <div>
-            <span class="block text-gray-400">المطلوب دفعه</span>
-            <strong id="card-extra-payable-display" class="text-sm font-black text-gold">0.00 ج.م</strong>
-          </div>
-        </div>
       </div>
 
-      <!-- قائمة سريعة داخل صفحة الكارت -->
-      <div class="space-y-3 rounded-2xl border border-white/10 bg-black/35 p-4">
+      <!-- خانة الكارت والرصيد المتبقي والمنيو الكامل داخل الكارت -->
+      <div id="card-balance-summary-box" class="space-y-4 rounded-2xl border border-gold/35 bg-black/55 p-4">
         <div class="flex flex-wrap items-center justify-between gap-2">
-          <span class="text-xs font-extrabold text-goldLight">قائمة سريعة بالمشروبات بالكارت:</span>
-          <input
-            id="card-menu-search-input"
-            oninput="renderCardFullMenu()"
-            type="text"
-            placeholder="ابحث عن مشروب..."
-            class="w-full rounded-xl border border-white/15 bg-charcoal px-3 py-1.5 text-xs text-white focus:border-gold focus:outline-none sm:w-60"
-          />
+          <span id="card-box-badge" class="text-xs font-black text-gold">خانه الكارت — 7VIP (كارت أسود)</span>
+          <span class="text-[11px] text-gray-400">يتم خصم قيمة المشروبات تلقائياً من رصيد الكارت المتبقي</span>
         </div>
-        <div id="card-menu-categories-bar" class="flex flex-wrap gap-1.5"></div>
-        <div id="card-full-menu-grid" class="grid max-h-60 gap-2.5 overflow-y-auto pr-1 sm:grid-cols-2"></div>
+        <div class="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+          <div class="rounded-xl border border-white/10 bg-charcoal p-2.5">
+            <div class="text-[10px] text-gray-400">الرصيد الأساسي للكارت</div>
+            <div id="card-allowance-display" class="mt-0.5 text-sm font-black text-white">3000.00 ج.م</div>
+          </div>
+          <div class="rounded-xl border border-white/10 bg-charcoal p-2.5">
+            <div class="text-[10px] text-gray-400">الخصم المجاني على السلة</div>
+            <div id="card-cart-free-used-display" class="mt-0.5 text-sm font-black text-amber-300">0.00 ج.م</div>
+          </div>
+          <div class="rounded-xl border border-emerald-500/25 bg-charcoal p-2.5">
+            <div class="text-[10px] text-emerald-300">الرصيد المجاني المتبقي بالكارت</div>
+            <div id="card-remaining-balance-display" class="mt-0.5 text-sm font-black text-emerald-300">3000.00 ج.م</div>
+          </div>
+          <div class="rounded-xl border border-gold/25 bg-charcoal p-2.5">
+            <div class="text-[10px] text-gold">المطلوب دفعه إضافياً</div>
+            <div id="card-extra-payable-display" class="mt-0.5 text-sm font-black text-gold">0.00 ج.م</div>
+          </div>
+        </div>
+
+        <!-- المنيو الكامل داخل الكارت -->
+        <div class="space-y-3 border-t border-white/10 pt-3">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h3 class="text-xs font-extrabold text-gold sm:text-sm">منيو المشروبات الكامل داخل الكارت</h3>
+              <p class="text-[11px] text-gray-400">اختر أي مشروب مباشرة من الكارت وادخل لصفحة الطلب والخريطة.</p>
+            </div>
+            <input
+              id="card-menu-search-input"
+              type="text"
+              oninput="renderCardFullMenu()"
+              placeholder="ابحث عن مشروب داخل الكارت..."
+              class="w-full rounded-xl border border-white/15 bg-charcoal px-3 py-1.5 text-xs text-white focus:border-gold focus:outline-none sm:w-60"
+            />
+          </div>
+          <div id="card-menu-categories-bar" class="flex flex-wrap gap-1.5"></div>
+          <div id="card-full-menu-grid" class="grid max-h-72 gap-2 overflow-y-auto pr-0.5 sm:grid-cols-2"></div>
+        </div>
       </div>
 
-      <p id="login-step-error" class="hidden rounded-xl bg-red-500/15 p-2.5 text-center text-xs font-bold text-red-300"></p>
+      <p id="login-step-error" class="hidden rounded-xl bg-red-500/15 px-3 py-2 text-xs font-bold text-red-300"></p>
 
-      <button
-        type="button"
-        onclick="proceedToDrinksPage(false)"
-        class="w-full rounded-2xl bg-gold py-3.5 text-sm font-black text-black shadow-lg transition hover:bg-goldLight"
-      >
-        حفظ البيانات والانتقال لصفحة المشروبات والخريطة ←
-      </button>
+      <div class="flex justify-end">
+        <button
+          type="button"
+          onclick="proceedToDrinksPage(false)"
+          class="w-full rounded-2xl bg-gold px-6 py-3 text-sm font-black text-black shadow-lg transition hover:bg-goldLight sm:w-auto"
+        >
+          التالي: المشروبات والخريطة والطلب ←
+        </button>
+      </div>
     </section>
 
-    <!-- الخطوة الثانية: صفحة المشروبات والخريطة والسلة ومتابعة الطلب -->
+    <!-- المرحلة الثانية: صفحة المشروبات والخريطة وسلة الأوردر -->
     <section id="customer-drinks-and-map-page" class="hidden space-y-6">
-      <div class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-gold/25 bg-charcoal px-4 py-3">
-        <div class="flex flex-wrap items-center gap-3 text-xs">
-          <span id="logged-customer-display" class="font-black text-gold"></span>
-          <span id="logged-car-display" class="text-gray-300"></span>
-          <span id="logged-card-balance-display" class="rounded-lg bg-emerald-500/15 px-2.5 py-1 font-bold text-emerald-300"></span>
+      <!-- شريط بيانات العميل المسجل وزر الرجوع -->
+      <div class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-gold/30 bg-surface px-4 py-3">
+        <div class="flex flex-wrap items-center gap-2 text-xs">
+          <span class="rounded-lg bg-gold/20 px-2.5 py-1 font-black text-gold">العميل المسجل</span>
+          <span id="logged-customer-display" class="font-extrabold text-white">—</span>
+          <span class="text-gray-500">•</span>
+          <span id="logged-car-display" class="font-bold text-sky-300">—</span>
+          <span class="text-gray-500">•</span>
+          <span id="logged-card-balance-display" class="font-extrabold text-emerald-300">—</span>
         </div>
         <button
           type="button"
           onclick="backToLoginStep()"
           class="rounded-xl border border-white/15 bg-white/5 px-3 py-1.5 text-xs font-bold text-gray-200 hover:bg-white/10"
         >
-          تعديل بيانات العميل والكارت
+          ← تعديل البيانات أو الكارت
         </button>
       </div>
 
-      <!-- الخريطة وتحديد الموقع -->
-      <div class="space-y-3 rounded-3xl border border-gold/25 bg-charcoal p-4 sm:p-5">
+      <!-- خريطة تتبع مسار العميل إلى الكافيه -->
+      <div class="space-y-3 rounded-3xl border border-gold/25 bg-surface p-5 shadow-xl">
         <div class="flex flex-wrap items-center justify-between gap-2">
           <div>
-            <h3 class="text-sm font-extrabold text-gold sm:text-base">خريطة الطريق والموقع المباشر</h3>
-            <p id="gps-status" class="text-xs text-gray-400">جاري تحديد موقعك ورسم المسار...</p>
+            <h2 class="text-base font-extrabold text-gold">خريطة موقعك ومسار الوصول إلى الكافيه</h2>
+            <p class="text-xs text-gray-400">يتم تحديد موقع سيارتك ورسم مسار الطريق والزمن المتوقع للوصول.</p>
           </div>
-          <div class="flex flex-wrap items-center gap-2 text-xs">
-            <span class="rounded-xl bg-black/50 px-3 py-1.5 font-bold text-sky-300">
-              المسافة: <strong id="route-distance-text">—</strong>
-            </span>
-            <span class="rounded-xl bg-black/50 px-3 py-1.5 font-bold text-emerald-300">
-              الوقت: <strong id="route-duration-text">—</strong>
-            </span>
+          <div class="flex flex-wrap items-center gap-2">
             <button
               type="button"
               onclick="captureGPSAndDrawRoute()"
-              class="rounded-xl bg-gold/20 px-3 py-1.5 font-extrabold text-gold hover:bg-gold hover:text-black"
+              class="rounded-xl bg-gold px-3.5 py-2 text-xs font-black text-black hover:bg-goldLight"
             >
-              ↻ تحديث موقعي
+              📍 تحديد موقعي ورسم المسار
             </button>
             <a
               id="gps-map-link"
-              href="https://www.google.com/maps"
+              href="https://maps.google.com/?q=31.2465,29.9735"
               target="_blank"
               rel="noopener noreferrer"
-              class="rounded-xl border border-sky-400/40 bg-sky-500/15 px-3 py-1.5 font-extrabold text-sky-200 hover:bg-sky-400 hover:text-black"
+              class="rounded-xl border border-sky-400/40 bg-sky-500/15 px-3.5 py-2 text-xs font-extrabold text-sky-300 hover:bg-sky-500/25"
             >
               فتح في خرائط جوجل ↗
             </a>
           </div>
         </div>
-        <div id="customer-route-map" class="h-64 w-full overflow-hidden rounded-2xl border border-white/10"></div>
+
+        <div id="customer-route-map" class="border border-white/10"></div>
+
+        <div class="grid gap-2 text-xs sm:grid-cols-3">
+          <div class="rounded-xl border border-white/10 bg-black/45 px-3 py-2">
+            <span class="text-gray-400">حالة GPS:</span>
+            <strong id="gps-status" class="mr-1 text-emerald-300">بانتظار التحديد...</strong>
+          </div>
+          <div class="rounded-xl border border-white/10 bg-black/45 px-3 py-2">
+            <span class="text-gray-400">المسافة على الطريق:</span>
+            <strong id="route-distance-text" class="mr-1 text-gold">—</strong>
+          </div>
+          <div class="rounded-xl border border-white/10 bg-black/45 px-3 py-2">
+            <span class="text-gray-400">الزمن المتوقع:</span>
+            <strong id="route-duration-text" class="mr-1 text-sky-300">—</strong>
+          </div>
+        </div>
       </div>
 
-      <!-- المنيو وسلة الطلب -->
+      <!-- المنيو + سلة الأوردر -->
       <div class="grid gap-6 lg:grid-cols-3">
-        <div class="space-y-4 rounded-3xl border border-gold/25 bg-charcoal p-4 sm:p-5 lg:col-span-2">
+        <!-- قائمة المشروبات -->
+        <div class="space-y-4 rounded-3xl border border-white/10 bg-surface p-5 lg:col-span-2">
           <div class="flex flex-wrap items-center justify-between gap-2">
-            <h3 class="text-base font-black text-gold">قائمة المشروبات والمخبوزات</h3>
+            <h2 class="text-base font-extrabold text-gold">منيو المشروبات</h2>
             <input
               id="menu-search-input"
-              oninput="renderDrinksGrid()"
               type="text"
-              placeholder="ابحث بالاسم أو التصنيف..."
-              class="w-full rounded-xl border border-white/15 bg-black/60 px-3.5 py-2 text-xs text-white focus:border-gold focus:outline-none sm:w-64"
+              oninput="renderDrinksGrid()"
+              placeholder="ابحث عن مشروب..."
+              class="w-full rounded-xl border border-white/15 bg-black/50 px-3 py-2 text-xs text-white focus:border-gold focus:outline-none sm:w-56"
             />
           </div>
-          <div id="menu-categories-bar" class="flex flex-wrap gap-2"></div>
-          <div id="drinks-grid" class="grid gap-3 sm:grid-cols-2"></div>
+
+          <div id="menu-categories-bar" class="flex flex-wrap gap-1.5"></div>
+          <div id="drinks-grid" class="grid gap-2.5 sm:grid-cols-2"></div>
         </div>
 
-        <div class="space-y-4 rounded-3xl border border-gold/25 bg-charcoal p-4 sm:p-5">
-          <h3 class="text-base font-black text-gold">سلة الأوردر الحالية</h3>
-          <div id="cart-items" class="max-h-72 space-y-2 overflow-y-auto pr-1 text-xs"></div>
-
-          <div class="flex items-center justify-between border-t border-white/10 pt-3 text-sm font-black">
-            <span class="text-gray-300">المطلوب دفعه:</span>
-            <span id="cart-total" class="text-gold">0.00 ج.م</span>
+        <!-- سلة الأوردر المجمعة -->
+        <div class="space-y-4 rounded-3xl border border-gold/30 bg-surface p-5">
+          <div class="flex items-center justify-between">
+            <h2 class="text-base font-extrabold text-gold">سلة الأوردر</h2>
+            <span class="text-[11px] text-gray-400">تجميع فوري</span>
           </div>
 
-          <p id="order-feedback" class="hidden text-center text-xs font-bold"></p>
+          <div id="cart-items" class="max-h-72 space-y-2 overflow-y-auto text-xs">
+            <p class="py-4 text-center text-gray-500">لم تختر مشروبات بعد — اضغط «دوس بنزين اوردرك» من القائمة.</p>
+          </div>
+
+          <div class="flex items-center justify-between border-t border-white/10 pt-3 text-sm font-black">
+            <span class="text-gray-300">الإجمالي المطلوب:</span>
+            <span id="cart-total" class="text-lg text-gold">0.00 ج.م</span>
+          </div>
 
           <button
             type="button"
@@ -441,144 +462,133 @@
             إرسال الأوردر الآن
           </button>
 
+          <p id="order-feedback" class="hidden rounded-xl p-2.5 text-center text-xs font-bold"></p>
+
+          <!-- الأوردرات المجمّعة الخاصة بالعميل -->
           <div class="space-y-2 border-t border-white/10 pt-3">
             <div class="flex items-center justify-between">
-              <span class="text-xs font-extrabold text-gray-300">أوردراتك المجمّعة</span>
-              <span id="collected-orders-count" class="rounded-lg bg-white/10 px-2 py-0.5 text-[10px] font-bold text-gold">0 أوردر</span>
+              <span class="text-xs font-extrabold text-goldLight">أوردراتك المجمّعة</span>
+              <span id="collected-orders-count" class="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-bold text-gray-300">0 أوردر</span>
             </div>
-            <div id="collected-customer-orders-box" class="max-h-56 space-y-2 overflow-y-auto pr-1 text-xs"></div>
+            <div id="collected-customer-orders-box" class="max-h-52 space-y-2 overflow-y-auto text-xs"></div>
           </div>
         </div>
       </div>
 
-      <!-- متابعة حالة الأوردر لحظياً -->
-      <div class="space-y-2 rounded-3xl border border-gold/25 bg-charcoal p-4 sm:p-5">
-        <h3 class="text-sm font-black text-gold">متابعة حالة طلبك لحظياً</h3>
+      <!-- متابعة حالة الطلب للعميل -->
+      <div id="customer-live-tracker" class="rounded-3xl border border-emerald-500/30 bg-surface p-5">
+        <div class="mb-2 flex items-center justify-between">
+          <h3 class="text-sm font-extrabold text-emerald-300">متابعة حالة طلبك لحظة بلحظة</h3>
+          <span class="text-[11px] text-gray-400">تحديث تلقائي</span>
+        </div>
         <div id="customer-live-tracker-body" class="text-xs text-gray-300">
           لم يتم إرسال طلب من هذا الجهاز بعد.
         </div>
       </div>
     </section>
 
-    <!-- لوحة الاونر والمدير العام والمسؤولين والباريستا -->
-    <section id="owner-hidden-content" class="hidden space-y-6 rounded-3xl border border-gold/40 bg-charcoal p-5 shadow-2xl sm:p-6">
+    <!-- قسم الاونر والإدارة والباريستا (مقفول بباسورد الاونر) -->
+    <section id="owner-hidden-content" class="hidden space-y-6 rounded-3xl border-2 border-gold/50 bg-surface p-5 shadow-2xl sm:p-6">
       <div class="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
         <div>
-          <h2 class="text-lg font-black text-gold sm:text-xl">لوحة الإدارة والعمليات الحية</h2>
-          <p id="active-staff-session-badge" class="text-xs font-bold text-sky-300">
-            الصلاحية المفعّلة حالياً: المدير العام — محمد بورسعيد
-          </p>
+          <h2 class="text-lg font-black text-gold">لوحة الاونر والمدير العام والمسؤولين والباريستا</h2>
+          <p class="text-xs text-gray-400">إدارة الطلبات الحية، العملاء المشتركين بالكروت، المنيو والأسعار، وباسوردات الأفراد.</p>
         </div>
-
-        <div class="flex flex-wrap gap-2">
-          <button id="tab-all" type="button" onclick="applyOwnerTabDirectly('all')" class="owner-tab rounded-xl bg-gold px-3.5 py-2 text-xs font-extrabold text-black">
-            الكل
-          </button>
-          <button id="tab-subscribers" type="button" onclick="requestStaffTab('subscribers')" class="owner-tab rounded-xl border border-white/15 bg-black/50 px-3.5 py-2 text-xs font-bold text-gray-200 hover:border-gold/50">
-            المشتركون (<span id="count-subscribers">0</span>)
-          </button>
-          <button id="tab-barista1" type="button" onclick="requestStaffTab('barista1')" class="owner-tab rounded-xl border border-white/15 bg-black/50 px-3.5 py-2 text-xs font-bold text-gray-200 hover:border-gold/50">
-            باريستا 1 (<span id="count-barista1">0</span>)
-          </button>
-          <button id="tab-barista2" type="button" onclick="requestStaffTab('barista2')" class="owner-tab rounded-xl border border-white/15 bg-black/50 px-3.5 py-2 text-xs font-bold text-gray-200 hover:border-gold/50">
-            باريستا 2 (<span id="count-barista2">0</span>)
-          </button>
-          <button id="tab-admin_control" type="button" onclick="requestStaffTab('admin_control')" class="owner-tab rounded-xl border border-white/15 bg-black/50 px-3.5 py-2 text-xs font-bold text-gray-200 hover:border-gold/50">
-            إدارة المنيو
-          </button>
-          <button id="tab-settings" type="button" onclick="requestStaffTab('settings')" class="owner-tab rounded-xl border border-white/15 bg-black/50 px-3.5 py-2 text-xs font-bold text-gray-200 hover:border-gold/50">
-            الإعدادات والباسوردات
-          </button>
-        </div>
-      </div>
-
-      <!-- تنبيه وصول أوردر جديد -->
-      <div id="new-order-banner" class="hidden flex-wrap items-center justify-between gap-2 rounded-2xl border border-emerald-400/40 bg-emerald-500/15 px-4 py-3 text-xs font-extrabold text-emerald-200">
-        <span id="new-order-banner-text">وصل أوردر جديد</span>
-        <button type="button" onclick="document.getElementById('new-order-banner').classList.add('hidden')" class="rounded-lg bg-black/40 px-2.5 py-1 text-[11px] text-white">
-          إخفاء
-        </button>
+        <span id="active-staff-session-badge" class="rounded-full border border-gold/40 bg-gold/15 px-3 py-1 text-xs font-extrabold text-gold">
+          الصلاحية المفعّلة حالياً: المدير العام — محمد بورسعيد
+        </span>
       </div>
 
       <!-- إحصائيات سريعة -->
       <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <div class="rounded-2xl border border-white/10 bg-black/45 p-3.5">
-          <div class="text-[11px] text-gray-400">بانتظار الموافقة</div>
-          <div id="stat-pending" class="mt-1 text-xl font-black text-amber-300">0</div>
+        <div class="rounded-2xl border border-amber-400/25 bg-black/50 p-3.5">
+          <div class="text-[11px] text-amber-300">بانتظار الموافقة</div>
+          <div id="stat-pending" class="mt-1 text-xl font-black text-white">0</div>
         </div>
-        <div class="rounded-2xl border border-white/10 bg-black/45 p-3.5">
-          <div class="text-[11px] text-gray-400">قيد التحضير والتسليم</div>
-          <div id="stat-approved" class="mt-1 text-xl font-black text-sky-300">0</div>
+        <div class="rounded-2xl border border-sky-400/25 bg-black/50 p-3.5">
+          <div class="text-[11px] text-sky-300">قيد التحضير / التسليم</div>
+          <div id="stat-approved" class="mt-1 text-xl font-black text-white">0</div>
         </div>
-        <div class="rounded-2xl border border-white/10 bg-black/45 p-3.5">
-          <div class="text-[11px] text-gray-400">تم التسليم</div>
-          <div id="stat-completed" class="mt-1 text-xl font-black text-emerald-300">0</div>
+        <div class="rounded-2xl border border-emerald-400/25 bg-black/50 p-3.5">
+          <div class="text-[11px] text-emerald-300">تم التسليم</div>
+          <div id="stat-completed" class="mt-1 text-xl font-black text-white">0</div>
         </div>
-        <div class="rounded-2xl border border-white/10 bg-black/45 p-3.5">
-          <div class="text-[11px] text-gray-400">إجمالي الطلبات</div>
-          <div id="stat-new-customers" class="mt-1 text-xl font-black text-gold">0</div>
+        <div class="rounded-2xl border border-gold/25 bg-black/50 p-3.5">
+          <div class="text-[11px] text-gold">إجمالي الأوردرات</div>
+          <div id="stat-new-customers" class="mt-1 text-xl font-black text-white">0</div>
         </div>
       </div>
 
-      <!-- خريطة متابعة مسار العميل في لوحة الإدارة -->
+      <!-- خريطة متابعة موقع العميل للأونر -->
       <div class="space-y-2 rounded-2xl border border-white/10 bg-black/45 p-4">
         <div class="flex flex-wrap items-center justify-between gap-2">
-          <h3 class="text-sm font-extrabold text-gold">خريطة تتبع مسار العميل</h3>
-          <span id="owner-route-info" class="text-xs text-gray-300">بانتظار تحديد موقع العميل...</span>
+          <h3 class="text-sm font-extrabold text-gold">خريطة متابعة موقع العميل ومسار الطريق</h3>
+          <span id="owner-route-info" class="text-xs font-bold text-sky-300">بانتظار إحداثيات العميل...</span>
         </div>
-        <div id="owner-live-map" class="h-56 w-full overflow-hidden rounded-xl border border-white/10"></div>
+        <div id="owner-live-map"></div>
       </div>
 
-      <!-- قسم المشتركين وتجديد شحن الكروت -->
+      <!-- تبويبات الأقسام والصلاحيات -->
+      <div class="flex flex-wrap gap-2">
+        <button id="tab-all" type="button" onclick="applyOwnerTabDirectly('all')" class="owner-tab rounded-xl bg-gold px-3.5 py-2 text-xs font-extrabold text-black">
+          كل الطلبات والمشتركين
+        </button>
+        <button id="tab-subscribers" type="button" onclick="requestStaffTab('subscribers')" class="owner-tab rounded-xl border border-white/15 bg-black/50 px-3.5 py-2 text-xs font-bold text-gray-200 hover:border-gold/50">
+          المشتركون بالكروت (<span id="count-subscribers">0</span>)
+        </button>
+        <button id="tab-barista1" type="button" onclick="requestStaffTab('barista1')" class="owner-tab rounded-xl border border-white/15 bg-black/50 px-3.5 py-2 text-xs font-bold text-gray-200 hover:border-gold/50">
+          باريستا 1 (<span id="count-barista1">0</span>)
+        </button>
+        <button id="tab-barista2" type="button" onclick="requestStaffTab('barista2')" class="owner-tab rounded-xl border border-white/15 bg-black/50 px-3.5 py-2 text-xs font-bold text-gray-200 hover:border-gold/50">
+          باريستا 2 (<span id="count-barista2">0</span>)
+        </button>
+        <button id="tab-admin_control" type="button" onclick="requestStaffTab('admin_control')" class="owner-tab rounded-xl border border-white/15 bg-black/50 px-3.5 py-2 text-xs font-bold text-gray-200 hover:border-gold/50">
+          إدارة المنيو والأسعار
+        </button>
+        <button id="tab-settings" type="button" onclick="requestStaffTab('settings')" class="owner-tab rounded-xl border border-white/15 bg-black/50 px-3.5 py-2 text-xs font-bold text-gray-200 hover:border-gold/50">
+          السحابة والطباعة والباسوردات
+        </button>
+      </div>
+
+      <!-- لوحة المشتركين بالكروت وتجديد الرصيد -->
       <div id="gm-subscribers-panel" class="space-y-3 rounded-2xl border border-gold/30 bg-black/50 p-4">
         <div class="flex flex-wrap items-center justify-between gap-2">
-          <h3 class="text-sm font-extrabold text-gold">سجل المشتركين وأرصدة الكروت</h3>
-          <span id="gm-subscribers-summary-badge" class="rounded-lg bg-gold/15 px-2.5 py-1 text-xs font-black text-gold">0 عميل مشترك</span>
+          <h3 class="text-sm font-extrabold text-gold">سجل العملاء المشتركين بالكروت (7VIP / VVIP / VIP)</h3>
+          <span id="gm-subscribers-summary-badge" class="rounded-full bg-gold/15 px-3 py-1 text-xs font-extrabold text-gold">0 عميل مشترك</span>
         </div>
         <div id="gm-subscribers-list" class="grid gap-3 md:grid-cols-2"></div>
       </div>
 
-      <!-- إدارة المنيو والأسعار -->
-      <div id="admin-control-panel" class="hidden space-y-4 rounded-2xl border border-gold/30 bg-black/50 p-4">
+      <!-- لوحة إدارة المنيو والأسعار -->
+      <div id="admin-control-panel" class="hidden space-y-4 rounded-2xl border border-white/10 bg-black/50 p-4">
         <div class="flex flex-wrap items-center justify-between gap-2">
-          <h3 class="text-sm font-extrabold text-gold">إدارة قائمة المشروبات والأسعار</h3>
+          <h3 class="text-sm font-extrabold text-gold">إضافة وتعديل وحذف أصناف المنيو</h3>
           <button type="button" onclick="resetMenuToDefault()" class="rounded-xl border border-white/15 bg-white/5 px-3 py-1.5 text-xs font-bold text-gray-300 hover:bg-white/10">
-            استعادة القائمة الافتراضية
+            استعادة المنيو الافتراضي
           </button>
         </div>
 
-        <div class="grid gap-3 sm:grid-cols-7">
-          <div class="sm:col-span-2">
-            <label class="mb-1 block text-[11px] font-bold text-gray-300">اسم الصنف</label>
-            <input id="new-item-name" type="text" placeholder="مثال: لاتيه فستق" class="w-full rounded-xl border border-white/15 bg-black/70 px-3 py-2 text-xs text-white focus:border-gold focus:outline-none" />
-          </div>
-          <div class="sm:col-span-3">
-            <label class="mb-1 block text-[11px] font-bold text-gray-300">التصنيف</label>
-            <select id="new-item-category" class="w-full rounded-xl border border-white/15 bg-black/70 px-3 py-2 text-xs text-white focus:border-gold focus:outline-none">
-              <option value="إسبريسو وقهوة ساخنة">إسبريسو وقهوة ساخنة</option>
-              <option value="قهوة مختصة وتقطير">قهوة مختصة وتقطير</option>
-              <option value="مشروبات مثلجة وآيس كوفي">مشروبات مثلجة وآيس كوفي</option>
-              <option value="ماتشا وشاي ومشروبات دافئة">ماتشا وشاي ومشروبات دافئة</option>
-              <option value="سموزي وفريش ومشروبات طاقة">سموزي وفريش ومشروبات طاقة</option>
-              <option value="مخبوزات وحلويات وسناكس">مخبوزات وحلويات وسناكس</option>
-            </select>
-          </div>
-          <div class="sm:col-span-2">
-            <label class="mb-1 block text-[11px] font-bold text-gray-300">السعر (ج.م)</label>
-            <input id="new-item-price" type="number" step="0.5" min="1" placeholder="85" class="w-full rounded-xl border border-white/15 bg-black/70 px-3 py-2 text-xs text-white focus:border-gold focus:outline-none" />
-          </div>
-          <div class="flex items-end sm:col-span-2">
-            <button type="button" onclick="adminAddMenuItem()" class="w-full rounded-xl bg-emerald-500 py-2 text-xs font-black text-black hover:bg-emerald-400">
-              + إضافة
-            </button>
-          </div>
+        <div class="grid gap-2.5 sm:grid-cols-4">
+          <input id="new-item-name" type="text" placeholder="اسم المشروب الجديد..." class="rounded-xl border border-white/15 bg-charcoal px-3 py-2 text-xs text-white focus:border-gold focus:outline-none" />
+          <select id="new-item-category" class="rounded-xl border border-white/15 bg-charcoal px-3 py-2 text-xs text-white focus:border-gold focus:outline-none">
+            <option value="إسبريسو وقهوة ساخنة">إسبريسو وقهوة ساخنة</option>
+            <option value="قهوة مختصة وتقطير">قهوة مختصة وتقطير</option>
+            <option value="مشروبات مثلجة وآيس كوفي">مشروبات مثلجة وآيس كوفي</option>
+            <option value="ماتشا وشاي ومشروبات دافئة">ماتشا وشاي ومشروبات دافئة</option>
+            <option value="سموزي وفريش ومشروبات طاقة">سموزي وفريش ومشروبات طاقة</option>
+            <option value="مخبوزات وحلويات وسناكس">مخبوزات وحلويات وسناكس</option>
+          </select>
+          <input id="new-item-price" type="number" step="0.5" min="1" placeholder="السعر (ج.م)" class="rounded-xl border border-white/15 bg-charcoal px-3 py-2 text-xs text-white focus:border-gold focus:outline-none" />
+          <button type="button" onclick="adminAddMenuItem()" class="rounded-xl bg-gold px-4 py-2 text-xs font-black text-black hover:bg-goldLight">
+            + إضافة صنف
+          </button>
         </div>
 
-        <input id="admin-menu-search" oninput="renderAdminMenuManager()" type="text" placeholder="ابحث في المنيو..." class="w-full rounded-xl border border-white/15 bg-charcoal px-3 py-1.5 text-xs text-white focus:border-gold focus:outline-none sm:w-64" />
-        <div id="admin-menu-list" class="max-h-80 space-y-2 overflow-y-auto pr-1"></div>
+        <input id="admin-menu-search" type="text" oninput="renderAdminMenuManager()" placeholder="بحث داخل أصناف المنيو..." class="w-full rounded-xl border border-white/15 bg-charcoal px-3 py-2 text-xs text-white focus:border-gold focus:outline-none" />
+        <div id="admin-menu-list" class="max-h-80 space-y-2 overflow-y-auto"></div>
       </div>
 
-      <!-- إعدادات السحابة والطباعة وباسوردات كل فرد -->
+      <!-- لوحة إعدادات السحابة والطباعة وباسوردات الأفراد -->
       <div id="owner-settings-panel" class="hidden space-y-4 rounded-2xl border border-gold/30 bg-black/50 p-4">
         <h3 class="text-sm font-extrabold text-gold">إعدادات السحابة (Firebase) والطباعة وباسوردات الأفراد</h3>
         <div class="grid gap-3 sm:grid-cols-2">
@@ -633,7 +643,7 @@
     </section>
   </main>
 
-  <!-- نافذة باسورد خانة اونر: 301088poro -->
+  <!-- نافذة باسورد خانة اونر -->
   <div id="owner-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
     <div class="w-full max-w-md space-y-4 rounded-3xl border border-gold/40 bg-charcoal p-6 shadow-2xl">
       <div class="flex items-center justify-between">
@@ -652,7 +662,7 @@
     </div>
   </div>
 
-  <!-- نافذة باسورد خاصة بكل فرد (المدير العام / كل مسؤول / كل باريستا) -->
+  <!-- نافذة باسورد خاصة بكل فرد -->
   <div id="staff-role-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
     <div class="w-full max-w-md space-y-4 rounded-3xl border border-sky-400/40 bg-charcoal p-6 shadow-2xl">
       <div class="flex items-center justify-between">
@@ -1870,11 +1880,9 @@
       customerTier = tier;
       document.querySelectorAll('.tier-btn').forEach((btn) => {
         btn.classList.remove('border-2', 'border-gold');
-        btn.classList.add('border', 'border-white/15');
       });
       const activeBtn = document.getElementById(`tier-${tier}-btn`);
       if (activeBtn) {
-        activeBtn.classList.remove('border', 'border-white/15');
         activeBtn.classList.add('border-2', 'border-gold');
       }
 
@@ -2005,9 +2013,9 @@
             <button
               type="button"
               onclick="addDrinkFromCard('${item.id}')"
-              class="shrink-0 rounded-xl bg-gold/20 px-3 py-1.5 text-[11px] font-black text-gold transition hover:bg-gold hover:text-black"
+              class="shrink-0 rounded-xl border border-amber-400/50 bg-amber-500/15 px-3 py-1.5 text-[11px] font-black text-amber-200 transition hover:bg-gold hover:text-black"
             >
-              + اطلب بالكارت
+              دوس بنزين اوردرك
             </button>
           </div>
         `
@@ -3141,11 +3149,9 @@
         customerTier = savedCustomerProfile.tier;
         document.querySelectorAll('.tier-btn').forEach((btn) => {
           btn.classList.remove('border-2', 'border-gold');
-          btn.classList.add('border', 'border-white/15');
         });
         const activeBtn = document.getElementById(`tier-${customerTier}-btn`);
         if (activeBtn) {
-          activeBtn.classList.remove('border', 'border-white/15');
           activeBtn.classList.add('border-2', 'border-gold');
         }
       }
