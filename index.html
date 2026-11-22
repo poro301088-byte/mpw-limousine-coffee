@@ -103,12 +103,12 @@
   </div>
 
   <main class="mx-auto max-w-6xl space-y-6 px-4 py-6">
-    <!-- المرحلة الأولى: دخول العميل واختيار نوع الكارت -->
+    <!-- المرحلة الأولى: التسجيل — اختيار الفئة أولاً ثم النوع والبيانات -->
     <section id="customer-login-step" class="space-y-5 rounded-3xl border border-gold/25 bg-surface p-5 shadow-xl sm:p-6">
       <div class="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3">
         <div>
-          <h2 class="text-base font-extrabold text-gold sm:text-lg">تسجيل دخول العميل واختيار الكارت</h2>
-          <p class="text-xs text-gray-400">سجّل بياناتك أو اختر كارت العضوية أولاً، ثم انتقل لصفحة المشروبات والخريطة والطلب.</p>
+          <h2 class="text-base font-extrabold text-gold sm:text-lg">تسجيل العميل — اختر الفئة أولاً ثم النوع والبيانات</h2>
+          <p class="text-xs text-gray-400">ابدأ باختيار الفئة ثم النوع والاسم والسيارة وأكمل التسجيل ليظهر لك المنيو وجميع بيانات اشتراكك ورصيدك.</p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
           <span id="saved-profile-badge" class="hidden rounded-full border border-emerald-400/40 bg-emerald-500/15 px-3 py-1 text-[11px] font-extrabold text-emerald-300">
@@ -207,54 +207,12 @@
         </div>
       </div>
 
-      <!-- الاسم والنوع والسيارة -->
-      <div class="grid gap-3 sm:grid-cols-3">
-        <div>
-          <label class="mb-1 block text-xs font-bold text-gray-300">اسم العميل</label>
-          <input
-            id="customer-name"
-            type="text"
-            oninput="persistCustomerProfileFromInputs()"
-            placeholder="اكتب اسمك..."
-            class="w-full rounded-xl border border-white/15 bg-charcoal px-3.5 py-2.5 text-xs text-white focus:border-gold focus:outline-none"
-          />
+      <!-- الخطوة 1 من التسجيل: اختيار الفئة أولاً -->
+      <div class="rounded-2xl border border-gold/30 bg-black/45 p-4">
+        <div class="mb-2 flex items-center justify-between">
+          <label class="text-xs font-extrabold text-gold">1. اختر الفئة أولاً</label>
+          <span id="selected-category-label" class="rounded-lg bg-gold/15 px-2.5 py-0.5 text-[11px] font-bold text-goldLight">الفئة المختارة: 7VIP (كارت أسود)</span>
         </div>
-        <div>
-          <label class="mb-1 block text-xs font-bold text-gray-300">النوع</label>
-          <div class="grid grid-cols-2 gap-2">
-            <button
-              id="gender-male-btn"
-              type="button"
-              onclick="setCustomerGender('male')"
-              class="rounded-xl border border-gold bg-gold/20 py-2 text-xs font-extrabold text-gold"
-            >
-              ذكر
-            </button>
-            <button
-              id="gender-female-btn"
-              type="button"
-              onclick="setCustomerGender('female')"
-              class="rounded-xl border border-white/15 bg-black/50 py-2 text-xs font-bold text-gray-300"
-            >
-              أنثى
-            </button>
-          </div>
-        </div>
-        <div>
-          <label class="mb-1 block text-xs font-bold text-gray-300">نوع ولون ورقم السيارة</label>
-          <input
-            id="car-info"
-            type="text"
-            oninput="persistCustomerProfileFromInputs()"
-            placeholder="مثال: مرسيدس سوداء - 777"
-            class="w-full rounded-xl border border-white/15 bg-charcoal px-3.5 py-2.5 text-xs text-white focus:border-gold focus:outline-none"
-          />
-        </div>
-      </div>
-
-      <!-- كروت العضوية الـ 3 + بدون كارت -->
-      <div>
-        <label class="mb-2 block text-xs font-bold text-gray-300">اختر كارت العضوية</label>
         <div class="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
           <button
             id="tier-7vip-btn"
@@ -295,8 +253,56 @@
         </div>
       </div>
 
-      <!-- خانة الكارت والرصيد المتبقي والمنيو الكامل داخل الكارت -->
-      <div id="card-balance-summary-box" class="space-y-4 rounded-2xl border border-gold/35 bg-black/55 p-4">
+      <!-- الخطوة 2 من التسجيل: النوع والاسم والسيارة -->
+      <div class="rounded-2xl border border-white/10 bg-black/45 p-4">
+        <label class="mb-2.5 block text-xs font-extrabold text-gold">2. اختر النوع وأدخل بيانات التسجيل</label>
+        <div class="grid gap-3 sm:grid-cols-3">
+          <div>
+            <label class="mb-1 block text-xs font-bold text-gray-300">النوع</label>
+            <div class="grid grid-cols-2 gap-2">
+              <button
+                id="gender-male-btn"
+                type="button"
+                onclick="setCustomerGender('male')"
+                class="rounded-xl border border-gold bg-gold/20 py-2 text-xs font-extrabold text-gold"
+              >
+                ذكر
+              </button>
+              <button
+                id="gender-female-btn"
+                type="button"
+                onclick="setCustomerGender('female')"
+                class="rounded-xl border border-white/15 bg-black/50 py-2 text-xs font-bold text-gray-300"
+              >
+                أنثى
+              </button>
+            </div>
+          </div>
+          <div>
+            <label class="mb-1 block text-xs font-bold text-gray-300">اسم العميل</label>
+            <input
+              id="customer-name"
+              type="text"
+              oninput="persistCustomerProfileFromInputs()"
+              placeholder="اكتب اسمك..."
+              class="w-full rounded-xl border border-white/15 bg-charcoal px-3.5 py-2.5 text-xs text-white focus:border-gold focus:outline-none"
+            />
+          </div>
+          <div>
+            <label class="mb-1 block text-xs font-bold text-gray-300">نوع ولون ورقم السيارة</label>
+            <input
+              id="car-info"
+              type="text"
+              oninput="persistCustomerProfileFromInputs()"
+              placeholder="مثال: مرسيدس سوداء - 777"
+              class="w-full rounded-xl border border-white/15 bg-charcoal px-3.5 py-2.5 text-xs text-white focus:border-gold focus:outline-none"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- ملخص الكارت والرصيد المتبقي -->
+      <div id="card-balance-summary-box" class="space-y-3 rounded-2xl border border-gold/35 bg-black/55 p-4">
         <div class="flex flex-wrap items-center justify-between gap-2">
           <span id="card-box-badge" class="text-xs font-black text-gold">خانه الكارت — 7VIP (كارت أسود)</span>
           <span class="text-[11px] text-gray-400">يتم خصم قيمة المشروبات تلقائياً من رصيد الكارت المتبقي</span>
@@ -319,25 +325,6 @@
             <div id="card-extra-payable-display" class="mt-0.5 text-sm font-black text-gold">0.00 ج.م</div>
           </div>
         </div>
-
-        <!-- المنيو الكامل داخل الكارت -->
-        <div class="space-y-3 border-t border-white/10 pt-3">
-          <div class="flex flex-wrap items-center justify-between gap-2">
-            <div>
-              <h3 class="text-xs font-extrabold text-gold sm:text-sm">منيو المشروبات الكامل داخل الكارت</h3>
-              <p class="text-[11px] text-gray-400">اختر أي مشروب مباشرة من الكارت وادخل لصفحة الطلب والخريطة.</p>
-            </div>
-            <input
-              id="card-menu-search-input"
-              type="text"
-              oninput="renderCardFullMenu()"
-              placeholder="ابحث عن مشروب داخل الكارت..."
-              class="w-full rounded-xl border border-white/15 bg-charcoal px-3 py-1.5 text-xs text-white focus:border-gold focus:outline-none sm:w-60"
-            />
-          </div>
-          <div id="card-menu-categories-bar" class="flex flex-wrap gap-1.5"></div>
-          <div id="card-full-menu-grid" class="grid max-h-72 gap-2 overflow-y-auto pr-0.5 sm:grid-cols-2"></div>
-        </div>
       </div>
 
       <p id="login-step-error" class="hidden rounded-xl bg-red-500/15 px-3 py-2 text-xs font-bold text-red-300"></p>
@@ -348,12 +335,12 @@
           onclick="proceedToDrinksPage(false)"
           class="w-full rounded-2xl bg-gold px-6 py-3 text-sm font-black text-black shadow-lg transition hover:bg-goldLight sm:w-auto"
         >
-          التالي: المشروبات والخريطة والطلب ←
+          إتمام التسجيل وعرض المنيو وبياناتي ←
         </button>
       </div>
     </section>
 
-    <!-- المرحلة الثانية: صفحة المشروبات والخريطة وسلة الأوردر -->
+    <!-- المرحلة الثانية بعد التسجيل: المنيو وجميع بيانات العميل والاشتراك والرصيد والخريطة -->
     <section id="customer-drinks-and-map-page" class="hidden space-y-6">
       <!-- شريط بيانات العميل المسجل وزر الرجوع -->
       <div class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-gold/30 bg-surface px-4 py-3">
@@ -370,8 +357,40 @@
           onclick="backToLoginStep()"
           class="rounded-xl border border-white/15 bg-white/5 px-3 py-1.5 text-xs font-bold text-gray-200 hover:bg-white/10"
         >
-          ← تعديل البيانات أو الكارت
+          ← تعديل التسجيل أو الفئة
         </button>
+      </div>
+
+      <!-- بطاقة بيانات الاشتراك الكاملة للعميل المسجل -->
+      <div class="space-y-3 rounded-3xl border border-gold/35 bg-surface p-5 shadow-xl">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-2.5">
+          <h2 class="text-sm font-extrabold text-gold sm:text-base">بيانات اشتراكك ورصيدك المسجل</h2>
+          <span id="profile-joined-date-display" class="rounded-full bg-gold/15 px-3 py-1 text-[11px] font-bold text-goldLight">
+            تاريخ الاشتراك: —
+          </span>
+        </div>
+        <div class="grid grid-cols-2 gap-2.5 text-xs sm:grid-cols-5">
+          <div class="rounded-2xl border border-white/10 bg-black/45 p-3">
+            <div class="text-[10px] text-gray-400">الاسم والنوع</div>
+            <div id="profile-name-gender-display" class="mt-0.5 font-extrabold text-white">—</div>
+          </div>
+          <div class="rounded-2xl border border-white/10 bg-black/45 p-3">
+            <div class="text-[10px] text-gray-400">الفئة / الكارت</div>
+            <div id="profile-tier-display" class="mt-0.5 font-extrabold text-gold">—</div>
+          </div>
+          <div class="rounded-2xl border border-white/10 bg-black/45 p-3">
+            <div class="text-[10px] text-gray-400">تاريخ الاشتراك</div>
+            <div id="profile-subscription-date-card" class="mt-0.5 font-extrabold text-sky-300">—</div>
+          </div>
+          <div class="rounded-2xl border border-emerald-500/25 bg-black/45 p-3">
+            <div class="text-[10px] text-emerald-300">المتبقي من الرصيد</div>
+            <div id="profile-remaining-balance-card" class="mt-0.5 font-black text-emerald-300">0.00 ج.م</div>
+          </div>
+          <div class="rounded-2xl border border-white/10 bg-black/45 p-3">
+            <div class="text-[10px] text-gray-400">السيارة والحساب</div>
+            <div id="profile-car-account-display" class="mt-0.5 truncate font-bold text-gray-200">—</div>
+          </div>
+        </div>
       </div>
 
       <!-- خريطة تتبع مسار العميل إلى الكافيه -->
@@ -487,15 +506,15 @@
       </div>
     </section>
 
-    <!-- قسم الاونر والإدارة والباريستا (مقفول بباسورد الاونر) -->
+    <!-- قسم الاونر والإدارة والباريستا (مقفول بباسورد الاونر 7777) -->
     <section id="owner-hidden-content" class="hidden space-y-6 rounded-3xl border-2 border-gold/50 bg-surface p-5 shadow-2xl sm:p-6">
       <div class="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
         <div>
-          <h2 class="text-lg font-black text-gold">لوحة الاونر والمدير العام والمسؤولين والباريستا</h2>
-          <p class="text-xs text-gray-400">إدارة الطلبات الحية، العملاء المشتركين بالكروت، المنيو والأسعار، وباسوردات الأفراد.</p>
+          <h2 class="text-lg font-black text-gold">لوحة الاونر والمدير العام ومدير التشغيل ورقيه والباريستا</h2>
+          <p class="text-xs text-gray-400">الترتيب: المدير العام مستر محمد بورسعيد ← مدير التشغيل مستر محمود بورسعيد ← رقيه ← باريستا 1 ← باريستا 2.</p>
         </div>
         <span id="active-staff-session-badge" class="rounded-full border border-gold/40 bg-gold/15 px-3 py-1 text-xs font-extrabold text-gold">
-          الصلاحية المفعّلة حالياً: المدير العام — محمد بورسعيد
+          الصلاحية المفعّلة حالياً: المدير العام — مستر محمد بورسعيد
         </span>
       </div>
 
@@ -528,24 +547,30 @@
         <div id="owner-live-map"></div>
       </div>
 
-      <!-- تبويبات الأقسام والصلاحيات -->
+      <!-- خانات الأدوار بالترتيب المطلوب -->
       <div class="flex flex-wrap gap-2">
-        <button id="tab-all" type="button" onclick="applyOwnerTabDirectly('all')" class="owner-tab rounded-xl bg-gold px-3.5 py-2 text-xs font-extrabold text-black">
-          كل الطلبات والمشتركين
+        <button id="tab-gm" type="button" onclick="requestStaffTab('gm')" class="owner-tab rounded-xl bg-gold px-3.5 py-2 text-xs font-extrabold text-black">
+          1. المدير العام — مستر محمد بورسعيد
         </button>
-        <button id="tab-subscribers" type="button" onclick="requestStaffTab('subscribers')" class="owner-tab rounded-xl border border-white/15 bg-black/50 px-3.5 py-2 text-xs font-bold text-gray-200 hover:border-gold/50">
-          المشتركون بالكروت (<span id="count-subscribers">0</span>)
+        <button id="tab-ops_mahmoud" type="button" onclick="requestStaffTab('ops_mahmoud')" class="owner-tab rounded-xl border border-white/15 bg-black/50 px-3.5 py-2 text-xs font-bold text-gray-200 hover:border-gold/50">
+          2. مدير التشغيل — مستر محمود بورسعيد
+        </button>
+        <button id="tab-roqaia" type="button" onclick="requestStaffTab('roqaia')" class="owner-tab rounded-xl border border-white/15 bg-black/50 px-3.5 py-2 text-xs font-bold text-gray-200 hover:border-gold/50">
+          3. رقيه (الموافقة على الطلبات)
         </button>
         <button id="tab-barista1" type="button" onclick="requestStaffTab('barista1')" class="owner-tab rounded-xl border border-white/15 bg-black/50 px-3.5 py-2 text-xs font-bold text-gray-200 hover:border-gold/50">
-          باريستا 1 (<span id="count-barista1">0</span>)
+          4. الباريستا 1 (<span id="count-barista1">0</span>)
         </button>
         <button id="tab-barista2" type="button" onclick="requestStaffTab('barista2')" class="owner-tab rounded-xl border border-white/15 bg-black/50 px-3.5 py-2 text-xs font-bold text-gray-200 hover:border-gold/50">
-          باريستا 2 (<span id="count-barista2">0</span>)
+          5. الباريستا 2 (<span id="count-barista2">0</span>)
         </button>
-        <button id="tab-admin_control" type="button" onclick="requestStaffTab('admin_control')" class="owner-tab rounded-xl border border-white/15 bg-black/50 px-3.5 py-2 text-xs font-bold text-gray-200 hover:border-gold/50">
+        <button id="tab-subscribers" type="button" onclick="applyOwnerTabDirectly('subscribers')" class="owner-tab rounded-xl border border-white/15 bg-black/50 px-3.5 py-2 text-xs font-bold text-gray-200 hover:border-gold/50">
+          المشتركون بالكروت (<span id="count-subscribers">0</span>)
+        </button>
+        <button id="tab-admin_control" type="button" onclick="applyOwnerTabDirectly('admin_control')" class="owner-tab rounded-xl border border-white/15 bg-black/50 px-3.5 py-2 text-xs font-bold text-gray-200 hover:border-gold/50">
           إدارة المنيو والأسعار
         </button>
-        <button id="tab-settings" type="button" onclick="requestStaffTab('settings')" class="owner-tab rounded-xl border border-white/15 bg-black/50 px-3.5 py-2 text-xs font-bold text-gray-200 hover:border-gold/50">
+        <button id="tab-settings" type="button" onclick="applyOwnerTabDirectly('settings')" class="owner-tab rounded-xl border border-white/15 bg-black/50 px-3.5 py-2 text-xs font-bold text-gray-200 hover:border-gold/50">
           السحابة والطباعة والباسوردات
         </button>
       </div>
@@ -601,23 +626,23 @@
             <input id="fb-api-key" type="text" class="w-full rounded-xl border border-white/15 bg-charcoal px-3 py-2 text-xs text-white focus:border-gold focus:outline-none" />
           </div>
           <div>
-            <label class="mb-1 block text-xs font-bold text-goldLight">باسورد المدير العام (محمد بورسعيد)</label>
+            <label class="mb-1 block text-xs font-bold text-goldLight">باسورد المدير العام — مستر محمد بورسعيد</label>
             <input id="pass-gm-input" type="text" class="w-full rounded-xl border border-white/15 bg-charcoal px-3 py-2 text-xs font-bold text-gold focus:border-gold focus:outline-none" />
           </div>
           <div>
-            <label class="mb-1 block text-xs font-bold text-sky-300">باسورد المسؤول — محمود بورسعيد</label>
-            <input id="pass-sup-mahmoud-input" type="text" class="w-full rounded-xl border border-white/15 bg-charcoal px-3 py-2 text-xs font-bold text-sky-200 focus:border-sky-400 focus:outline-none" />
+            <label class="mb-1 block text-xs font-bold text-sky-300">باسورد مدير التشغيل — مستر محمود بورسعيد</label>
+            <input id="pass-ops-mahmoud-input" type="text" class="w-full rounded-xl border border-white/15 bg-charcoal px-3 py-2 text-xs font-bold text-sky-200 focus:border-sky-400 focus:outline-none" />
           </div>
           <div>
-            <label class="mb-1 block text-xs font-bold text-cyan-300">باسورد المسؤول — رقيه محمود</label>
-            <input id="pass-sup-roqaia-input" type="text" class="w-full rounded-xl border border-white/15 bg-charcoal px-3 py-2 text-xs font-bold text-cyan-200 focus:border-cyan-400 focus:outline-none" />
+            <label class="mb-1 block text-xs font-bold text-cyan-300">باسورد رقيه (الموافقة على الطلبات)</label>
+            <input id="pass-roqaia-input" type="text" class="w-full rounded-xl border border-white/15 bg-charcoal px-3 py-2 text-xs font-bold text-cyan-200 focus:border-cyan-400 focus:outline-none" />
           </div>
           <div>
-            <label class="mb-1 block text-xs font-bold text-emerald-300">باسورد باريستا 1</label>
+            <label class="mb-1 block text-xs font-bold text-emerald-300">باسورد الباريستا 1</label>
             <input id="pass-b1-input" type="text" class="w-full rounded-xl border border-white/15 bg-charcoal px-3 py-2 text-xs font-bold text-emerald-200 focus:border-emerald-400 focus:outline-none" />
           </div>
           <div>
-            <label class="mb-1 block text-xs font-bold text-indigo-300">باسورد باريستا 2</label>
+            <label class="mb-1 block text-xs font-bold text-indigo-300">باسورد الباريستا 2</label>
             <input id="pass-b2-input" type="text" class="w-full rounded-xl border border-white/15 bg-charcoal px-3 py-2 text-xs font-bold text-indigo-200 focus:border-indigo-400 focus:outline-none" />
           </div>
           <div class="sm:col-span-2">
@@ -638,12 +663,12 @@
         </div>
       </div>
 
-      <!-- قائمة الطلبات الحية ومهام المدير العام والمسؤولين والباريستا -->
+      <!-- قائمة الطلبات الحية ومهام المدير العام ومدير التشغيل ورقيه والباريستا -->
       <div id="orders-feed" class="grid gap-4 md:grid-cols-2"></div>
     </section>
   </main>
 
-  <!-- نافذة باسورد خانة اونر -->
+  <!-- نافذة باسورد خانة اونر: 7777 -->
   <div id="owner-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
     <div class="w-full max-w-md space-y-4 rounded-3xl border border-gold/40 bg-charcoal p-6 shadow-2xl">
       <div class="flex items-center justify-between">
@@ -685,22 +710,22 @@
   <div id="cashier-receipt-print"></div>
 
   <script>
-    const OWNER_PASSWORD = '301088poro';
+    const OWNER_PASSWORD = '7777';
 
     const DEFAULT_STAFF_PASSWORDS = {
-      gm: 'gm2026',
-      sup_mahmoud: 'sup_mb2026',
-      sup_roqaia: 'sup_rm2026',
-      barista1: 'b12026',
-      barista2: 'b22026'
+      gm: '1984',
+      ops_mahmoud: '1988',
+      roqaia: '1998',
+      barista1: '1111',
+      barista2: '2222'
     };
 
     const STAFF_ROLE_LABELS = {
-      gm: 'المدير العام — محمد بورسعيد',
-      sup_mahmoud: 'مسؤول — محمود بورسعيد',
-      sup_roqaia: 'مسؤولة — رقيه محمود',
-      barista1: 'باريستا 1',
-      barista2: 'باريستا 2'
+      gm: 'المدير العام — مستر محمد بورسعيد',
+      ops_mahmoud: 'مدير التشغيل — مستر محمود بورسعيد',
+      roqaia: 'رقيه — الموافقة على الطلبات',
+      barista1: 'الباريستا 1',
+      barista2: 'الباريستا 2'
     };
 
     const BASE_MENU_TUPLES = [
@@ -811,7 +836,6 @@
     let pendingStaffTabAfterAuth = null;
     let activeOwnerTab = 'all';
     let activeCategoryFilter = 'الكل';
-    let activeCardCategoryFilter = 'الكل';
     let cart = [];
     let customerTier = '7vip';
     let customerGender = 'male';
@@ -831,7 +855,7 @@
     let audioCtx = null;
     let masterBus = null;
     let startupStopTimer = null;
-    let brakeStopTimer = null;
+    let hornStopTimer = null;
     let startupSoundDone = false;
 
     let customerMap = null;
@@ -841,6 +865,14 @@
     let ownerMap = null;
     let ownerCustomerMarker = null;
     let ownerRouteLine = null;
+
+    function formatArabicDateNow() {
+      return new Date().toLocaleDateString('ar-EG', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      });
+    }
 
     function loadSavedCustomerProfile() {
       try {
@@ -853,6 +885,7 @@
 
     function saveCustomerProfile(profile) {
       if (!profile) return;
+      const existingJoinedAt = savedCustomerProfile?.joinedAt || formatArabicDateNow();
       savedCustomerProfile = {
         name: (profile.name || '').trim(),
         carInfo: (profile.carInfo || '').trim(),
@@ -860,12 +893,14 @@
         gender: profile.gender || 'male',
         email: (profile.email || '').trim(),
         socialBadge: profile.socialBadge || '',
+        joinedAt: profile.joinedAt || existingJoinedAt,
         registered: Boolean(profile.registered || (profile.name && profile.name.trim()))
       };
       try {
         localStorage.setItem(SAVED_CUSTOMER_PROFILE_KEY, JSON.stringify(savedCustomerProfile));
       } catch {}
       updateSavedProfileUI();
+      updateRegisteredCustomerProfileCards();
     }
 
     function persistCustomerProfileFromInputs() {
@@ -900,6 +935,36 @@
       }
     }
 
+    function updateRegisteredCustomerProfileCards() {
+      const customerName = (document.getElementById('customer-name')?.value || savedCustomerProfile?.name || boundDeviceGmail || '—').trim();
+      const carText = (document.getElementById('car-info')?.value || savedCustomerProfile?.carInfo || 'سيارة العميل').trim();
+      const genderText = customerGender === 'female' ? 'أنثى' : 'ذكر';
+      const remainingFree = getCurrentCustomerRemainingFreeBalance();
+      const subObj = subscribers.find(
+        (s) => s.key === (boundDeviceGmail || customerName).trim().toLowerCase()
+      );
+      const joinedDate = subObj?.joinedAt || savedCustomerProfile?.joinedAt || formatArabicDateNow();
+      const gmailNote = boundDeviceGmail ? ` • ${boundDeviceGmail}` : '';
+
+      const topJoined = document.getElementById('profile-joined-date-display');
+      const nameGenderEl = document.getElementById('profile-name-gender-display');
+      const tierEl = document.getElementById('profile-tier-display');
+      const subDateCard = document.getElementById('profile-subscription-date-card');
+      const remBalanceCard = document.getElementById('profile-remaining-balance-card');
+      const carAccCard = document.getElementById('profile-car-account-display');
+
+      if (topJoined) topJoined.textContent = `تاريخ الاشتراك: ${joinedDate}`;
+      if (nameGenderEl) nameGenderEl.textContent = `${customerName} (${genderText})`;
+      if (tierEl) tierEl.textContent = TIER_LABELS[customerTier] || customerTier;
+      if (subDateCard) subDateCard.textContent = joinedDate;
+      if (remBalanceCard) {
+        remBalanceCard.textContent = getTierFreeAllowance(customerTier) > 0
+          ? `${remainingFree.toFixed(2)} ج.م`
+          : '0.00 ج.م (بدون كارت)';
+      }
+      if (carAccCard) carAccCard.textContent = `${carText}${gmailNote}`;
+    }
+
     function resumeSavedCustomerSession() {
       if (!savedCustomerProfile) return;
       const nameField = document.getElementById('customer-name');
@@ -908,16 +973,7 @@
       if (carField && savedCustomerProfile.carInfo) carField.value = savedCustomerProfile.carInfo;
       if (savedCustomerProfile.gender) setCustomerGender(savedCustomerProfile.gender);
       if (savedCustomerProfile.tier) {
-        customerTier = savedCustomerProfile.tier;
-        document.querySelectorAll('.tier-btn').forEach((btn) => {
-          btn.classList.remove('border-2', 'border-gold');
-          btn.classList.add('border', 'border-white/15');
-        });
-        const activeBtn = document.getElementById(`tier-${customerTier}-btn`);
-        if (activeBtn) {
-          activeBtn.classList.remove('border', 'border-white/15');
-          activeBtn.classList.add('border-2', 'border-gold');
-        }
+        setCustomerTier(savedCustomerProfile.tier);
       }
       proceedToDrinksPage(true);
     }
@@ -1148,75 +1204,57 @@
       }, 3050);
     }
 
-    function playBrakeSound2Sec() {
-      if (brakeStopTimer) clearTimeout(brakeStopTimer);
+    // كلاكس سيارة فاخرة مزدوج (F4 + A4) عند إرسال الطلب من العملاء
+    function playLuxuryCarHorn() {
+      if (hornStopTimer) clearTimeout(hornStopTimer);
 
       const bundle = getAudioOutputNode();
       if (!bundle) return;
       const { ctx, out } = bundle;
 
       const now = ctx.currentTime;
-      const duration = 2.0;
+      const totalDur = 0.72;
 
-      const len = Math.floor(ctx.sampleRate * duration);
-      const padBuffer = ctx.createBuffer(1, len, ctx.sampleRate);
-      const padData = padBuffer.getChannelData(0);
-      let last = 0;
-      for (let i = 0; i < len; i++) {
-        const tNorm = i / len;
-        const white = Math.random() * 2 - 1;
-        const rotorWave = Math.sin(i * 0.032 * (1 - tNorm * 0.55));
-        const envelope = Math.pow(1 - tNorm, 0.72) * (0.7 + 0.3 * rotorWave);
-        last = last * 0.35 + white * 0.65;
-        padData[i] = last * envelope;
-      }
+      const toneHigh = ctx.createOscillator();
+      toneHigh.type = 'sawtooth';
+      toneHigh.frequency.setValueAtTime(440, now);
 
-      const padSrc = ctx.createBufferSource();
-      padSrc.buffer = padBuffer;
+      const toneLow = ctx.createOscillator();
+      toneLow.type = 'triangle';
+      toneLow.frequency.setValueAtTime(349.23, now);
 
-      const padFilter = ctx.createBiquadFilter();
-      padFilter.type = 'bandpass';
-      padFilter.frequency.setValueAtTime(1950, now);
-      padFilter.frequency.exponentialRampToValueAtTime(780, now + duration);
-      padFilter.Q.setValueAtTime(4.2, now);
+      const hornFilter = ctx.createBiquadFilter();
+      hornFilter.type = 'bandpass';
+      hornFilter.frequency.setValueAtTime(920, now);
+      hornFilter.Q.setValueAtTime(2.2, now);
 
-      const squealOsc = ctx.createOscillator();
-      squealOsc.type = 'triangle';
-      squealOsc.frequency.setValueAtTime(1520, now);
-      squealOsc.frequency.exponentialRampToValueAtTime(520, now + 1.55);
-      squealOsc.frequency.exponentialRampToValueAtTime(240, now + duration);
+      const hornGain = ctx.createGain();
+      hornGain.gain.setValueAtTime(0.001, now);
+      hornGain.gain.linearRampToValueAtTime(0.75, now + 0.03);
+      hornGain.gain.setValueAtTime(0.72, now + 0.24);
+      hornGain.gain.linearRampToValueAtTime(0.08, now + 0.31);
+      hornGain.gain.linearRampToValueAtTime(0.85, now + 0.36);
+      hornGain.gain.setValueAtTime(0.8, now + 0.62);
+      hornGain.gain.exponentialRampToValueAtTime(0.002, now + totalDur);
 
-      const squealGain = ctx.createGain();
-      squealGain.gain.setValueAtTime(0.01, now);
-      squealGain.gain.linearRampToValueAtTime(0.28, now + 0.08);
-      squealGain.gain.exponentialRampToValueAtTime(0.002, now + duration);
+      toneHigh.connect(hornFilter);
+      toneLow.connect(hornFilter);
+      hornFilter.connect(hornGain);
+      hornGain.connect(out);
 
-      const brakeMasterGain = ctx.createGain();
-      brakeMasterGain.gain.setValueAtTime(0.02, now);
-      brakeMasterGain.gain.linearRampToValueAtTime(0.92, now + 0.05);
-      brakeMasterGain.gain.exponentialRampToValueAtTime(0.002, now + duration);
+      toneHigh.start(now);
+      toneLow.start(now);
+      toneHigh.stop(now + totalDur);
+      toneLow.stop(now + totalDur);
 
-      padSrc.connect(padFilter);
-      padFilter.connect(brakeMasterGain);
-
-      squealOsc.connect(squealGain);
-      squealGain.connect(brakeMasterGain);
-
-      brakeMasterGain.connect(out);
-
-      padSrc.start(now);
-      squealOsc.start(now);
-
-      padSrc.stop(now + duration);
-      squealOsc.stop(now + duration);
-
-      brakeStopTimer = setTimeout(() => {
+      hornStopTimer = setTimeout(() => {
         try {
-          padSrc.disconnect();
-          squealOsc.disconnect();
-          brakeMasterGain.disconnect();
+          toneHigh.disconnect();
+          toneLow.disconnect();
+          hornFilter.disconnect();
+          hornGain.disconnect();
         } catch {}
-      }, 2050);
+      }, 760);
     }
 
     window.addEventListener('DOMContentLoaded', () => {
@@ -1248,8 +1286,8 @@
           autoPrintOnApprove: Boolean(parsed.autoPrintOnApprove),
           staffPasswords: {
             gm: parsed.staffPasswords?.gm || DEFAULT_STAFF_PASSWORDS.gm,
-            sup_mahmoud: parsed.staffPasswords?.sup_mahmoud || DEFAULT_STAFF_PASSWORDS.sup_mahmoud,
-            sup_roqaia: parsed.staffPasswords?.sup_roqaia || DEFAULT_STAFF_PASSWORDS.sup_roqaia,
+            ops_mahmoud: parsed.staffPasswords?.ops_mahmoud || DEFAULT_STAFF_PASSWORDS.ops_mahmoud,
+            roqaia: parsed.staffPasswords?.roqaia || DEFAULT_STAFF_PASSWORDS.roqaia,
             barista1: parsed.staffPasswords?.barista1 || DEFAULT_STAFF_PASSWORDS.barista1,
             barista2: parsed.staffPasswords?.barista2 || DEFAULT_STAFF_PASSWORDS.barista2
           }
@@ -1322,6 +1360,7 @@
       const memberKey = (email || cleanName).trim().toLowerCase();
       if (!memberKey) return;
 
+      const dateOnlyStr = formatArabicDateNow();
       const nowStr = new Date().toLocaleString('ar-EG', {
         day: '2-digit',
         month: '2-digit',
@@ -1341,6 +1380,7 @@
           gender: gender || prev.gender || 'male',
           ordersCount: (prev.ordersCount || 0) + (addedOrderAmount > 0 ? 1 : 0),
           totalSpent: Number(((prev.totalSpent || 0) + addedOrderAmount).toFixed(2)),
+          joinedAt: prev.joinedAt || dateOnlyStr,
           updatedAt: nowStr
         };
       } else {
@@ -1354,7 +1394,7 @@
           ordersCount: addedOrderAmount > 0 ? 1 : 0,
           totalSpent: Number((addedOrderAmount || 0).toFixed(2)),
           renewedAtMs: 0,
-          joinedAt: nowStr,
+          joinedAt: dateOnlyStr,
           updatedAt: nowStr
         });
       }
@@ -1362,6 +1402,7 @@
       saveSubscribers();
       pushSubscriberToCloud(subscribers.find((s) => s.key === memberKey));
       renderGMSubscribersPanel();
+      updateRegisteredCustomerProfileCards();
     }
 
     function renewSubscriberCardBalance(memberKey, tier) {
@@ -1397,7 +1438,7 @@
           totalSpent: 0,
           renewedAtMs: nowMs,
           renewedAt: nowStr,
-          joinedAt: nowStr,
+          joinedAt: formatArabicDateNow(),
           updatedAt: nowStr
         });
       }
@@ -1408,6 +1449,7 @@
       renderCardBalanceSummary();
       renderCart();
       renderCollectedCustomerOrdersBox();
+      updateRegisteredCustomerProfileCards();
 
       const currentName = (document.getElementById('customer-name')?.value || '').trim().toLowerCase();
       const currentKey = (boundDeviceGmail || currentName || '').toLowerCase();
@@ -1446,7 +1488,7 @@
             ordersCount: 1,
             totalSpent: Number(ord.subtotal || ord.total || 0),
             renewedAtMs: 0,
-            joinedAt: ord.createdAt || '—',
+            joinedAt: ord.createdAt || formatArabicDateNow(),
             updatedAt: ord.createdAt || '—'
           });
         }
@@ -1491,7 +1533,7 @@
               </div>
 
               <div class="flex flex-wrap items-center justify-between gap-2 border-t border-white/10 pt-2 text-[10px] text-gray-400">
-                <span>انضمام: ${sub.joinedAt || '—'}${sub.renewedAt ? ` • تجديد: ${sub.renewedAt}` : ''}</span>
+                <span>اشتراك: ${sub.joinedAt || '—'}${sub.renewedAt ? ` • تجديد: ${sub.renewedAt}` : ''}</span>
                 <button
                   type="button"
                   onclick="renewSubscriberCardBalance('${safeKeyEscaped}', '${sub.tier}')"
@@ -1665,7 +1707,6 @@
             } catch {}
             renderMenuCategories();
             renderDrinksGrid();
-            renderCardFullMenu();
             renderAdminMenuManager();
           }
         }
@@ -1702,6 +1743,7 @@
             renderCollectedCustomerOrdersBox();
             renderCardBalanceSummary();
             renderGMSubscribersPanel();
+            updateRegisteredCustomerProfileCards();
 
             if (detectedNewOrder) {
               showNewOrderBanner(detectedNewOrder);
@@ -1857,6 +1899,8 @@
         ? `رصيد الكارت المجاني المتبقي: ${remainingFree.toFixed(2)} ج.م`
         : 'حساب غير مشترك بكارت مجاني';
 
+      updateRegisteredCustomerProfileCards();
+
       document.getElementById('customer-login-step').classList.add('hidden');
       document.getElementById('customer-drinks-and-map-page').classList.remove('hidden');
 
@@ -1873,7 +1917,6 @@
       document.getElementById('customer-drinks-and-map-page').classList.add('hidden');
       document.getElementById('customer-login-step').classList.remove('hidden');
       renderCardBalanceSummary();
-      renderCardFullMenu();
     }
 
     function setCustomerTier(tier) {
@@ -1884,6 +1927,11 @@
       const activeBtn = document.getElementById(`tier-${tier}-btn`);
       if (activeBtn) {
         activeBtn.classList.add('border-2', 'border-gold');
+      }
+
+      const catLabel = document.getElementById('selected-category-label');
+      if (catLabel) {
+        catLabel.textContent = `الفئة المختارة: ${TIER_LABELS[tier] || tier}`;
       }
 
       const currentName = (document.getElementById('customer-name')?.value || '').trim();
@@ -1908,9 +1956,9 @@
       }
 
       renderCardBalanceSummary();
-      renderCardFullMenu();
       renderCart();
       renderCollectedCustomerOrdersBox();
+      updateRegisteredCustomerProfileCards();
     }
 
     function setCustomerGender(gender) {
@@ -1953,78 +2001,6 @@
       if (extraEl) {
         extraEl.textContent = `${billing.payableAmount.toFixed(2)} ج.م`;
       }
-    }
-
-    function renderCardMenuCategories() {
-      const bar = document.getElementById('card-menu-categories-bar');
-      if (!bar) return;
-      const cats = ['الكل', ...new Set(customMenu.map((m) => m.category))];
-      bar.innerHTML = cats
-        .map((c) => {
-          const active = activeCardCategoryFilter === c;
-          return `
-            <button
-              type="button"
-              onclick="selectCardMenuCategory('${c.replace(/'/g, "\\'")}')"
-              class="rounded-xl px-2.5 py-1 text-[11px] font-extrabold transition ${
-                active
-                  ? 'bg-gold text-black'
-                  : 'border border-white/15 bg-charcoal text-gray-300 hover:border-gold/50'
-              }"
-            >
-              ${c}
-            </button>
-          `;
-        })
-        .join('');
-    }
-
-    function selectCardMenuCategory(cat) {
-      activeCardCategoryFilter = cat;
-      renderCardMenuCategories();
-      renderCardFullMenu();
-    }
-
-    function renderCardFullMenu() {
-      const grid = document.getElementById('card-full-menu-grid');
-      if (!grid) return;
-      const q = (document.getElementById('card-menu-search-input')?.value || '').trim().toLowerCase();
-
-      const filtered = customMenu.filter((m) => {
-        const matchCat = activeCardCategoryFilter === 'الكل' || m.category === activeCardCategoryFilter;
-        const matchSearch = !q || m.name.toLowerCase().includes(q) || m.category.toLowerCase().includes(q);
-        return matchCat && matchSearch;
-      });
-
-      if (filtered.length === 0) {
-        grid.innerHTML = '<div class="col-span-2 rounded-2xl border border-white/10 bg-charcoal p-4 text-center text-xs text-gray-400">لا توجد مشروبات مطابقة للبحث داخل الكارت.</div>';
-        return;
-      }
-
-      grid.innerHTML = filtered
-        .map(
-          (item) => `
-          <div class="flex items-center justify-between gap-2 rounded-2xl border border-white/10 bg-charcoal p-2.5 transition hover:border-gold/50">
-            <div class="min-w-0">
-              <div class="truncate text-xs font-extrabold text-white">${item.name}</div>
-              <div class="text-[10px] text-gray-400">${item.category}</div>
-              <div class="mt-0.5 text-xs font-black text-gold">${Number(item.price).toFixed(2)} ج.م</div>
-            </div>
-            <button
-              type="button"
-              onclick="addDrinkFromCard('${item.id}')"
-              class="shrink-0 rounded-xl border border-amber-400/50 bg-amber-500/15 px-3 py-1.5 text-[11px] font-black text-amber-200 transition hover:bg-gold hover:text-black"
-            >
-              دوس بنزين اوردرك
-            </button>
-          </div>
-        `
-        )
-        .join('');
-    }
-
-    function addDrinkFromCard(itemId) {
-      addToCart(itemId);
     }
 
     function haversineKm(lat1, lon1, lat2, lon2) {
@@ -2359,7 +2335,7 @@
         return;
       }
 
-      playBrakeSound2Sec();
+      playLuxuryCarHorn();
 
       const orderItems = [...cart];
       const subtotal = orderItems.reduce((sum, item) => sum + item.price * item.qty, 0);
@@ -2423,6 +2399,7 @@
       renderCustomerLiveTracker();
       renderCollectedCustomerOrdersBox();
       renderGMSubscribersPanel();
+      updateRegisteredCustomerProfileCards();
       showNewOrderBanner(newOrder);
 
       if (feedback) {
@@ -2553,6 +2530,7 @@
       renderOrdersFeed();
       renderCardBalanceSummary();
       renderGMSubscribersPanel();
+      updateRegisteredCustomerProfileCards();
     }
 
     function renderCustomerLiveTracker() {
@@ -2599,11 +2577,11 @@
 
     function acceptOrderAndSendToPrinter(orderId, roleOrSlot = 'barista1') {
       const slotMap = {
-        gm: { slot: 'barista1', actor: 'المدير العام (محمد بورسعيد) → باريستا 1' },
-        sup_mahmoud: { slot: 'barista1', actor: 'مسؤول (محمود بورسعيد) → باريستا 1' },
-        sup_roqaia: { slot: 'barista1', actor: 'مسؤولة (رقيه محمود) → باريستا 1' },
-        barista1: { slot: 'barista1', actor: 'باريستا 1' },
-        barista2: { slot: 'barista2', actor: 'باريستا 2' }
+        gm: { slot: 'barista1', actor: 'المدير العام — مستر محمد بورسعيد → باريستا 1' },
+        ops_mahmoud: { slot: 'barista1', actor: 'مدير التشغيل — مستر محمود بورسعيد → باريستا 1' },
+        roqaia: { slot: 'barista1', actor: 'رقيه → باريستا 1' },
+        barista1: { slot: 'barista1', actor: 'الباريستا 1' },
+        barista2: { slot: 'barista2', actor: 'الباريستا 2' }
       };
 
       const cfg = slotMap[roleOrSlot] || slotMap.barista1;
@@ -2686,6 +2664,7 @@
       renderCollectedCustomerOrdersBox();
       renderCardBalanceSummary();
       renderGMSubscribersPanel();
+      updateRegisteredCustomerProfileCards();
     }
 
     function sendOrderToPrinter(orderId) {
@@ -2766,6 +2745,7 @@
       document.getElementById('logout-btn').classList.remove('hidden');
       document.getElementById('owner-hidden-content').classList.remove('hidden');
       updateActiveStaffBadge();
+      applyOwnerTabDirectly('gm');
 
       closeOwnerModal();
       renderGMSubscribersPanel();
@@ -2833,13 +2813,7 @@
       updateActiveStaffBadge();
       closeStaffRoleModal();
 
-      const tabToOpen = pendingStaffTabAfterAuth || (
-        pendingStaffRoleForModal === 'barista1'
-          ? 'barista1'
-          : pendingStaffRoleForModal === 'barista2'
-            ? 'barista2'
-            : 'all'
-      );
+      const tabToOpen = pendingStaffTabAfterAuth || pendingStaffRoleForModal;
       applyOwnerTabDirectly(tabToOpen);
     }
 
@@ -2851,23 +2825,7 @@
     }
 
     function requestStaffTab(tab) {
-      if (tab === 'barista1') {
-        openStaffRoleModal('barista1', 'barista1');
-        return;
-      }
-      if (tab === 'barista2') {
-        openStaffRoleModal('barista2', 'barista2');
-        return;
-      }
-      if (tab === 'subscribers') {
-        openStaffRoleModal('gm', 'subscribers');
-        return;
-      }
-      if (tab === 'admin_control' || tab === 'settings') {
-        openStaffRoleModal('gm', tab);
-        return;
-      }
-      openStaffRoleModal('sup_mahmoud', 'all');
+      openStaffRoleModal(tab, tab);
     }
 
     function applyOwnerTabDirectly(tab) {
@@ -2881,7 +2839,7 @@
         activeBtn.className = 'owner-tab rounded-xl bg-gold px-3.5 py-2 text-xs font-extrabold text-black';
       }
 
-      document.getElementById('gm-subscribers-panel').classList.toggle('hidden', tab !== 'all' && tab !== 'subscribers');
+      document.getElementById('gm-subscribers-panel').classList.toggle('hidden', tab !== 'subscribers');
       document.getElementById('admin-control-panel').classList.toggle('hidden', tab !== 'admin_control');
       document.getElementById('owner-settings-panel').classList.toggle('hidden', tab !== 'settings');
       document.getElementById('orders-feed').classList.toggle('hidden', tab === 'admin_control' || tab === 'settings' || tab === 'subscribers');
@@ -2925,8 +2883,8 @@
         .map((o) => {
           const badgeMap = {
             pending_approval: '<span class="rounded-full bg-amber-500/15 px-2.5 py-1 text-[11px] font-extrabold text-amber-300">بانتظار الموافقة</span>',
-            approved_barista1: '<span class="rounded-full bg-sky-500/15 px-2.5 py-1 text-[11px] font-extrabold text-sky-300">مقبول → باريستا 1</span>',
-            approved_barista2: '<span class="rounded-full bg-indigo-500/15 px-2.5 py-1 text-[11px] font-extrabold text-indigo-300">مقبول → باريستا 2</span>',
+            approved_barista1: '<span class="rounded-full bg-sky-500/15 px-2.5 py-1 text-[11px] font-extrabold text-sky-300">مقبول → الباريستا 1</span>',
+            approved_barista2: '<span class="rounded-full bg-indigo-500/15 px-2.5 py-1 text-[11px] font-extrabold text-indigo-300">مقبول → الباريستا 2</span>',
             preparing: '<span class="rounded-full bg-amber-400/15 px-2.5 py-1 text-[11px] font-extrabold text-amber-200">جاري التحضير</span>',
             ready_for_car: '<span class="rounded-full bg-cyan-400/15 px-2.5 py-1 text-[11px] font-extrabold text-cyan-200">جاهز للسيارة</span>',
             completed: '<span class="rounded-full bg-emerald-500/15 px-2.5 py-1 text-[11px] font-extrabold text-emerald-300">تم التسليم</span>',
@@ -2975,19 +2933,19 @@
                   o.status === 'pending_approval'
                     ? `
                       <button type="button" onclick="acceptOrderAndSendToPrinter('${o.id}', 'gm')" class="rounded-xl bg-gold px-3 py-1.5 text-xs font-black text-black hover:bg-goldLight">
-                        🖨️ قبول المدير العام وإرسال للبرينتر
+                        🖨️ موافقة المدير العام (مستر محمد بورسعيد) وإرسال للبرينتر
                       </button>
-                      <button type="button" onclick="acceptOrderAndSendToPrinter('${o.id}', 'sup_mahmoud')" class="rounded-xl bg-sky-400 px-3 py-1.5 text-xs font-black text-black hover:bg-sky-300">
-                        🖨️ قبول محمود بورسعيد وإرسال للبرينتر
+                      <button type="button" onclick="acceptOrderAndSendToPrinter('${o.id}', 'ops_mahmoud')" class="rounded-xl bg-sky-400 px-3 py-1.5 text-xs font-black text-black hover:bg-sky-300">
+                        🖨️ موافقة مدير التشغيل (مستر محمود بورسعيد) وإرسال للبرينتر
                       </button>
-                      <button type="button" onclick="acceptOrderAndSendToPrinter('${o.id}', 'sup_roqaia')" class="rounded-xl bg-cyan-400 px-3 py-1.5 text-xs font-black text-black hover:bg-cyan-300">
-                        🖨️ قبول رقيه محمود وإرسال للبرينتر
+                      <button type="button" onclick="acceptOrderAndSendToPrinter('${o.id}', 'roqaia')" class="rounded-xl bg-cyan-400 px-3 py-1.5 text-xs font-black text-black hover:bg-cyan-300">
+                        🖨️ موافقة رقيه وإرسال للبرينتر
                       </button>
                       <button type="button" onclick="acceptOrderAndSendToPrinter('${o.id}', 'barista1')" class="rounded-xl bg-emerald-500 px-3 py-1.5 text-xs font-black text-black hover:bg-emerald-400">
-                        🖨️ قبول باريستا 1 وإرسال للبرينتر
+                        🖨️ قبول الباريستا 1 وإرسال للبرينتر
                       </button>
                       <button type="button" onclick="acceptOrderAndSendToPrinter('${o.id}', 'barista2')" class="rounded-xl bg-indigo-400 px-3 py-1.5 text-xs font-black text-black hover:bg-indigo-300">
-                        🖨️ قبول باريستا 2 وإرسال للبرينتر
+                        🖨️ قبول الباريستا 2 وإرسال للبرينتر
                       </button>
                       <button type="button" onclick="rejectOrder('${o.id}')" class="rounded-xl bg-red-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-red-500">
                         ✕ رفض
@@ -3054,7 +3012,6 @@
       saveCustomMenu();
       renderMenuCategories();
       renderDrinksGrid();
-      renderCardFullMenu();
       renderAdminMenuManager();
       document.getElementById('new-item-name').value = '';
       document.getElementById('new-item-price').value = '';
@@ -3066,7 +3023,6 @@
       customMenu = customMenu.map((m) => (m.id === id ? { ...m, price } : m));
       saveCustomMenu();
       renderDrinksGrid();
-      renderCardFullMenu();
     }
 
     function adminDeleteMenuItem(id) {
@@ -3074,7 +3030,6 @@
       saveCustomMenu();
       renderMenuCategories();
       renderDrinksGrid();
-      renderCardFullMenu();
       renderAdminMenuManager();
     }
 
@@ -3083,7 +3038,6 @@
       saveCustomMenu();
       renderMenuCategories();
       renderDrinksGrid();
-      renderCardFullMenu();
       renderAdminMenuManager();
     }
 
@@ -3094,8 +3048,8 @@
         autoPrintOnApprove: Boolean(document.getElementById('auto-print-on-approve').checked),
         staffPasswords: {
           gm: (document.getElementById('pass-gm-input')?.value || '').trim() || DEFAULT_STAFF_PASSWORDS.gm,
-          sup_mahmoud: (document.getElementById('pass-sup-mahmoud-input')?.value || '').trim() || DEFAULT_STAFF_PASSWORDS.sup_mahmoud,
-          sup_roqaia: (document.getElementById('pass-sup-roqaia-input')?.value || '').trim() || DEFAULT_STAFF_PASSWORDS.sup_roqaia,
+          ops_mahmoud: (document.getElementById('pass-ops-mahmoud-input')?.value || '').trim() || DEFAULT_STAFF_PASSWORDS.ops_mahmoud,
+          roqaia: (document.getElementById('pass-roqaia-input')?.value || '').trim() || DEFAULT_STAFF_PASSWORDS.roqaia,
           barista1: (document.getElementById('pass-b1-input')?.value || '').trim() || DEFAULT_STAFF_PASSWORDS.barista1,
           barista2: (document.getElementById('pass-b2-input')?.value || '').trim() || DEFAULT_STAFF_PASSWORDS.barista2
         }
@@ -3122,8 +3076,8 @@
       document.getElementById('fb-db-url').value = DEFAULT_DB_URL;
       document.getElementById('fb-api-key').value = '';
       document.getElementById('pass-gm-input').value = DEFAULT_STAFF_PASSWORDS.gm;
-      document.getElementById('pass-sup-mahmoud-input').value = DEFAULT_STAFF_PASSWORDS.sup_mahmoud;
-      document.getElementById('pass-sup-roqaia-input').value = DEFAULT_STAFF_PASSWORDS.sup_roqaia;
+      document.getElementById('pass-ops-mahmoud-input').value = DEFAULT_STAFF_PASSWORDS.ops_mahmoud;
+      document.getElementById('pass-roqaia-input').value = DEFAULT_STAFF_PASSWORDS.roqaia;
       document.getElementById('pass-b1-input').value = DEFAULT_STAFF_PASSWORDS.barista1;
       document.getElementById('pass-b2-input').value = DEFAULT_STAFF_PASSWORDS.barista2;
       document.getElementById('auto-print-on-approve').checked = false;
@@ -3133,8 +3087,8 @@
     document.getElementById('fb-db-url').value = appSettings.dbUrl || DEFAULT_DB_URL;
     document.getElementById('fb-api-key').value = appSettings.apiKey || '';
     document.getElementById('pass-gm-input').value = appSettings.staffPasswords?.gm || DEFAULT_STAFF_PASSWORDS.gm;
-    document.getElementById('pass-sup-mahmoud-input').value = appSettings.staffPasswords?.sup_mahmoud || DEFAULT_STAFF_PASSWORDS.sup_mahmoud;
-    document.getElementById('pass-sup-roqaia-input').value = appSettings.staffPasswords?.sup_roqaia || DEFAULT_STAFF_PASSWORDS.sup_roqaia;
+    document.getElementById('pass-ops-mahmoud-input').value = appSettings.staffPasswords?.ops_mahmoud || DEFAULT_STAFF_PASSWORDS.ops_mahmoud;
+    document.getElementById('pass-roqaia-input').value = appSettings.staffPasswords?.roqaia || DEFAULT_STAFF_PASSWORDS.roqaia;
     document.getElementById('pass-b1-input').value = appSettings.staffPasswords?.barista1 || DEFAULT_STAFF_PASSWORDS.barista1;
     document.getElementById('pass-b2-input').value = appSettings.staffPasswords?.barista2 || DEFAULT_STAFF_PASSWORDS.barista2;
     document.getElementById('auto-print-on-approve').checked = Boolean(appSettings.autoPrintOnApprove);
@@ -3153,6 +3107,10 @@
         const activeBtn = document.getElementById(`tier-${customerTier}-btn`);
         if (activeBtn) {
           activeBtn.classList.add('border-2', 'border-gold');
+        }
+        const catLabel = document.getElementById('selected-category-label');
+        if (catLabel) {
+          catLabel.textContent = `الفئة المختارة: ${TIER_LABELS[customerTier] || customerTier}`;
         }
       }
       if (savedCustomerProfile.socialBadge) {
@@ -3175,9 +3133,8 @@
     }
 
     updateSavedProfileUI();
+    updateRegisteredCustomerProfileCards();
     renderCardBalanceSummary();
-    renderCardMenuCategories();
-    renderCardFullMenu();
     renderMenuCategories();
     renderDrinksGrid();
     renderCart();
