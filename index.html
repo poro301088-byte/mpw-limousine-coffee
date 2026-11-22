@@ -3,25 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MPW Limousine Coffee | تسجيل العميل والمشروبات والمسار</title>
+  <title>MPW Limousine Coffee — طلبات السيارات ولوحة الإدارة والباريستا</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
     tailwind.config = {
       theme: {
         extend: {
-          fontFamily: {
-            cairo: ['Cairo', 'sans-serif']
-          },
           colors: {
-            obsidian: '#0B0B0C',
-            charcoal: '#141417',
             gold: '#D4AF37',
-            goldLight: '#F3D26B'
+            goldLight: '#F3D26A',
+            charcoal: '#121212'
           }
         }
       }
@@ -29,406 +22,273 @@
   </script>
   <style>
     body {
-      font-family: 'Cairo', sans-serif;
-      background-color: #0B0B0C;
-      color: #F9FAFB;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans Arabic', sans-serif;
     }
-
-    #customer-route-map {
+    #customer-route-map, #owner-live-map {
       height: 260px;
       width: 100%;
-      border-radius: 16px;
+      border-radius: 1rem;
       z-index: 1;
     }
-
-    #owner-live-map {
-      height: 220px;
-      width: 100%;
-      border-radius: 14px;
-      z-index: 1;
-    }
-
     #cashier-receipt-print {
       display: none;
     }
-
     @media print {
       body * {
-        visibility: hidden !important;
+        visibility: hidden;
       }
-      #cashier-receipt-print,
-      #cashier-receipt-print * {
-        visibility: visible !important;
+      #cashier-receipt-print, #cashier-receipt-print * {
+        visibility: visible;
       }
       #cashier-receipt-print {
-        display: block !important;
+        display: block;
         position: fixed;
-        left: 0;
-        top: 0;
-        width: 80mm;
-        max-width: 100%;
-        background: #ffffff !important;
-        color: #000000 !important;
-        padding: 8px;
+        inset: 0;
+        background: #fff;
+        color: #000;
+        padding: 16px;
         font-size: 12px;
-        line-height: 1.5;
-        z-index: 99999;
       }
     }
   </style>
 </head>
-<body class="min-h-screen bg-obsidian text-gray-100 selection:bg-gold selection:text-black">
-
-  <!-- عناصر الأوديو للبداية والفرامل -->
-  <audio id="startup-race-audio" preload="auto"></audio>
-  <audio id="brake-stop-audio" preload="auto"></audio>
-
-  <!-- هيدر علوي -->
-  <header class="sticky top-0 z-40 border-b border-gold/25 bg-charcoal/95 backdrop-blur">
-    <div class="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-3">
+<body class="min-h-screen bg-black text-white selection:bg-gold selection:text-black">
+  <header class="sticky top-0 z-30 border-b border-gold/25 bg-charcoal/95 backdrop-blur">
+    <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3">
       <div class="flex items-center gap-3">
-        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-gold to-amber-600 text-lg font-black text-black shadow-lg shadow-gold/20">
-          ☕
+        <div class="flex h-11 w-11 items-center justify-center rounded-2xl border border-gold/50 bg-black text-lg font-black text-gold">
+          MPW
         </div>
         <div>
-          <h1 class="text-base font-extrabold text-gold sm:text-lg">MPW Limousine Coffee</h1>
-          <p class="text-[11px] text-gray-400">تسجيل العميل • قائمة المشروبات • مسار الوصول</p>
+          <h1 class="text-base font-black text-gold sm:text-lg">MPW Limousine Coffee</h1>
+          <p class="text-[11px] text-gray-400">طلب السيارات • بطاقات 7VIP / VVIP / VIP • متابعة الإدارة والباريستا</p>
         </div>
       </div>
 
       <div class="flex flex-wrap items-center gap-2">
-        <span id="sync-status-badge" class="hidden rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-bold text-emerald-300">
-          متصل
-        </span>
-
-        <button type="button" onclick="openOwnerModal()" class="flex items-center gap-1.5 rounded-xl border border-gold bg-gold/15 px-3.5 py-1.5 text-xs font-black text-gold transition hover:bg-gold hover:text-black">
+        <span id="sync-status-badge" class="hidden rounded-full border border-amber-500/40 bg-amber-500/10 px-2.5 py-1 text-[11px] font-bold text-amber-300">محلي</span>
+        <button type="button" onclick="openOwnerModal()" class="flex items-center gap-1.5 rounded-xl border border-gold/50 bg-gold/15 px-3.5 py-2 text-xs font-extrabold text-gold transition hover:bg-gold hover:text-black">
           <span id="owner-lock-icon">👑</span>
           <span id="owner-btn-label">اونر</span>
         </button>
-
-        <button id="logout-btn" type="button" onclick="logoutOwner()" class="hidden rounded-xl border border-red-500/40 bg-red-500/10 px-2.5 py-1.5 text-xs font-bold text-red-300 transition hover:bg-red-500 hover:text-white">
+        <button id="logout-btn" type="button" onclick="logoutOwner()" class="hidden rounded-xl border border-red-500/40 bg-red-500/15 px-3 py-2 text-xs font-bold text-red-300 hover:bg-red-500 hover:text-white">
           خروج
         </button>
       </div>
     </div>
   </header>
 
-  <!-- تنبيه وصول أوردر جديد -->
-  <div id="new-order-banner" class="hidden mx-auto mt-3 max-w-5xl px-4">
-    <div class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-emerald-400/50 bg-emerald-950/70 px-4 py-2.5 text-emerald-100 shadow-lg">
-      <div class="flex items-center gap-2 text-xs font-bold sm:text-sm">
-        <span>🔔</span>
-        <span id="new-order-banner-text">وصل طلب جديد الآن!</span>
-      </div>
-      <button type="button" onclick="document.getElementById('new-order-banner').classList.add('hidden')" class="text-xs text-emerald-300 hover:underline">
-        إغلاق
-      </button>
+  <!-- بانر تنبيه وصول أوردر جديد -->
+  <div id="new-order-banner" class="mx-auto mt-3 hidden max-w-6xl px-4">
+    <div class="flex items-center justify-between gap-3 rounded-2xl border border-gold/50 bg-gold/15 px-4 py-2.5 text-xs font-extrabold text-goldLight">
+      <span id="new-order-banner-text">وصل أوردر جديد</span>
+      <button type="button" onclick="document.getElementById('new-order-banner').classList.add('hidden')" class="rounded-lg bg-black/50 px-2.5 py-1 text-[11px] text-white">إخفاء</button>
     </div>
   </div>
 
-  <!-- المحتوى الرئيسي -->
-  <main class="mx-auto max-w-5xl space-y-6 px-4 py-6">
-
-    <!-- المرحلة 1: تسجيل دخول العميل وربط الجيميل المتواجد على الجهاز -->
-    <section id="customer-login-step" class="space-y-5 rounded-3xl border border-gold/35 bg-charcoal p-5 sm:p-6 shadow-2xl">
+  <main class="mx-auto max-w-6xl space-y-6 px-4 py-6">
+    <!-- مرحلة دخول العميل واختيار الكارت والمنيو الكامل داخل خانة الكارت -->
+    <section id="customer-login-step" class="space-y-5 rounded-3xl border border-gold/30 bg-charcoal p-4 sm:p-6 shadow-2xl">
       <div class="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3">
         <div>
-          <span class="rounded-lg bg-gold/20 px-2.5 py-0.5 text-[11px] font-black text-gold">الخطوة 1 من 2</span>
-          <h2 class="mt-1 text-lg font-extrabold text-white">تسجيل دخول العميل وربط الجيميل</h2>
-          <p class="text-xs text-gray-400">اربط حساب الجيميل المتواجد على جهازك عند منح الأمر، أو ادخل عبر جيميل / فيسبوك لفتح المشروبات</p>
+          <h2 class="text-lg font-extrabold text-gold">تسجيل العميل واختيار البطاقة والمنيو</h2>
+          <p class="text-xs text-gray-400">الكارت الأسود 3000 ج.م مجاناً • الكارت الأزرق 2000 ج.م مجاناً • الكارت الأبيض 1000 ج.م مجاناً</p>
         </div>
+        <span id="social-auth-badge" class="rounded-full bg-white/10 px-3 py-1 text-[11px] font-bold text-gray-300">غير مرتبط بحساب</span>
       </div>
 
-      <!-- ربط حساب الجيميل على الجهاز + دخول جيميل / فيسبوك -->
-      <div class="space-y-3 rounded-2xl border border-gold/25 bg-black/55 p-4">
-        <div class="flex flex-wrap items-center justify-between gap-2">
-          <span class="text-xs font-black text-goldLight">حساب الجيميل على الجهاز وتسجيل الدخول</span>
-          <span id="social-auth-badge" class="rounded-full bg-white/10 px-2.5 py-0.5 text-[10px] font-bold text-gray-300">غير مرتبط</span>
-        </div>
-
-        <button
-          type="button"
-          onclick="requestDeviceGmailBinding()"
-          class="flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-400/50 bg-emerald-500/15 py-2.5 text-xs font-black text-emerald-200 transition hover:bg-emerald-500/25"
-        >
-          <span>🔗</span>
-          <span>ربط التطبيق بحساب الجيميل المتواجد على الجهاز (منح الأمر)</span>
-        </button>
-
-        <!-- مربع منح الأمر وربط الجيميل المتواجد على الجهاز -->
-        <div id="device-gmail-consent-box" class="hidden space-y-2.5 rounded-xl border border-emerald-400/40 bg-charcoal p-3">
-          <p class="text-xs font-bold text-emerald-200">
-            هل تمنح الأمر بربط التطبيق بحساب الجيميل المتواجد على جهازك؟
-          </p>
-          <input
-            id="device-gmail-input"
-            type="email"
-            placeholder="اعتمد أو اكتب حساب الجيميل على الجهاز (مثال: name@gmail.com)"
-            class="w-full rounded-xl border border-white/15 bg-black/70 px-3.5 py-2 text-xs text-white focus:border-emerald-400 focus:outline-none"
-          />
-          <div class="flex gap-2">
-            <button type="button" onclick="grantGmailPermissionAndBind()" class="flex-1 rounded-xl bg-emerald-500 py-2 text-xs font-black text-black hover:bg-emerald-400">
-              منح الأمر وربط الجيميل وفتح المشروبات ☕
-            </button>
-            <button type="button" onclick="cancelDeviceGmailConsent()" class="rounded-xl bg-white/10 px-3.5 py-2 text-xs font-bold text-gray-300">
-              إلغاء
-            </button>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
-          <button type="button" onclick="startSocialLogin('google')" class="flex items-center justify-center gap-2 rounded-xl border border-red-400/50 bg-red-500/15 py-2.5 text-xs font-extrabold text-red-200 transition hover:bg-red-500/25">
-            <span class="text-sm font-black">G</span>
-            <span>دخول عبر جيميل (Gmail)</span>
-          </button>
-          <button type="button" onclick="startSocialLogin('facebook')" class="flex items-center justify-center gap-2 rounded-xl border border-blue-400/50 bg-blue-500/15 py-2.5 text-xs font-extrabold text-blue-200 transition hover:bg-blue-500/25">
-            <span class="text-sm font-black">f</span>
-            <span>دخول عبر فيسبوك (Facebook)</span>
-          </button>
-        </div>
-
-        <div id="social-login-box" class="hidden space-y-2.5 rounded-xl border border-gold/30 bg-charcoal p-3">
-          <label id="social-input-label" class="block text-xs font-bold text-goldLight">أدخل حسابك أو اسمك:</label>
-          <input id="social-account-input" type="text" placeholder="name@gmail.com" class="w-full rounded-xl border border-white/15 bg-black/70 px-3.5 py-2 text-xs text-white focus:border-gold focus:outline-none" />
-          <div class="flex gap-2">
-            <button type="button" onclick="completeLoginAndOpenMenu()" class="flex-1 rounded-xl bg-gold py-2 text-xs font-black text-black hover:bg-goldLight">
-              تأكيد الدخول وفتح صفحة المشروبات ☕
-            </button>
-            <button type="button" onclick="cancelSocialLogin()" class="rounded-xl bg-white/10 px-3.5 py-2 text-xs font-bold text-gray-300">
-              إلغاء
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- بيانات العميل والسيارة وفئة العضوية -->
       <div class="grid gap-4 sm:grid-cols-2">
         <div>
-          <label class="mb-1 block text-xs font-bold text-gray-300">اسم العميل / رقم الهاتف</label>
-          <input id="customer-name" type="text" placeholder="مثال: أستاذ أحمد - 010..." class="w-full rounded-xl border border-white/15 bg-black/60 px-3.5 py-2.5 text-xs text-white focus:border-gold focus:outline-none" />
+          <label class="mb-1 block text-xs font-bold text-gray-300">اسم العميل</label>
+          <input id="customer-name" type="text" placeholder="اكتب اسمك أو اربط الجيميل..." class="w-full rounded-xl border border-white/15 bg-black/60 px-3.5 py-2.5 text-xs text-white focus:border-gold focus:outline-none" />
         </div>
-
         <div>
-          <label class="mb-1 block text-xs font-bold text-gray-300">بيانات السيارة / لونها / رقم اللوحة</label>
-          <input id="car-info" type="text" placeholder="مثال: مرسيدس سوداء - لوحة س أ 1234" class="w-full rounded-xl border border-white/15 bg-black/60 px-3.5 py-2.5 text-xs text-white focus:border-gold focus:outline-none" />
+          <label class="mb-1 block text-xs font-bold text-gray-300">نوع السيارة ولونها / رقمها</label>
+          <input id="car-info" type="text" placeholder="مثال: مرسيدس سوداء - 1234" class="w-full rounded-xl border border-white/15 bg-black/60 px-3.5 py-2.5 text-xs text-white focus:border-gold focus:outline-none" />
         </div>
       </div>
 
-      <!-- فئة العضوية (4 خانات) -->
-      <div>
-        <label class="mb-1.5 block text-xs font-bold text-gray-300">فئة العميل وبطاقة العضوية</label>
-        <div class="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
-          <button type="button" id="tier-7vip-btn" onclick="setCustomerTier('7vip')" class="tier-btn overflow-hidden rounded-2xl border-2 border-gold bg-black p-1.5 text-right transition">
-            <div class="flex h-12 w-full flex-col justify-between rounded-xl border border-gold/50 bg-gradient-to-br from-zinc-900 via-black to-amber-950/60 p-2">
-              <div class="flex items-center justify-between text-[10px] font-black text-gold">
-                <span>MPW</span>
-                <span>7VIP</span>
-              </div>
-              <div class="text-[9px] font-bold text-amber-200/90">BLACK CARD</div>
-            </div>
-            <div class="mt-1 flex items-center justify-between px-0.5">
-              <span class="text-xs font-black text-gold">7VIP</span>
-              <span class="text-[10px] text-gray-300">أسود</span>
-            </div>
+      <!-- أزرار الجنس والدخول السريع -->
+      <div class="grid gap-3 sm:grid-cols-2">
+        <div class="grid grid-cols-2 gap-2">
+          <button id="gender-male-btn" type="button" onclick="setCustomerGender('male')" class="rounded-xl border border-gold bg-gold/20 py-2 text-xs font-extrabold text-gold">ذكر</button>
+          <button id="gender-female-btn" type="button" onclick="setCustomerGender('female')" class="rounded-xl border border-white/15 bg-black/50 py-2 text-xs font-bold text-gray-300">أنثى</button>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button type="button" onclick="requestDeviceGmailBinding()" class="flex-1 rounded-xl border border-emerald-400/40 bg-emerald-500/15 px-3 py-2 text-xs font-extrabold text-emerald-200 hover:bg-emerald-500 hover:text-black">
+            ربط جيميل الجهاز
           </button>
-
-          <button type="button" id="tier-vvip-btn" onclick="setCustomerTier('vvip')" class="tier-btn overflow-hidden rounded-2xl border border-white/15 bg-black p-1.5 text-right transition">
-            <div class="flex h-12 w-full flex-col justify-between rounded-xl border border-sky-400/50 bg-gradient-to-br from-blue-950 via-indigo-950 to-slate-950 p-2">
-              <div class="flex items-center justify-between text-[10px] font-black text-sky-300">
-                <span>MPW</span>
-                <span>VVIP</span>
-              </div>
-              <div class="text-[9px] font-bold text-goldLight">BLUE CARD</div>
-            </div>
-            <div class="mt-1 flex items-center justify-between px-0.5">
-              <span class="text-xs font-black text-sky-300">VVIP</span>
-              <span class="text-[10px] text-gray-300">أزرق</span>
-            </div>
-          </button>
-
-          <button type="button" id="tier-vip-btn" onclick="setCustomerTier('vip')" class="tier-btn overflow-hidden rounded-2xl border border-white/15 bg-black p-1.5 text-right transition">
-            <div class="flex h-12 w-full flex-col justify-between rounded-xl border border-amber-300 bg-gradient-to-br from-white via-stone-100 to-amber-100 p-2">
-              <div class="flex items-center justify-between text-[10px] font-black text-zinc-900">
-                <span>MPW</span>
-                <span class="rounded bg-amber-500/20 px-1 text-amber-800">VIP</span>
-              </div>
-              <div class="text-[9px] font-extrabold text-amber-800">WHITE CARD</div>
-            </div>
-            <div class="mt-1 flex items-center justify-between px-0.5">
-              <span class="text-xs font-black text-white">VIP</span>
-              <span class="text-[10px] text-gray-300">أبيض</span>
-            </div>
-          </button>
-
-          <button type="button" id="tier-none-btn" onclick="setCustomerTier('none')" class="tier-btn overflow-hidden rounded-2xl border border-white/15 bg-black/50 p-1.5 text-right transition">
-            <div class="flex h-12 w-full flex-col justify-between rounded-xl border border-dashed border-white/20 bg-black/60 p-2">
-              <div class="flex items-center justify-between text-[10px] font-bold text-gray-400">
-                <span>MPW</span>
-                <span>👤</span>
-              </div>
-              <div class="text-[9px] font-bold text-gray-400">NO CARD</div>
-            </div>
-            <div class="mt-1 flex items-center justify-between px-0.5">
-              <span class="text-xs font-black text-gray-200">غير مشترك</span>
-              <span class="text-[10px] text-gray-400">بلا كارت</span>
-            </div>
-          </button>
+          <button type="button" onclick="startSocialLogin('google')" class="rounded-xl border border-white/15 bg-black/50 px-3 py-2 text-xs font-bold text-gray-200 hover:border-gold">Google</button>
+          <button type="button" onclick="startSocialLogin('facebook')" class="rounded-xl border border-white/15 bg-black/50 px-3 py-2 text-xs font-bold text-gray-200 hover:border-gold">Facebook</button>
         </div>
       </div>
 
-      <!-- الصفة عند أول زيارة -->
-      <div class="grid grid-cols-2 gap-2.5">
-        <button type="button" id="gender-male-btn" onclick="setCustomerGender('male')" class="rounded-xl border border-gold bg-gold/20 py-2 text-xs font-extrabold text-gold">
-          عميل جديد
+      <!-- مربع ربط جيميل الجهاز -->
+      <div id="device-gmail-consent-box" class="hidden space-y-2.5 rounded-2xl border border-emerald-400/40 bg-black/70 p-3.5 text-xs">
+        <div class="font-extrabold text-emerald-300">ربط حساب الجيميل لحفظ عضويتك ورصيد الكارت:</div>
+        <input id="device-gmail-input" type="email" placeholder="example@gmail.com" class="w-full rounded-xl border border-white/15 bg-charcoal px-3 py-2 text-xs text-white focus:border-emerald-400 focus:outline-none" />
+        <div class="flex gap-2">
+          <button type="button" onclick="grantGmailPermissionAndBind()" class="rounded-xl bg-emerald-500 px-4 py-1.5 text-xs font-black text-black hover:bg-emerald-400">تأكيد الربط والدخول</button>
+          <button type="button" onclick="cancelDeviceGmailConsent()" class="rounded-xl bg-white/10 px-3 py-1.5 text-xs font-bold text-gray-300">إلغاء</button>
+        </div>
+      </div>
+
+      <!-- مربع الدخول السريع -->
+      <div id="social-login-box" class="hidden space-y-2.5 rounded-2xl border border-gold/40 bg-black/70 p-3.5 text-xs">
+        <label id="social-input-label" class="block font-extrabold text-gold">أدخل حسابك للدخول:</label>
+        <input id="social-account-input" type="text" class="w-full rounded-xl border border-white/15 bg-charcoal px-3 py-2 text-xs text-white focus:border-gold focus:outline-none" />
+        <div class="flex gap-2">
+          <button type="button" onclick="completeLoginAndOpenMenu()" class="rounded-xl bg-gold px-4 py-1.5 text-xs font-black text-black hover:bg-goldLight">دخول وفتح المنيو</button>
+          <button type="button" onclick="cancelSocialLogin()" class="rounded-xl bg-white/10 px-3 py-1.5 text-xs font-bold text-gray-300">إلغاء</button>
+        </div>
+      </div>
+
+      <!-- اختيار الكروت الثلاثة -->
+      <div class="grid gap-3 sm:grid-cols-3">
+        <button id="tier-7vip-btn" type="button" onclick="setCustomerTier('7vip')" class="tier-btn rounded-2xl border-2 border-gold bg-black/70 p-3.5 text-right transition">
+          <div class="flex items-center justify-between">
+            <span class="rounded-lg bg-zinc-900 px-2.5 py-0.5 text-xs font-black text-gold border border-gold/40">كارت أسود</span>
+            <span class="text-xs font-black text-emerald-300">3000 ج.م مجاناً</span>
+          </div>
+          <div class="mt-1.5 text-sm font-black text-white">7VIP — الكارت الأسود</div>
+          <p class="mt-0.5 text-[11px] text-gray-400">سحب مشروبات وأصناف بقيمة 3000 جنيه مجاناً</p>
         </button>
-        <button type="button" id="gender-female-btn" onclick="setCustomerGender('female')" class="rounded-xl border border-white/15 bg-black/50 py-2 text-xs font-bold text-gray-300">
-          عميلة جديدة
+
+        <button id="tier-vvip-btn" type="button" onclick="setCustomerTier('vvip')" class="tier-btn rounded-2xl border border-white/15 bg-sky-950/35 p-3.5 text-right transition">
+          <div class="flex items-center justify-between">
+            <span class="rounded-lg bg-sky-500/20 px-2.5 py-0.5 text-xs font-black text-sky-300 border border-sky-400/40">كارت أزرق</span>
+            <span class="text-xs font-black text-emerald-300">2000 ج.م مجاناً</span>
+          </div>
+          <div class="mt-1.5 text-sm font-black text-white">VVIP — الكارت الأزرق</div>
+          <p class="mt-0.5 text-[11px] text-gray-400">طلب مشروبات وأصناف بقيمة 2000 جنيه مجاناً</p>
         </button>
+
+        <button id="tier-vip-btn" type="button" onclick="setCustomerTier('vip')" class="tier-btn rounded-2xl border border-white/15 bg-zinc-100/10 p-3.5 text-right transition">
+          <div class="flex items-center justify-between">
+            <span class="rounded-lg bg-white/20 px-2.5 py-0.5 text-xs font-black text-white border border-white/40">كارت أبيض</span>
+            <span class="text-xs font-black text-emerald-300">1000 ج.م مجاناً</span>
+          </div>
+          <div class="mt-1.5 text-sm font-black text-white">VIP — الكارت الأبيض</div>
+          <p class="mt-0.5 text-[11px] text-gray-400">طلب مشروبات وأصناف بقيمة 1000 جنيه مجاناً</p>
+        </button>
+      </div>
+
+      <!-- خانة الكارت الموحدة: ملخص الرصيد + المنيو كامل بداخل خانة الكارت لكل كارت -->
+      <div class="space-y-4 rounded-2xl border-2 border-gold/45 bg-black/60 p-4">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-2.5">
+          <span id="card-box-badge" class="rounded-xl bg-gold/20 px-3 py-1 text-xs font-black text-gold">خانه الكارت — 7VIP (كارت أسود)</span>
+          <button type="button" onclick="proceedToDrinksPage(false)" class="rounded-xl bg-gold px-4 py-2 text-xs font-black text-black hover:bg-goldLight">
+            الانتقال لصفحة الطلب والخريطة ←
+          </button>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2.5 sm:grid-cols-4 text-xs">
+          <div class="rounded-xl border border-white/10 bg-charcoal p-2.5">
+            <div class="text-[10px] text-gray-400">قيمة الكارت المجانية</div>
+            <div id="card-allowance-display" class="mt-0.5 font-black text-white">3000.00 ج.م</div>
+          </div>
+          <div class="rounded-xl border border-white/10 bg-charcoal p-2.5">
+            <div class="text-[10px] text-gray-400">المغطى مجاناً في السلة</div>
+            <div id="card-cart-free-used-display" class="mt-0.5 font-black text-emerald-300">0.00 ج.م</div>
+          </div>
+          <div class="rounded-xl border border-white/10 bg-charcoal p-2.5">
+            <div class="text-[10px] text-gray-400">المتبقي بالكارت</div>
+            <div id="card-remaining-balance-display" class="mt-0.5 font-black text-sky-300">3000.00 ج.م</div>
+          </div>
+          <div class="rounded-xl border border-white/10 bg-charcoal p-2.5">
+            <div class="text-[10px] text-gray-400">المطلوب دفعه</div>
+            <div id="card-extra-payable-display" class="mt-0.5 font-black text-gold">0.00 ج.م</div>
+          </div>
+        </div>
+
+        <!-- المنيو كامل بداخل خانة الكارت -->
+        <div class="space-y-3 pt-1">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <h3 class="text-sm font-black text-goldLight">منيو المشروبات والأصناف داخل الكارت</h3>
+            <input id="card-menu-search-input" oninput="renderCardFullMenu()" type="text" placeholder="ابحث داخل منيو الكارت..." class="w-full rounded-xl border border-white/15 bg-charcoal px-3 py-1.5 text-xs text-white focus:border-gold focus:outline-none sm:w-60" />
+          </div>
+          <div id="card-menu-categories-bar" class="flex flex-wrap gap-1.5"></div>
+          <div id="card-full-menu-grid" class="grid max-h-96 gap-2.5 overflow-y-auto pr-1 sm:grid-cols-2 lg:grid-cols-3"></div>
+        </div>
       </div>
 
       <p id="login-step-error" class="hidden rounded-xl bg-red-500/15 p-2.5 text-center text-xs font-bold text-red-300"></p>
-
-      <div class="flex flex-wrap gap-2.5">
-        <button type="button" onclick="proceedToDrinksPage()" class="flex-1 rounded-2xl bg-gradient-to-r from-gold to-amber-500 py-3 text-sm font-black text-black shadow-lg shadow-gold/20 transition hover:brightness-110">
-          متابعة إلى صفحة المشروبات والخريطة ☕
-        </button>
-        <button type="button" onclick="submitOrder()" class="rounded-2xl border border-emerald-400/50 bg-emerald-500/15 px-5 py-3 text-sm font-black text-emerald-200 transition hover:bg-emerald-500/25">
-          إرسال الأوردر
-        </button>
-      </div>
     </section>
 
-    <!-- المرحلة 2: صفحة المشروبات والخريطة ومربع تجميع الأوردرات أمام العميل -->
-    <div id="customer-drinks-and-map-page" class="hidden space-y-6">
-
-      <!-- شريط بيانات العميل المسجل + مربع صغير لتجميع الأوردرات أمام العميل -->
-      <div class="grid gap-4 lg:grid-cols-12">
-        <div class="flex flex-col justify-between space-y-3 rounded-2xl border border-emerald-400/35 bg-charcoal p-4 lg:col-span-6">
-          <div class="text-xs space-y-1">
-            <span class="rounded-md bg-emerald-500/20 px-2 py-0.5 font-extrabold text-emerald-300">حساب العميل</span>
-            <div id="logged-customer-display" class="pt-1 font-extrabold text-white"></div>
-            <div id="logged-car-display" class="text-gray-400"></div>
-          </div>
-          <div>
-            <button type="button" onclick="backToLoginStep()" class="rounded-xl border border-white/15 bg-black/50 px-3 py-1.5 text-xs font-bold text-gold hover:border-gold">
-              ✏️ تعديل بيانات الدخول والجيميل والسيارة
-            </button>
-          </div>
+    <!-- صفحة المشروبات والخريطة وسلة الطلبات -->
+    <section id="customer-drinks-and-map-page" class="hidden space-y-6">
+      <div class="flex flex-wrap items-center justify-between gap-3 rounded-3xl border border-gold/30 bg-charcoal p-4">
+        <div class="space-y-0.5">
+          <div id="logged-customer-display" class="text-sm font-black text-gold">العميل</div>
+          <div id="logged-car-display" class="text-xs text-gray-300">السيارة</div>
+          <div id="logged-card-balance-display" class="text-xs font-bold text-emerald-300">رصيد الكارت</div>
         </div>
-
-        <!-- مربع صغير يجمع الأوردرات أمام العميل ليعلم ما طلب ويضيف أو يزيل -->
-        <div class="space-y-2.5 rounded-2xl border border-gold/40 bg-black/65 p-4 lg:col-span-6">
-          <div class="flex items-center justify-between border-b border-white/10 pb-2">
-            <h3 class="text-xs font-black text-gold">📦 أوردراتي المجمّعة (ما تم طلبه)</h3>
-            <span id="collected-orders-count" class="rounded-full bg-gold/20 px-2.5 py-0.5 text-[10px] font-black text-goldLight">0 أوردر</span>
-          </div>
-          <div id="collected-customer-orders-box" class="max-h-40 space-y-2 overflow-y-auto pr-1 text-xs">
-            <p class="py-2 text-center text-gray-500">لا توجد أوردرات مجمّعة بعد — أضف مشروباً أو أرسل أوردرك.</p>
-          </div>
-        </div>
+        <button type="button" onclick="backToLoginStep()" class="rounded-xl border border-white/15 bg-black/60 px-3.5 py-2 text-xs font-bold text-gray-200 hover:border-gold">
+          ← تعديل البيانات أو الكارت
+        </button>
       </div>
 
-      <!-- خريطة تحديد مسار العميل على الطريق قبل الوصول إلينا -->
-      <section id="customer-route-section" class="space-y-3 rounded-3xl border border-sky-400/35 bg-charcoal p-4 sm:p-5 shadow-2xl">
+      <!-- خريطة تحديد موقع العميل ورسم مسار الطريق -->
+      <div class="space-y-3 rounded-3xl border border-sky-400/35 bg-charcoal p-4 sm:p-5">
         <div class="flex flex-wrap items-center justify-between gap-2">
           <div>
-            <h2 class="text-base font-extrabold text-sky-300">🗺️ خريطة المسار المباشر إلى MPW Limousine Coffee</h2>
-            <p class="text-xs text-gray-400">تحديد موقعك الحالي ورسم خط السير على الطريق قبل الوصول إلينا</p>
+            <h3 class="text-sm font-black text-sky-300">موقعك الحالي ومسار الوصول إلى MPW Limousine Coffee</h3>
+            <p id="gps-status" class="text-[11px] text-gray-400">جاري تحديد الموقع...</p>
           </div>
-          <div class="flex flex-wrap items-center gap-2">
-            <button type="button" onclick="captureGPSAndDrawRoute()" class="rounded-xl bg-sky-500/20 px-3.5 py-2 text-xs font-extrabold text-sky-200 hover:bg-sky-500/30">
-              📍 تحديث مساري على الطريق
-            </button>
-            <a id="gps-map-link" href="https://www.google.com/maps/dir/?api=1&destination=31.2465,29.9735" target="_blank" rel="noopener noreferrer" class="rounded-xl border border-gold/40 bg-gold/10 px-3 py-2 text-xs font-extrabold text-gold hover:bg-gold hover:text-black">
-              فتح الاتجاهات في Google Maps ↗
-            </a>
+          <div class="flex items-center gap-3 text-xs font-bold">
+            <span class="text-gold">المسافة: <strong id="route-distance-text">—</strong></span>
+            <span class="text-emerald-300">الوقت: <strong id="route-duration-text">—</strong></span>
+            <a id="gps-map-link" href="#" target="_blank" rel="noopener noreferrer" class="rounded-xl bg-sky-500/20 px-3 py-1.5 text-sky-300 underline">خرائط جوجل ↗</a>
           </div>
         </div>
+        <div id="customer-route-map" class="border border-sky-400/25 bg-black/70"></div>
+      </div>
 
-        <div id="customer-route-map" class="border border-sky-400/30 bg-black/70"></div>
-
-        <div class="grid gap-2 rounded-2xl border border-white/10 bg-black/50 p-3 text-xs sm:grid-cols-3">
-          <div>
-            <span class="text-gray-400">حالة GPS:</span>
-            <strong id="gps-status" class="mr-1 text-emerald-300">جاري تحديد موقعك...</strong>
+      <div class="grid gap-6 lg:grid-cols-12">
+        <!-- قائمة المشروبات الكاملة -->
+        <div class="space-y-4 rounded-3xl border border-white/10 bg-charcoal p-4 sm:p-5 lg:col-span-7">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <h3 class="text-base font-black text-gold">قائمة المشروبات والأصناف</h3>
+            <input id="menu-search-input" oninput="renderDrinksGrid()" type="text" placeholder="ابحث عن مشروب..." class="w-full rounded-xl border border-white/15 bg-black/60 px-3 py-1.5 text-xs text-white focus:border-gold focus:outline-none sm:w-56" />
           </div>
-          <div>
-            <span class="text-gray-400">المسافة على الطريق:</span>
-            <strong id="route-distance-text" class="mr-1 text-gold">—</strong>
-          </div>
-          <div>
-            <span class="text-gray-400">الوقت المتوقع للوصول:</span>
-            <strong id="route-duration-text" class="mr-1 text-sky-300">—</strong>
-          </div>
-        </div>
-      </section>
-
-      <!-- قائمة المشروبات والأصناف + سلة الطلب -->
-      <section id="drinks-menu-section" class="grid gap-5 rounded-3xl border border-gold/30 bg-charcoal p-5 shadow-2xl lg:grid-cols-12">
-        <div class="space-y-4 lg:col-span-8">
-          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3">
-            <div>
-              <h2 class="text-lg font-extrabold text-gold">قائمة المشروبات والأصناف</h2>
-              <p class="text-xs text-gray-400">اضغط «دوس بنزين اوردرك» بجانب كل مشروب لإضافته</p>
-            </div>
-            <input
-              id="menu-search-input"
-              oninput="renderDrinksGrid()"
-              type="text"
-              placeholder="ابحث عن مشروب..."
-              class="w-full rounded-xl border border-white/15 bg-black/60 px-3.5 py-2 text-xs text-white focus:border-gold focus:outline-none sm:w-56"
-            />
-          </div>
-
-          <div id="menu-categories-bar" class="flex flex-wrap gap-2"></div>
+          <div id="menu-categories-bar" class="flex flex-wrap gap-1.5"></div>
           <div id="drinks-grid" class="grid gap-2.5 sm:grid-cols-2"></div>
         </div>
 
-        <!-- سلة الطلب الحالية -->
-        <aside class="flex flex-col justify-between space-y-4 rounded-2xl border border-gold/30 bg-black/50 p-4 lg:col-span-4">
-          <div class="space-y-3">
-            <div class="flex items-center justify-between border-b border-white/10 pb-2.5">
-              <h3 class="text-sm font-black text-goldLight">سلة المشروبات</h3>
-              <span id="cart-total" class="text-sm font-black text-gold">0.00 ج.م</span>
+        <!-- السلة وإرسال الأوردر والأوردرات المجمّعة -->
+        <div class="space-y-4 lg:col-span-5">
+          <div class="space-y-3 rounded-3xl border border-gold/35 bg-charcoal p-4 sm:p-5">
+            <h3 class="text-base font-black text-gold">سلة الطلب الحالي</h3>
+            <div id="cart-items" class="space-y-2 text-xs"></div>
+            <div class="flex items-center justify-between border-t border-white/10 pt-3 text-sm font-black">
+              <span>المطلوب دفعه:</span>
+              <span id="cart-total" class="text-gold">0.00 ج.م</span>
             </div>
+            <button type="button" onclick="submitOrder()" class="w-full rounded-2xl bg-gold py-3 text-sm font-black text-black transition hover:bg-goldLight">
+              إرسال الأوردر الآن
+            </button>
+            <p id="order-feedback" class="text-center text-xs font-bold"></p>
+          </div>
 
-            <div id="cart-items" class="max-h-72 space-y-2 overflow-y-auto pr-1 text-xs">
-              <p class="py-4 text-center text-gray-500">لم تختر مشروبات بعد — اضغط «دوس بنزين اوردرك» من القائمة.</p>
+          <!-- مربع أوردراتي المجمّعة مع عرض الرصيد المجاني المتبقي من الكارت لكل طلب -->
+          <div class="space-y-3 rounded-3xl border border-white/10 bg-charcoal p-4 sm:p-5">
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-black text-goldLight">أوردراتي المجمّعة</h3>
+              <span id="collected-orders-count" class="rounded-full bg-gold/20 px-2.5 py-0.5 text-[11px] font-black text-gold">0 أوردر</span>
             </div>
-          </div>
-
-          <div class="space-y-2.5 pt-2">
-            <button type="button" onclick="submitOrder()" class="w-full rounded-2xl bg-gradient-to-r from-gold to-amber-500 py-3 text-sm font-black text-black shadow-lg shadow-gold/20 transition hover:brightness-110">
-              إرسال الأوردر
-            </button>
-            <p id="order-feedback" class="hidden rounded-xl bg-emerald-500/15 p-2.5 text-center text-xs font-bold text-emerald-300"></p>
-          </div>
-        </aside>
-      </section>
-
-      <!-- متابعة حالة الطلب للعميل + نطق "هتشرب وتفول ياباشا" عند الموافقة -->
-      <section id="customer-order-tracker" class="rounded-3xl border border-emerald-400/30 bg-charcoal/90 p-4 sm:p-5">
-        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3">
-          <div>
-            <h2 class="text-sm font-black text-emerald-300">حالة الأوردر المباشرة</h2>
-            <p class="text-[11px] text-gray-400">عند موافقة المسؤول أو الإدارة أو الباريستا تُنطق: «هتشرب وتفول ياباشا»</p>
-          </div>
-          <div class="flex items-center gap-2">
-            <button type="button" onclick="speakCustomerApprovalPhrase()" class="rounded-xl border border-emerald-400/40 bg-emerald-500/15 px-3 py-1.5 text-xs font-extrabold text-emerald-200 hover:bg-emerald-500/25">
-              🗣️ هتشرب وتفول ياباشا
-            </button>
-            <button type="button" onclick="syncFromCloudNow()" class="rounded-xl border border-white/15 bg-black/50 px-3 py-1.5 text-xs font-bold text-gray-200 hover:border-gold/50">
-              🔄 تحديث
-            </button>
+            <div id="collected-customer-orders-box" class="space-y-2 text-xs"></div>
           </div>
         </div>
-        <div id="customer-live-tracker-body" class="mt-3 text-xs text-gray-300">
-          لم يتم إرسال طلب من هذا الجهاز بعد.
-        </div>
-      </section>
-    </div>
+      </div>
 
-    <!-- لوحة الاونر المخفية بباسورد 301088poro -->
+      <!-- متابعة حالة الأوردر لحظة بلحظة -->
+      <div class="space-y-2 rounded-3xl border border-emerald-500/30 bg-charcoal p-4 sm:p-5">
+        <h3 class="text-sm font-black text-emerald-300">متابعة حالة طلبك لحظة بلحظة</h3>
+        <div id="customer-live-tracker-body" class="text-xs text-gray-300">لم يتم إرسال طلب من هذا الجهاز بعد.</div>
+      </div>
+    </section>
+
+    <!-- لوحة الاونر والمدير العام والمسؤولين والباريستا -->
     <section id="owner-hidden-content" class="hidden space-y-6 rounded-3xl border-2 border-gold/50 bg-charcoal p-4 sm:p-6 shadow-2xl">
       <div class="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
         <div>
@@ -440,6 +300,9 @@
         <div class="flex flex-wrap gap-2">
           <button type="button" onclick="requestStaffTab('all')" id="tab-all" class="owner-tab rounded-xl bg-gold px-3.5 py-2 text-xs font-extrabold text-black">
             🔐 المدير العام والمسؤولون
+          </button>
+          <button type="button" onclick="requestStaffTab('subscribers')" id="tab-subscribers" class="owner-tab rounded-xl border border-gold/40 bg-gold/10 px-3.5 py-2 text-xs font-extrabold text-gold hover:bg-gold hover:text-black">
+            🔐 العملاء المشتركون (<span id="count-subscribers">0</span>)
           </button>
           <button type="button" onclick="requestStaffTab('barista1')" id="tab-barista1" class="owner-tab rounded-xl border border-white/15 bg-black/50 px-3.5 py-2 text-xs font-bold text-gray-200 hover:border-gold/50">
             🔐 باريستا 1 (<span id="count-barista1">0</span>)
@@ -463,7 +326,7 @@
             <span>المدير العام — محمود بورسعيد</span>
             <span>🔑 باسورد</span>
           </div>
-          <div class="text-xs font-extrabold text-white">قبول الأوردرات، إرسالها للبرينتر، الإشراف والأسعار</div>
+          <div class="text-xs font-extrabold text-white">قبول الأوردرات، إرسالها للبرينتر، الإشراف والأسعار والعملاء</div>
         </button>
 
         <button type="button" onclick="openStaffRoleModal('supervisor')" class="rounded-2xl border border-sky-400/30 bg-black/50 p-3.5 text-right space-y-1 transition hover:border-sky-400">
@@ -486,6 +349,20 @@
           </div>
         </div>
       </div>
+
+      <!-- خانة المدير العام: جميع العملاء المشتركين ونوع العضوية وتفاصيل الاشتراك وتجديد شحن الرصيد -->
+      <section id="gm-subscribers-panel" class="space-y-3 rounded-2xl border-2 border-gold/45 bg-black/65 p-4">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-2.5">
+          <div>
+            <h3 class="text-sm font-black text-gold">👑 خانة المدير العام — جميع العملاء المشتركين وتفاصيل العضوية</h3>
+            <p class="text-[11px] text-gray-400">عرض نوع البطاقة (7VIP / VVIP / VIP)، الرصيد المجاني الكلي، المستهلك، المتبقي، وعدد الطلبات، وتجديد شحن الرصيد</p>
+          </div>
+          <span id="gm-subscribers-summary-badge" class="rounded-full bg-gold/20 px-3 py-1 text-xs font-black text-goldLight">0 عميل مشترك</span>
+        </div>
+        <div id="gm-subscribers-list" class="grid gap-3 md:grid-cols-2">
+          <p class="col-span-2 py-3 text-center text-xs text-gray-400">لا يوجد عملاء مشتركون مسجلون بعد.</p>
+        </div>
+      </section>
 
       <!-- خريطة متابعة مسار العميل للاونر -->
       <div class="rounded-2xl border border-sky-400/35 bg-black/55 p-4 space-y-2.5">
@@ -750,11 +627,19 @@
       'none': 'غير مشترك (بلا كارت)'
     };
 
+    const TIER_FREE_ALLOWANCE = {
+      '7vip': 3000,
+      'vvip': 2000,
+      'vip': 1000,
+      'none': 0
+    };
+
     const CAFE_COORDS = { lat: 31.2465, lng: 29.9735 };
     const DEFAULT_DB_URL = 'https://mpw-limousine-coffee-default-rtdb.firebaseio.com';
-    const ORDERS_STORAGE_KEY = 'mpw_limousine_orders_live_v13';
-    const MENU_STORAGE_KEY = 'mpw_limousine_menu_live_v13';
-    const SETTINGS_STORAGE_KEY = 'mpw_limousine_settings_v13';
+    const ORDERS_STORAGE_KEY = 'mpw_limousine_orders_live_v15';
+    const MENU_STORAGE_KEY = 'mpw_limousine_menu_live_v15';
+    const SETTINGS_STORAGE_KEY = 'mpw_limousine_settings_v15';
+    const SUBSCRIBERS_STORAGE_KEY = 'mpw_limousine_subscribers_v15';
     const DEVICE_GMAIL_STORAGE_KEY = 'mpw_device_bound_gmail';
     const LAST_CUSTOMER_ORDER_KEY = 'mpw_limousine_last_customer_order_id';
 
@@ -764,6 +649,7 @@
     let pendingStaffTabAfterAuth = null;
     let activeOwnerTab = 'all';
     let activeCategoryFilter = 'الكل';
+    let activeCardCategoryFilter = 'الكل';
     let cart = [];
     let customerTier = '7vip';
     let customerGender = 'male';
@@ -771,6 +657,7 @@
     let currentGPS = null;
     let customMenu = loadCustomMenu();
     let orders = loadOrders();
+    let subscribers = loadSubscribers();
     let knownOrderIds = new Set(orders.map((o) => o.id));
     let spokenApprovedOrderIds = new Set();
     let appSettings = loadSettings();
@@ -779,7 +666,7 @@
     let cloudPollTimer = null;
 
     let audioCtx = null;
-    let masterCompressor = null;
+    let masterBus = null;
     let startupStopTimer = null;
     let brakeStopTimer = null;
     let startupSoundDone = false;
@@ -792,15 +679,83 @@
     let ownerCustomerMarker = null;
     let ownerRouteLine = null;
 
-    function createSaturationCurve(amount = 45) {
-      const nSamples = 44100;
-      const curve = new Float32Array(nSamples);
-      const deg = Math.PI / 180;
-      for (let i = 0; i < nSamples; ++i) {
-        const x = (i * 2) / nSamples - 1;
-        curve[i] = ((3 + amount) * x * 20 * deg) / (Math.PI + amount * Math.abs(x));
+    function getTierFreeAllowance(tier) {
+      return TIER_FREE_ALLOWANCE[tier] || 0;
+    }
+
+    function getMemberRenewalResetMs(memberKey, tier) {
+      const sub = subscribers.find((s) => s.key === memberKey && s.tier === tier);
+      return Number(sub?.renewedAtMs || 0);
+    }
+
+    function getUsedFreeBalanceForMember(memberKey, tier) {
+      const allowance = getTierFreeAllowance(tier);
+      if (allowance <= 0) return 0;
+
+      const renewalResetMs = getMemberRenewalResetMs(memberKey, tier);
+      const usedFromOrders = orders
+        .filter((o) => {
+          if (o.status === 'rejected') return false;
+          if ((o.customerTier || 'none') !== tier) return false;
+          if (renewalResetMs > 0 && Number(o.createdAtMs || 0) <= renewalResetMs) return false;
+          const key = (o.customerEmail || o.customerName || '').trim().toLowerCase();
+          return key && key === memberKey;
+        })
+        .reduce((sum, o) => sum + Number(o.freeCoveredAmount || 0), 0);
+
+      return Math.min(allowance, Number(usedFromOrders.toFixed(2)));
+    }
+
+    function getCurrentCustomerRemainingFreeBalance() {
+      const allowance = getTierFreeAllowance(customerTier);
+      if (allowance <= 0) return 0;
+
+      const currentName = (document.getElementById('customer-name')?.value || '').trim().toLowerCase();
+      const currentKey = (boundDeviceGmail || currentName || 'guest').toLowerCase();
+      const used = getUsedFreeBalanceForMember(currentKey, customerTier);
+      return Math.max(0, Number((allowance - used).toFixed(2)));
+    }
+
+    function calculateCardBilling(subtotal, tier, remainingFreeBeforeCart) {
+      const safeSub = Math.max(0, Number(subtotal) || 0);
+      const allowance = getTierFreeAllowance(tier);
+      const availFree = Math.max(0, Number(remainingFreeBeforeCart) || 0);
+      const freeCovered = Number(Math.min(safeSub, availFree).toFixed(2));
+      const remainingFreeAfterCart = Number(Math.max(0, availFree - freeCovered).toFixed(2));
+      const payableAmount = Number(Math.max(0, safeSub - freeCovered).toFixed(2));
+
+      return {
+        subtotal: safeSub,
+        allowance,
+        availableFreeBeforeCart: availFree,
+        freeCovered,
+        remainingFreeAfterCart,
+        payableAmount
+      };
+    }
+
+    // محرك صوتي واقعي: تدوير محرك فاره مع كتمة بدء + خامل منخفض + دوّاس بنزين وهدير عادم واقعي
+    function createWarmTubeCurve(drive = 38) {
+      const n = 44100;
+      const curve = new Float32Array(n);
+      for (let i = 0; i < n; i++) {
+        const x = (i * 2) / n - 1;
+        curve[i] = Math.tanh(x * (1 + drive * 0.04)) / Math.tanh(1 + drive * 0.04);
       }
       return curve;
+    }
+
+    function createImpulseResponse(ctx, duration = 0.28, decay = 2.6) {
+      const len = Math.floor(ctx.sampleRate * duration);
+      const impulse = ctx.createBuffer(2, len, ctx.sampleRate);
+      for (let ch = 0; ch < 2; ch++) {
+        const data = impulse.getChannelData(ch);
+        for (let i = 0; i < len; i++) {
+          const t = i / len;
+          data[i] = (Math.random() * 2 - 1) * Math.pow(1 - t, decay) * 0.35;
+        }
+      }
+      return impulse;
     }
 
     function getAudioOutputNode() {
@@ -808,201 +763,224 @@
       if (!Ctx) return null;
       if (!audioCtx) {
         audioCtx = new Ctx();
-        const shaper = audioCtx.createWaveShaper();
-        shaper.curve = createSaturationCurve(55);
-        shaper.oversample = '2x';
 
-        masterCompressor = audioCtx.createDynamicsCompressor();
-        masterCompressor.threshold.setValueAtTime(-12, audioCtx.currentTime);
-        masterCompressor.knee.setValueAtTime(14, audioCtx.currentTime);
-        masterCompressor.ratio.setValueAtTime(8, audioCtx.currentTime);
-        masterCompressor.attack.setValueAtTime(0.002, audioCtx.currentTime);
-        masterCompressor.release.setValueAtTime(0.12, audioCtx.currentTime);
+        const driveShaper = audioCtx.createWaveShaper();
+        driveShaper.curve = createWarmTubeCurve(42);
+        driveShaper.oversample = '2x';
 
-        shaper.connect(masterCompressor);
-        masterCompressor.connect(audioCtx.destination);
-        masterCompressor._inputShaper = shaper;
+        const cabinetEq = audioCtx.createBiquadFilter();
+        cabinetEq.type = 'peaking';
+        cabinetEq.frequency.setValueAtTime(115, audioCtx.currentTime);
+        cabinetEq.gain.setValueAtTime(5.5, audioCtx.currentTime);
+        cabinetEq.Q.setValueAtTime(1.4, audioCtx.currentTime);
+
+        const presenceEq = audioCtx.createBiquadFilter();
+        presenceEq.type = 'lowpass';
+        presenceEq.frequency.setValueAtTime(2800, audioCtx.currentTime);
+        presenceEq.Q.setValueAtTime(0.8, audioCtx.currentTime);
+
+        const roomVerb = audioCtx.createConvolver();
+        roomVerb.buffer = createImpulseResponse(audioCtx, 0.22, 3.0);
+        const wetGain = audioCtx.createGain();
+        wetGain.gain.setValueAtTime(0.14, audioCtx.currentTime);
+
+        const limiter = audioCtx.createDynamicsCompressor();
+        limiter.threshold.setValueAtTime(-10, audioCtx.currentTime);
+        limiter.knee.setValueAtTime(10, audioCtx.currentTime);
+        limiter.ratio.setValueAtTime(10, audioCtx.currentTime);
+        limiter.attack.setValueAtTime(0.002, audioCtx.currentTime);
+        limiter.release.setValueAtTime(0.14, audioCtx.currentTime);
+
+        driveShaper.connect(cabinetEq);
+        cabinetEq.connect(presenceEq);
+        presenceEq.connect(limiter);
+        presenceEq.connect(roomVerb);
+        roomVerb.connect(wetGain);
+        wetGain.connect(limiter);
+        limiter.connect(audioCtx.destination);
+
+        masterBus = { ctx: audioCtx, out: driveShaper };
       }
       if (audioCtx.state === 'suspended') {
         audioCtx.resume().catch(() => {});
       }
-      return { ctx: audioCtx, out: masterCompressor._inputShaper || audioCtx.destination };
+      return masterBus;
     }
 
-    // صوت محرك سيارة رياضي واقعي وعالٍ لمدة 3.0 ثانية بالضبط عند التشغيل
+    // صوت تشغيل محرك واقعي (3 ثوانٍ): صوت سلف/إشعال قصير ثم استقرار المحرك ورفعة بنزين ثم تباطؤ طبيعي
     function playStartupEngine3Sec() {
       if (startupStopTimer) clearTimeout(startupStopTimer);
 
-      const nodeBundle = getAudioOutputNode();
-      if (!nodeBundle) return;
-      const { ctx, out } = nodeBundle;
+      const bundle = getAudioOutputNode();
+      if (!bundle) return;
+      const { ctx, out } = bundle;
 
       const now = ctx.currentTime;
       const duration = 3.0;
 
-      const pulseOsc = ctx.createOscillator();
-      const pulseGain = ctx.createGain();
-      pulseOsc.type = 'square';
-      pulseOsc.frequency.setValueAtTime(24, now);
-      pulseOsc.frequency.exponentialRampToValueAtTime(68, now + 1.05);
-      pulseOsc.frequency.exponentialRampToValueAtTime(42, now + 1.75);
-      pulseOsc.frequency.exponentialRampToValueAtTime(86, now + 2.72);
-      pulseOsc.frequency.exponentialRampToValueAtTime(30, now + duration);
-      pulseGain.gain.setValueAtTime(0.45, now);
+      // تردد أسطوانات المحرك (8 سلندر / محرك ليموزين عميق)
+      const cylFreq = ctx.createOscillator();
+      cylFreq.type = 'sawtooth';
+      cylFreq.frequency.setValueAtTime(34, now);
+      cylFreq.frequency.linearRampToValueAtTime(52, now + 0.35); // لحظة التقاط الإشعال
+      cylFreq.frequency.exponentialRampToValueAtTime(128, now + 1.15); // دوسة بنزين أولى
+      cylFreq.frequency.exponentialRampToValueAtTime(76, now + 1.75); // ارتداد طبيعي
+      cylFreq.frequency.exponentialRampToValueAtTime(164, now + 2.55); // هدير ليموزين صريح
+      cylFreq.frequency.exponentialRampToValueAtTime(46, now + duration); // خامل هادئ
 
-      const exhaustOsc1 = ctx.createOscillator();
-      const exhaustOsc2 = ctx.createOscillator();
-      exhaustOsc1.type = 'sawtooth';
-      exhaustOsc2.type = 'sawtooth';
+      const subOctave = ctx.createOscillator();
+      subOctave.type = 'triangle';
+      subOctave.frequency.setValueAtTime(17, now);
+      subOctave.frequency.linearRampToValueAtTime(26, now + 0.35);
+      subOctave.frequency.exponentialRampToValueAtTime(64, now + 1.15);
+      subOctave.frequency.exponentialRampToValueAtTime(38, now + 1.75);
+      subOctave.frequency.exponentialRampToValueAtTime(82, now + 2.55);
+      subOctave.frequency.exponentialRampToValueAtTime(23, now + duration);
 
-      exhaustOsc1.frequency.setValueAtTime(62, now);
-      exhaustOsc1.frequency.exponentialRampToValueAtTime(210, now + 1.05);
-      exhaustOsc1.frequency.exponentialRampToValueAtTime(132, now + 1.75);
-      exhaustOsc1.frequency.exponentialRampToValueAtTime(265, now + 2.72);
-      exhaustOsc1.frequency.exponentialRampToValueAtTime(74, now + duration);
+      // نبض إشعال الأسطوانات (firing pulses)
+      const firingLfo = ctx.createOscillator();
+      firingLfo.type = 'sine';
+      firingLfo.frequency.setValueAtTime(14, now);
+      firingLfo.frequency.linearRampToValueAtTime(28, now + 0.35);
+      firingLfo.frequency.exponentialRampToValueAtTime(68, now + 1.15);
+      firingLfo.frequency.exponentialRampToValueAtTime(42, now + 1.75);
+      firingLfo.frequency.exponentialRampToValueAtTime(84, now + 2.55);
+      firingLfo.frequency.exponentialRampToValueAtTime(24, now + duration);
 
-      exhaustOsc2.frequency.setValueAtTime(93, now);
-      exhaustOsc2.frequency.exponentialRampToValueAtTime(315, now + 1.05);
-      exhaustOsc2.frequency.exponentialRampToValueAtTime(198, now + 1.75);
-      exhaustOsc2.frequency.exponentialRampToValueAtTime(398, now + 2.72);
-      exhaustOsc2.frequency.exponentialRampToValueAtTime(111, now + duration);
+      const firingDepth = ctx.createGain();
+      firingDepth.gain.setValueAtTime(0.32, now);
 
-      const noiseSize = Math.floor(ctx.sampleRate * duration);
-      const noiseBuffer = ctx.createBuffer(1, noiseSize, ctx.sampleRate);
-      const noiseData = noiseBuffer.getChannelData(0);
-      let b0 = 0, b1 = 0, b2 = 0;
-      for (let i = 0; i < noiseSize; i++) {
-        const white = Math.random() * 2 - 1;
-        b0 = 0.997 * b0 + white * 0.029;
-        b1 = 0.985 * b1 + white * 0.032;
-        b2 = 0.950 * b2 + white * 0.048;
-        noiseData[i] = (b0 + b1 + b2 + white * 0.25) * 0.8;
+      // هواء العادم والتربو/السحب الواقعي (Pink + Brown Noise)
+      const noiseLen = Math.floor(ctx.sampleRate * duration);
+      const airBuffer = ctx.createBuffer(1, noiseLen, ctx.sampleRate);
+      const airData = airBuffer.getChannelData(0);
+      let brown = 0;
+      for (let i = 0; i < noiseLen; i++) {
+        const w = Math.random() * 2 - 1;
+        brown = (brown + 0.045 * w) / 1.045;
+        airData[i] = brown * 2.4 + w * 0.14;
       }
+      const airSrc = ctx.createBufferSource();
+      airSrc.buffer = airBuffer;
 
-      const noiseSrc = ctx.createBufferSource();
-      noiseSrc.buffer = noiseBuffer;
+      const exhaustBodyFilter = ctx.createBiquadFilter();
+      exhaustBodyFilter.type = 'bandpass';
+      exhaustBodyFilter.frequency.setValueAtTime(160, now);
+      exhaustBodyFilter.frequency.exponentialRampToValueAtTime(620, now + 1.15);
+      exhaustBodyFilter.frequency.exponentialRampToValueAtTime(340, now + 1.75);
+      exhaustBodyFilter.frequency.exponentialRampToValueAtTime(780, now + 2.55);
+      exhaustBodyFilter.frequency.exponentialRampToValueAtTime(185, now + duration);
+      exhaustBodyFilter.Q.setValueAtTime(1.6, now);
 
-      const exhaustFilter = ctx.createBiquadFilter();
-      exhaustFilter.type = 'lowpass';
-      exhaustFilter.frequency.setValueAtTime(520, now);
-      exhaustFilter.frequency.exponentialRampToValueAtTime(2400, now + 2.6);
-      exhaustFilter.frequency.exponentialRampToValueAtTime(480, now + duration);
-      exhaustFilter.Q.setValueAtTime(2.6, now);
+      const engineMixGain = ctx.createGain();
+      engineMixGain.gain.setValueAtTime(0.01, now);
+      engineMixGain.gain.linearRampToValueAtTime(0.88, now + 0.22);
+      engineMixGain.gain.setValueAtTime(0.92, now + 2.55);
+      engineMixGain.gain.exponentialRampToValueAtTime(0.002, now + duration);
 
-      const masterGain = ctx.createGain();
-      masterGain.gain.setValueAtTime(0.05, now);
-      masterGain.gain.linearRampToValueAtTime(0.95, now + 0.14);
-      masterGain.gain.setValueAtTime(0.95, now + 2.68);
-      masterGain.gain.exponentialRampToValueAtTime(0.003, now + duration);
+      firingLfo.connect(firingDepth);
+      firingDepth.connect(engineMixGain.gain);
 
-      pulseOsc.connect(pulseGain);
-      pulseGain.connect(exhaustFilter);
-      exhaustOsc1.connect(exhaustFilter);
-      exhaustOsc2.connect(exhaustFilter);
-      noiseSrc.connect(exhaustFilter);
+      cylFreq.connect(exhaustBodyFilter);
+      subOctave.connect(exhaustBodyFilter);
+      airSrc.connect(exhaustBodyFilter);
 
-      exhaustFilter.connect(masterGain);
-      masterGain.connect(out);
+      exhaustBodyFilter.connect(engineMixGain);
+      engineMixGain.connect(out);
 
-      pulseOsc.start(now);
-      exhaustOsc1.start(now);
-      exhaustOsc2.start(now);
-      noiseSrc.start(now);
+      cylFreq.start(now);
+      subOctave.start(now);
+      firingLfo.start(now);
+      airSrc.start(now);
 
-      pulseOsc.stop(now + duration);
-      exhaustOsc1.stop(now + duration);
-      exhaustOsc2.stop(now + duration);
-      noiseSrc.stop(now + duration);
+      cylFreq.stop(now + duration);
+      subOctave.stop(now + duration);
+      firingLfo.stop(now + duration);
+      airSrc.stop(now + duration);
 
       startupSoundDone = true;
       startupStopTimer = setTimeout(() => {
         try {
-          pulseOsc.disconnect();
-          exhaustOsc1.disconnect();
-          exhaustOsc2.disconnect();
-          noiseSrc.disconnect();
-          masterGain.disconnect();
+          cylFreq.disconnect();
+          subOctave.disconnect();
+          firingLfo.disconnect();
+          airSrc.disconnect();
+          engineMixGain.disconnect();
         } catch {}
       }, 3050);
     }
 
-    // صوت فرامل وتوقف سيارة واقعي وعالٍ لمدة ثانيتين (2.0 ثانية) بالضبط عند إرسال الأوردر
+    // صوت فرامل واقعي (ثانيتان): احتكاك تيل الفرامل بالقرص + صرير خفيف يتناقص بتوقف العجلات
     function playBrakeSound2Sec() {
       if (brakeStopTimer) clearTimeout(brakeStopTimer);
 
-      const nodeBundle = getAudioOutputNode();
-      if (!nodeBundle) return;
-      const { ctx, out } = nodeBundle;
+      const bundle = getAudioOutputNode();
+      if (!bundle) return;
+      const { ctx, out } = bundle;
 
       const now = ctx.currentTime;
       const duration = 2.0;
 
-      const bufferSize = Math.floor(ctx.sampleRate * duration);
-      const frictionBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-      const data = frictionBuffer.getChannelData(0);
-      for (let i = 0; i < bufferSize; i++) {
-        const tNorm = i / bufferSize;
-        const envelope = Math.pow(1 - tNorm, 0.55) * (0.75 + 0.25 * Math.sin(i * 0.045));
-        data[i] = (Math.random() * 2 - 1) * envelope;
+      // ضوضاء احتكاك معدنية دقيقة (Brake Pad Friction)
+      const len = Math.floor(ctx.sampleRate * duration);
+      const padBuffer = ctx.createBuffer(1, len, ctx.sampleRate);
+      const padData = padBuffer.getChannelData(0);
+      let last = 0;
+      for (let i = 0; i < len; i++) {
+        const tNorm = i / len;
+        const white = Math.random() * 2 - 1;
+        // نغمة احتكاك متقطعة طفيفة مع هبوط السرعة
+        const rotorWave = Math.sin(i * 0.032 * (1 - tNorm * 0.55));
+        const envelope = Math.pow(1 - tNorm, 0.72) * (0.7 + 0.3 * rotorWave);
+        last = last * 0.35 + white * 0.65;
+        padData[i] = last * envelope;
       }
 
-      const frictionSource = ctx.createBufferSource();
-      frictionSource.buffer = frictionBuffer;
+      const padSrc = ctx.createBufferSource();
+      padSrc.buffer = padBuffer;
 
-      const frictionBand = ctx.createBiquadFilter();
-      frictionBand.type = 'bandpass';
-      frictionBand.frequency.setValueAtTime(2350, now);
-      frictionBand.frequency.exponentialRampToValueAtTime(1050, now + duration);
-      frictionBand.Q.setValueAtTime(5.2, now);
+      const padFilter = ctx.createBiquadFilter();
+      padFilter.type = 'bandpass';
+      padFilter.frequency.setValueAtTime(1950, now);
+      padFilter.frequency.exponentialRampToValueAtTime(780, now + duration);
+      padFilter.Q.setValueAtTime(4.2, now);
 
-      const squeal1 = ctx.createOscillator();
-      const squeal2 = ctx.createOscillator();
-      squeal1.type = 'sawtooth';
-      squeal2.type = 'triangle';
+      // صرير فرملة واقعي يتدرج هبوطاً حتى التوقف
+      const squealOsc = ctx.createOscillator();
+      squealOsc.type = 'triangle';
+      squealOsc.frequency.setValueAtTime(1520, now);
+      squealOsc.frequency.exponentialRampToValueAtTime(520, now + 1.55);
+      squealOsc.frequency.exponentialRampToValueAtTime(240, now + duration);
 
-      squeal1.frequency.setValueAtTime(1780, now);
-      squeal1.frequency.exponentialRampToValueAtTime(640, now + 1.75);
-      squeal1.frequency.exponentialRampToValueAtTime(340, now + duration);
+      const squealGain = ctx.createGain();
+      squealGain.gain.setValueAtTime(0.01, now);
+      squealGain.gain.linearRampToValueAtTime(0.28, now + 0.08);
+      squealGain.gain.exponentialRampToValueAtTime(0.002, now + duration);
 
-      squeal2.frequency.setValueAtTime(2460, now);
-      squeal2.frequency.exponentialRampToValueAtTime(890, now + 1.75);
-      squeal2.frequency.exponentialRampToValueAtTime(480, now + duration);
+      const brakeMasterGain = ctx.createGain();
+      brakeMasterGain.gain.setValueAtTime(0.02, now);
+      brakeMasterGain.gain.linearRampToValueAtTime(0.92, now + 0.05);
+      brakeMasterGain.gain.exponentialRampToValueAtTime(0.002, now + duration);
 
-      const squealFilter = ctx.createBiquadFilter();
-      squealFilter.type = 'bandpass';
-      squealFilter.frequency.setValueAtTime(1850, now);
-      squealFilter.frequency.exponentialRampToValueAtTime(750, now + duration);
-      squealFilter.Q.setValueAtTime(3.0, now);
+      padSrc.connect(padFilter);
+      padFilter.connect(brakeMasterGain);
 
-      const gain = ctx.createGain();
-      gain.gain.setValueAtTime(0.05, now);
-      gain.gain.linearRampToValueAtTime(0.98, now + 0.06);
-      gain.gain.setValueAtTime(0.92, now + 1.55);
-      gain.gain.exponentialRampToValueAtTime(0.003, now + duration);
+      squealOsc.connect(squealGain);
+      squealGain.connect(brakeMasterGain);
 
-      frictionSource.connect(frictionBand);
-      frictionBand.connect(gain);
+      brakeMasterGain.connect(out);
 
-      squeal1.connect(squealFilter);
-      squeal2.connect(squealFilter);
-      squealFilter.connect(gain);
+      padSrc.start(now);
+      squealOsc.start(now);
 
-      gain.connect(out);
-
-      frictionSource.start(now);
-      squeal1.start(now);
-      squeal2.start(now);
-
-      frictionSource.stop(now + duration);
-      squeal1.stop(now + duration);
-      squeal2.stop(now + duration);
+      padSrc.stop(now + duration);
+      squealOsc.stop(now + duration);
 
       brakeStopTimer = setTimeout(() => {
         try {
-          frictionSource.disconnect();
-          squeal1.disconnect();
-          squeal2.disconnect();
-          gain.disconnect();
+          padSrc.disconnect();
+          squealOsc.disconnect();
+          brakeMasterGain.disconnect();
         } catch {}
       }, 2050);
     }
@@ -1014,9 +992,9 @@
     document.addEventListener(
       'pointerdown',
       () => {
-        const nodeBundle = getAudioOutputNode();
-        if (nodeBundle && nodeBundle.ctx.state === 'suspended') {
-          nodeBundle.ctx.resume().then(() => {
+        const bundle = getAudioOutputNode();
+        if (bundle && bundle.ctx.state === 'suspended') {
+          bundle.ctx.resume().then(() => {
             if (!startupSoundDone) playStartupEngine3Sec();
           }).catch(() => {});
         } else if (!startupSoundDone) {
@@ -1088,6 +1066,212 @@
       } catch {}
     }
 
+    function loadSubscribers() {
+      try {
+        const raw = localStorage.getItem(SUBSCRIBERS_STORAGE_KEY);
+        return raw ? JSON.parse(raw) : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function saveSubscribers() {
+      try {
+        localStorage.setItem(SUBSCRIBERS_STORAGE_KEY, JSON.stringify(subscribers));
+      } catch {}
+    }
+
+    function upsertSubscriberRecord({ name, email, carInfo, tier, gender, addedOrderAmount = 0 }) {
+      if (!tier || tier === 'none') return;
+      const cleanName = (name || email || 'عميل مشترك').trim();
+      const memberKey = (email || cleanName).trim().toLowerCase();
+      if (!memberKey) return;
+
+      const nowStr = new Date().toLocaleString('ar-EG', {
+        day: '2-digit',
+        month: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+
+      const existingIdx = subscribers.findIndex((s) => s.key === memberKey);
+      if (existingIdx >= 0) {
+        const prev = subscribers[existingIdx];
+        subscribers[existingIdx] = {
+          ...prev,
+          name: cleanName,
+          email: email || prev.email || '',
+          carInfo: carInfo || prev.carInfo || 'سيارة العميل',
+          tier,
+          gender: gender || prev.gender || 'male',
+          ordersCount: (prev.ordersCount || 0) + (addedOrderAmount > 0 ? 1 : 0),
+          totalSpent: Number(((prev.totalSpent || 0) + addedOrderAmount).toFixed(2)),
+          updatedAt: nowStr
+        };
+      } else {
+        subscribers.unshift({
+          key: memberKey,
+          name: cleanName,
+          email: email || '',
+          carInfo: carInfo || 'سيارة العميل',
+          tier,
+          gender: gender || 'male',
+          ordersCount: addedOrderAmount > 0 ? 1 : 0,
+          totalSpent: Number((addedOrderAmount || 0).toFixed(2)),
+          renewedAtMs: 0,
+          joinedAt: nowStr,
+          updatedAt: nowStr
+        });
+      }
+
+      saveSubscribers();
+      pushSubscriberToCloud(subscribers.find((s) => s.key === memberKey));
+      renderGMSubscribersPanel();
+    }
+
+    // تجديد وإعادة شحن رصيد الكارت المجاني للمشترك من لوحة المدير العام
+    function renewSubscriberCardBalance(memberKey, tier) {
+      const allowance = getTierFreeAllowance(tier);
+      if (allowance <= 0) return;
+
+      const nowMs = Date.now();
+      const nowStr = new Date(nowMs).toLocaleString('ar-EG', {
+        day: '2-digit',
+        month: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+
+      const idx = subscribers.findIndex((s) => s.key === memberKey);
+      if (idx >= 0) {
+        subscribers[idx] = {
+          ...subscribers[idx],
+          tier,
+          renewedAtMs: nowMs,
+          renewedAt: nowStr,
+          updatedAt: nowStr
+        };
+      } else {
+        subscribers.unshift({
+          key: memberKey,
+          name: memberKey,
+          email: memberKey.includes('@') ? memberKey : '',
+          carInfo: 'سيارة العميل',
+          tier,
+          gender: 'male',
+          ordersCount: 0,
+          totalSpent: 0,
+          renewedAtMs: nowMs,
+          renewedAt: nowStr,
+          joinedAt: nowStr,
+          updatedAt: nowStr
+        });
+      }
+
+      saveSubscribers();
+      pushSubscriberToCloud(subscribers.find((s) => s.key === memberKey));
+      renderGMSubscribersPanel();
+      renderCardBalanceSummary();
+      renderCart();
+      renderCollectedCustomerOrdersBox();
+
+      const currentName = (document.getElementById('customer-name')?.value || '').trim().toLowerCase();
+      const currentKey = (boundDeviceGmail || currentName || '').toLowerCase();
+      if (currentKey && currentKey === memberKey) {
+        const remEl = document.getElementById('logged-card-balance-display');
+        if (remEl) {
+          remEl.textContent = `رصيد الكارت المجاني المتبقي: ${allowance.toFixed(2)} ج.م`;
+        }
+      }
+    }
+
+    function renderGMSubscribersPanel() {
+      const listEl = document.getElementById('gm-subscribers-list');
+      const countBadge = document.getElementById('count-subscribers');
+      const summaryBadge = document.getElementById('gm-subscribers-summary-badge');
+
+      const memberOrders = orders.filter((o) => ['7vip', 'vvip', 'vip'].includes(o.customerTier));
+      const combinedMap = new Map();
+
+      subscribers.forEach((sub) => {
+        if (!['7vip', 'vvip', 'vip'].includes(sub.tier)) return;
+        combinedMap.set(sub.key, { ...sub });
+      });
+
+      memberOrders.forEach((ord) => {
+        const key = (ord.customerEmail || ord.customerName || ord.id).trim().toLowerCase();
+        const prev = combinedMap.get(key);
+        if (!prev) {
+          combinedMap.set(key, {
+            key,
+            name: ord.customerName || 'عميل مشترك',
+            email: ord.customerEmail || '',
+            carInfo: ord.carInfo || 'سيارة العميل',
+            tier: ord.customerTier,
+            gender: ord.customerGender || 'male',
+            ordersCount: 1,
+            totalSpent: Number(ord.subtotal || ord.total || 0),
+            renewedAtMs: 0,
+            joinedAt: ord.createdAt || '—',
+            updatedAt: ord.createdAt || '—'
+          });
+        }
+      });
+
+      const list = Array.from(combinedMap.values());
+      if (countBadge) countBadge.textContent = list.length;
+      if (summaryBadge) summaryBadge.textContent = `${list.length} عميل مشترك`;
+
+      if (!listEl) return;
+      if (list.length === 0) {
+        listEl.innerHTML = '<p class="col-span-2 py-3 text-center text-xs text-gray-400">لا يوجد عملاء مشتركون مسجلون بعد.</p>';
+        return;
+      }
+
+      listEl.innerHTML = list
+        .map((sub) => {
+          const allowance = getTierFreeAllowance(sub.tier);
+          const usedFree = getUsedFreeBalanceForMember(sub.key, sub.tier);
+          const remainingFree = Math.max(0, Number((allowance - usedFree).toFixed(2)));
+          const memberOrdList = orders.filter(
+            (o) => ((o.customerEmail || o.customerName || '').trim().toLowerCase() === sub.key)
+          );
+          const ordCount = Math.max(Number(sub.ordersCount || 0), memberOrdList.length);
+          const safeKeyEscaped = String(sub.key).replace(/'/g, "\\'");
+
+          return `
+            <div class="space-y-2.5 rounded-2xl border border-gold/30 bg-charcoal p-3.5 text-xs">
+              <div class="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-2">
+                <div>
+                  <div class="text-sm font-black text-white">${sub.name}</div>
+                  ${sub.email ? `<div class="text-[11px] text-gray-400">${sub.email}</div>` : ''}
+                </div>
+                <span class="rounded-lg bg-gold/20 px-2.5 py-1 text-[11px] font-black text-gold">${TIER_LABELS[sub.tier] || sub.tier}</span>
+              </div>
+
+              <div class="grid grid-cols-2 gap-1.5 text-[11px] text-gray-300">
+                <div><span class="text-gray-400">السيارة:</span> <strong>${sub.carInfo || '—'}</strong></div>
+                <div><span class="text-gray-400">عدد الطلبات:</span> <strong class="text-sky-300">${ordCount}</strong></div>
+                <div><span class="text-gray-400">الرصيد المجاني:</span> <strong class="text-white">${allowance.toFixed(2)} ج.م</strong></div>
+                <div><span class="text-gray-400">المتبقي بالبطاقة:</span> <strong class="text-emerald-300">${remainingFree.toFixed(2)} ج.م</strong></div>
+              </div>
+
+              <div class="flex flex-wrap items-center justify-between gap-2 border-t border-white/10 pt-2 text-[10px] text-gray-400">
+                <span>انضمام: ${sub.joinedAt || '—'}${sub.renewedAt ? ` • تجديد: ${sub.renewedAt}` : ''}</span>
+                <button
+                  type="button"
+                  onclick="renewSubscriberCardBalance('${safeKeyEscaped}', '${sub.tier}')"
+                  class="rounded-xl bg-emerald-500 px-3 py-1 text-[11px] font-black text-black transition hover:bg-emerald-400"
+                >
+                  ↻ تجديد شحن الرصيد (${allowance.toFixed(0)} ج.م)
+                </button>
+              </div>
+            </div>
+          `;
+        })
+        .join('');
+    }
+
     async function requestDeviceGmailBinding() {
       let suggestedEmail = boundDeviceGmail || '';
       if (!suggestedEmail && navigator.credentials && typeof navigator.credentials.get === 'function') {
@@ -1120,6 +1304,7 @@
     function grantGmailPermissionAndBind() {
       const inputEl = document.getElementById('device-gmail-input');
       const nameField = document.getElementById('customer-name');
+      const carField = document.getElementById('car-info');
       const badge = document.getElementById('social-auth-badge');
       const emailVal = (inputEl?.value || '').trim();
 
@@ -1137,6 +1322,14 @@
       if (nameField && !nameField.value.trim()) {
         nameField.value = resolvedGmail;
       }
+
+      upsertSubscriberRecord({
+        name: (nameField?.value || '').trim() || resolvedGmail,
+        email: resolvedGmail,
+        carInfo: (carField?.value || '').trim() || 'سيارة العميل',
+        tier: customerTier,
+        gender: customerGender
+      });
 
       cancelDeviceGmailConsent();
       proceedToDrinksPage(true);
@@ -1177,6 +1370,18 @@
       }
     }
 
+    async function pushSubscriberToCloud(subObj) {
+      if (!subObj || !subObj.key) return;
+      const safeKey = encodeURIComponent(subObj.key.replace(/[.#$[\]]/g, '_'));
+      try {
+        await fetch(buildFirebaseUrl(`subscribers/${safeKey}`), {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(subObj)
+        });
+      } catch {}
+    }
+
     async function deleteOrderFromCloud(orderId) {
       if (!orderId) return;
       try {
@@ -1198,9 +1403,10 @@
 
     async function syncFromCloudNow() {
       try {
-        const [ordersRes, menuRes] = await Promise.all([
+        const [ordersRes, menuRes, subsRes] = await Promise.all([
           fetch(buildFirebaseUrl('orders')),
-          fetch(buildFirebaseUrl('menu'))
+          fetch(buildFirebaseUrl('menu')),
+          fetch(buildFirebaseUrl('subscribers'))
         ]);
 
         if (menuRes.ok) {
@@ -1212,7 +1418,19 @@
             } catch {}
             renderMenuCategories();
             renderDrinksGrid();
+            renderCardFullMenu();
             renderAdminMenuManager();
+          }
+        }
+
+        if (subsRes.ok) {
+          const cloudSubsObj = await subsRes.json();
+          if (cloudSubsObj && typeof cloudSubsObj === 'object') {
+            const subList = Object.values(cloudSubsObj).filter((s) => s && s.key);
+            if (subList.length > 0) {
+              subscribers = subList;
+              saveSubscribers();
+            }
           }
         }
 
@@ -1235,6 +1453,8 @@
             renderOrdersFeed();
             renderCustomerLiveTracker();
             renderCollectedCustomerOrdersBox();
+            renderCardBalanceSummary();
+            renderGMSubscribersPanel();
 
             if (detectedNewOrder) {
               showNewOrderBanner(detectedNewOrder);
@@ -1301,6 +1521,7 @@
       const input = document.getElementById('social-account-input');
       const badge = document.getElementById('social-auth-badge');
       const nameField = document.getElementById('customer-name');
+      const carField = document.getElementById('car-info');
       const val = (input.value || '').trim();
 
       const label = socialProvider === 'facebook' ? 'Facebook' : 'Gmail';
@@ -1313,6 +1534,14 @@
           nameField.value = `${val} (${label})`;
         }
       }
+
+      upsertSubscriberRecord({
+        name: (nameField?.value || '').trim() || val || `${label} Client`,
+        email: socialProvider === 'google' && val.includes('@') ? val : (boundDeviceGmail || ''),
+        carInfo: (carField?.value || '').trim() || 'سيارة العميل',
+        tier: customerTier,
+        gender: customerGender
+      });
 
       document.getElementById('social-login-box').classList.add('hidden');
       proceedToDrinksPage(true);
@@ -1339,12 +1568,26 @@
 
       const carText = (carField.value || '').trim() || 'سيارة العميل';
       const gmailNote = boundDeviceGmail ? ` • ${boundDeviceGmail}` : '';
+      const remainingFree = getCurrentCustomerRemainingFreeBalance();
+
+      upsertSubscriberRecord({
+        name: customerName,
+        email: boundDeviceGmail,
+        carInfo: carText,
+        tier: customerTier,
+        gender: customerGender
+      });
+
       document.getElementById('logged-customer-display').textContent = `${customerName} (${TIER_LABELS[customerTier] || customerTier})${gmailNote}`;
       document.getElementById('logged-car-display').textContent = `السيارة: ${carText}`;
+      document.getElementById('logged-card-balance-display').textContent = getTierFreeAllowance(customerTier) > 0
+        ? `رصيد الكارت المجاني المتبقي: ${remainingFree.toFixed(2)} ج.م`
+        : 'حساب غير مشترك بكارت مجاني';
 
       document.getElementById('customer-login-step').classList.add('hidden');
       document.getElementById('customer-drinks-and-map-page').classList.remove('hidden');
 
+      renderCart();
       renderCollectedCustomerOrdersBox();
 
       setTimeout(() => {
@@ -1356,6 +1599,8 @@
     function backToLoginStep() {
       document.getElementById('customer-drinks-and-map-page').classList.add('hidden');
       document.getElementById('customer-login-step').classList.remove('hidden');
+      renderCardBalanceSummary();
+      renderCardFullMenu();
     }
 
     function setCustomerTier(tier) {
@@ -1369,6 +1614,23 @@
         activeBtn.classList.remove('border', 'border-white/15');
         activeBtn.classList.add('border-2', 'border-gold');
       }
+
+      const currentName = (document.getElementById('customer-name')?.value || '').trim();
+      const currentCar = (document.getElementById('car-info')?.value || '').trim();
+      if (currentName || boundDeviceGmail) {
+        upsertSubscriberRecord({
+          name: currentName || boundDeviceGmail,
+          email: boundDeviceGmail,
+          carInfo: currentCar || 'سيارة العميل',
+          tier: customerTier,
+          gender: customerGender
+        });
+      }
+
+      renderCardBalanceSummary();
+      renderCardFullMenu();
+      renderCart();
+      renderCollectedCustomerOrdersBox();
     }
 
     function setCustomerGender(gender) {
@@ -1382,6 +1644,106 @@
         fBtn.className = 'rounded-xl border border-gold bg-gold/20 py-2 text-xs font-extrabold text-gold';
         mBtn.className = 'rounded-xl border border-white/15 bg-black/50 py-2 text-xs font-bold text-gray-300';
       }
+    }
+
+    function renderCardBalanceSummary() {
+      const badgeEl = document.getElementById('card-box-badge');
+      const remEl = document.getElementById('card-remaining-balance-display');
+      const allowEl = document.getElementById('card-allowance-display');
+      const usedCartEl = document.getElementById('card-cart-free-used-display');
+      const extraEl = document.getElementById('card-extra-payable-display');
+
+      const subtotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+      const remainingFreeBeforeCart = getCurrentCustomerRemainingFreeBalance();
+      const billing = calculateCardBilling(subtotal, customerTier, remainingFreeBeforeCart);
+
+      if (badgeEl) {
+        badgeEl.textContent = `خانه الكارت — ${TIER_LABELS[customerTier] || customerTier}`;
+      }
+      if (allowEl) {
+        allowEl.textContent = `${billing.allowance.toFixed(2)} ج.م`;
+      }
+      if (usedCartEl) {
+        usedCartEl.textContent = `${billing.freeCovered.toFixed(2)} ج.م`;
+      }
+      if (remEl) {
+        remEl.textContent = `${billing.remainingFreeAfterCart.toFixed(2)} ج.م`;
+      }
+      if (extraEl) {
+        extraEl.textContent = `${billing.payableAmount.toFixed(2)} ج.م`;
+      }
+    }
+
+    function renderCardMenuCategories() {
+      const bar = document.getElementById('card-menu-categories-bar');
+      if (!bar) return;
+      const cats = ['الكل', ...new Set(customMenu.map((m) => m.category))];
+      bar.innerHTML = cats
+        .map((c) => {
+          const active = activeCardCategoryFilter === c;
+          return `
+            <button
+              type="button"
+              onclick="selectCardMenuCategory('${c.replace(/'/g, "\\'")}')"
+              class="rounded-xl px-2.5 py-1 text-[11px] font-extrabold transition ${
+                active
+                  ? 'bg-gold text-black'
+                  : 'border border-white/15 bg-charcoal text-gray-300 hover:border-gold/50'
+              }"
+            >
+              ${c}
+            </button>
+          `;
+        })
+        .join('');
+    }
+
+    function selectCardMenuCategory(cat) {
+      activeCardCategoryFilter = cat;
+      renderCardMenuCategories();
+      renderCardFullMenu();
+    }
+
+    function renderCardFullMenu() {
+      const grid = document.getElementById('card-full-menu-grid');
+      if (!grid) return;
+      const q = (document.getElementById('card-menu-search-input')?.value || '').trim().toLowerCase();
+
+      const filtered = customMenu.filter((m) => {
+        const matchCat = activeCardCategoryFilter === 'الكل' || m.category === activeCardCategoryFilter;
+        const matchSearch = !q || m.name.toLowerCase().includes(q) || m.category.toLowerCase().includes(q);
+        return matchCat && matchSearch;
+      });
+
+      if (filtered.length === 0) {
+        grid.innerHTML = '<div class="col-span-2 rounded-2xl border border-white/10 bg-charcoal p-4 text-center text-xs text-gray-400">لا توجد مشروبات مطابقة للبحث داخل الكارت.</div>';
+        return;
+      }
+
+      grid.innerHTML = filtered
+        .map(
+          (item) => `
+          <div class="flex items-center justify-between gap-2 rounded-2xl border border-white/10 bg-charcoal p-2.5 transition hover:border-gold/50">
+            <div class="min-w-0">
+              <div class="truncate text-xs font-extrabold text-white">${item.name}</div>
+              <div class="text-[10px] text-gray-400">${item.category}</div>
+              <div class="mt-0.5 text-xs font-black text-gold">${Number(item.price).toFixed(2)} ج.م</div>
+            </div>
+            <button
+              type="button"
+              onclick="addDrinkFromCard('${item.id}')"
+              class="shrink-0 rounded-xl bg-gold/20 px-3 py-1.5 text-[11px] font-black text-gold transition hover:bg-gold hover:text-black"
+            >
+              + اطلب بالكارت
+            </button>
+          </div>
+        `
+        )
+        .join('');
+    }
+
+    function addDrinkFromCard(itemId) {
+      addToCart(itemId);
     }
 
     function haversineKm(lat1, lon1, lat2, lon2) {
@@ -1624,6 +1986,7 @@
         cart.push({ ...item, qty: 1 });
       }
       renderCart();
+      renderCardBalanceSummary();
     }
 
     function updateCartQty(itemId, delta) {
@@ -1631,6 +1994,7 @@
         .map((c) => (c.id === itemId ? { ...c, qty: c.qty + delta } : c))
         .filter((c) => c.qty > 0);
       renderCart();
+      renderCardBalanceSummary();
     }
 
     function renderCart() {
@@ -1643,10 +2007,13 @@
         return;
       }
 
-      const total = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
-      totalEl.textContent = `${total.toFixed(2)} ج.م`;
+      const subtotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+      const remainingFreeBeforeCart = getCurrentCustomerRemainingFreeBalance();
+      const billing = calculateCardBilling(subtotal, customerTier, remainingFreeBeforeCart);
 
-      wrap.innerHTML = cart
+      totalEl.textContent = `${billing.payableAmount.toFixed(2)} ج.م`;
+
+      const itemsHtml = cart
         .map(
           (item) => `
           <div class="flex items-center justify-between gap-2 rounded-xl border border-white/10 bg-charcoal px-3 py-2">
@@ -1663,6 +2030,29 @@
         `
         )
         .join('');
+
+      const cardSummaryHtml = `
+        <div class="space-y-1 rounded-xl border border-gold/30 bg-charcoal/90 p-2.5 text-[11px]">
+          <div class="flex items-center justify-between text-gray-300">
+            <span>إجمالي المشروبات:</span>
+            <span>${billing.subtotal.toFixed(2)} ج.م</span>
+          </div>
+          <div class="flex items-center justify-between font-bold text-emerald-300">
+            <span>مغطى من رصيد ${TIER_LABELS[customerTier] || customerTier}:</span>
+            <span>- ${billing.freeCovered.toFixed(2)} ج.م</span>
+          </div>
+          <div class="flex items-center justify-between text-sky-300">
+            <span>المتبقي بالكارت بعد السلة:</span>
+            <span>${billing.remainingFreeAfterCart.toFixed(2)} ج.م</span>
+          </div>
+          <div class="flex items-center justify-between border-t border-white/10 pt-1 text-xs font-black text-gold">
+            <span>المطلوب دفعه:</span>
+            <span>${billing.payableAmount.toFixed(2)} ج.م</span>
+          </div>
+        </div>
+      `;
+
+      wrap.innerHTML = itemsHtml + cardSummaryHtml;
     }
 
     function submitOrder() {
@@ -1688,11 +2078,12 @@
         return;
       }
 
-      // تشغيل صوت الفرامل لمدة ثانيتين (2 ثانية) عند إرسال الأوردر
       playBrakeSound2Sec();
 
       const orderItems = [...cart];
-      const total = orderItems.reduce((sum, item) => sum + item.price * item.qty, 0);
+      const subtotal = orderItems.reduce((sum, item) => sum + item.price * item.qty, 0);
+      const remainingFreeBeforeCart = getCurrentCustomerRemainingFreeBalance();
+      const billing = calculateCardBilling(subtotal, customerTier, remainingFreeBeforeCart);
       const nowMs = Date.now();
 
       const newOrder = {
@@ -1704,7 +2095,11 @@
         carInfo: carInput.value.trim() || 'سيارة العميل',
         gps: currentGPS,
         items: orderItems,
-        total,
+        subtotal: billing.subtotal,
+        freeAllowance: billing.allowance,
+        freeCoveredAmount: billing.freeCovered,
+        remainingFreeAfterOrder: billing.remainingFreeAfterCart,
+        total: billing.payableAmount,
         status: 'pending_approval',
         assignedBarista: null,
         approvedBy: null,
@@ -1718,6 +2113,15 @@
       saveOrders();
       pushOrderToCloud(newOrder);
 
+      upsertSubscriberRecord({
+        name: customerName,
+        email: boundDeviceGmail,
+        carInfo: newOrder.carInfo,
+        tier: customerTier,
+        gender: customerGender,
+        addedOrderAmount: billing.subtotal
+      });
+
       lastCustomerOrderId = newOrder.id;
       try {
         localStorage.setItem(LAST_CUSTOMER_ORDER_KEY, newOrder.id);
@@ -1726,15 +2130,34 @@
       renderOrdersFeed();
       renderCustomerLiveTracker();
       renderCollectedCustomerOrdersBox();
+      renderGMSubscribersPanel();
       showNewOrderBanner(newOrder);
 
       if (feedback) {
-        feedback.textContent = `تم إرسال الأوردر (${newOrder.id}) — حالتك الحالية: بانتظار الموافقة.`;
+        feedback.textContent = `تم إرسال الأوردر (${newOrder.id}) — مغطى مجاناً بالكارت: ${newOrder.freeCoveredAmount.toFixed(2)} ج.م • المتبقي بالكارت: ${newOrder.remainingFreeAfterOrder.toFixed(2)} ج.م • المطلوب: ${newOrder.total.toFixed(2)} ج.م.`;
         feedback.className = 'rounded-xl bg-emerald-500/15 p-2.5 text-center text-xs font-bold text-emerald-300';
       }
 
       cart = [];
       renderCart();
+      renderCardBalanceSummary();
+    }
+
+    function getOrderRemainingCardBalance(ord) {
+      const ordTier = ord.customerTier || 'none';
+      const allowance = getTierFreeAllowance(ordTier);
+      if (allowance <= 0) return 0;
+
+      const memberKey = (ord.customerEmail || ord.customerName || '').trim().toLowerCase();
+      if (memberKey) {
+        const used = getUsedFreeBalanceForMember(memberKey, ordTier);
+        return Math.max(0, Number((allowance - used).toFixed(2)));
+      }
+
+      if (typeof ord.remainingFreeAfterOrder === 'number') {
+        return Math.max(0, Number(ord.remainingFreeAfterOrder.toFixed(2)));
+      }
+      return allowance;
     }
 
     function renderCollectedCustomerOrdersBox() {
@@ -1764,15 +2187,28 @@
             .map((it) => `${it.name} × ${it.qty}`)
             .join('، ');
 
+          const rawSub = (ord.items || []).reduce((s, it) => s + Number(it.price || 0) * Number(it.qty || 1), 0);
+          const ordTier = ord.customerTier || customerTier;
+          const freeCovered = typeof ord.freeCoveredAmount === 'number' ? ord.freeCoveredAmount : 0;
+          const finalTotal = typeof ord.total === 'number' ? ord.total : Math.max(0, rawSub - freeCovered);
+          const remainingCardFree = getOrderRemainingCardBalance(ord);
+
           return `
             <div class="flex items-start justify-between gap-2 rounded-xl border border-white/10 bg-charcoal p-2.5">
               <div class="min-w-0 space-y-0.5">
                 <div class="flex items-center gap-2">
                   <strong class="text-gold">${ord.id}</strong>
+                  <span class="rounded bg-white/10 px-1.5 py-0.5 text-[10px] font-bold text-goldLight">${TIER_LABELS[ordTier] || ordTier}</span>
                   <span class="text-[11px] font-bold text-gray-400">${ord.createdAt}</span>
                 </div>
                 <div class="truncate text-xs font-bold text-white">${itemsSummary}</div>
-                <div class="text-[11px] text-emerald-300">${Number(ord.total).toFixed(2)} ج.م</div>
+                <div class="text-[11px] text-gray-300">
+                  الإجمالي: ${rawSub.toFixed(2)} ج.م • <span class="text-emerald-300 font-bold">مجاني بالكارت: -${Number(freeCovered).toFixed(2)} ج.م</span>
+                </div>
+                <div class="text-[11px] font-bold text-sky-300">
+                  الرصيد المجاني المتبقي من الكارت: ${remainingCardFree.toFixed(2)} ج.م
+                </div>
+                <div class="text-[11px] font-black text-gold">المطلوب: ${Number(finalTotal).toFixed(2)} ج.م</div>
               </div>
               <div class="flex shrink-0 flex-col gap-1">
                 <button
@@ -1809,6 +2245,7 @@
         }
       });
       renderCart();
+      renderCardBalanceSummary();
     }
 
     function removeCustomerOrder(orderId) {
@@ -1822,6 +2259,8 @@
       renderCollectedCustomerOrdersBox();
       renderCustomerLiveTracker();
       renderOrdersFeed();
+      renderCardBalanceSummary();
+      renderGMSubscribersPanel();
     }
 
     function renderCustomerLiveTracker() {
@@ -1844,6 +2283,10 @@
         rejected: '❌ تعذّر اعتماد الطلب'
       };
 
+      const freeLine = targetOrder.freeCoveredAmount
+        ? ` • مجاني بالكارت: -${Number(targetOrder.freeCoveredAmount || 0).toFixed(2)} ج.م`
+        : '';
+
       box.innerHTML = `
         <div class="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-white/10 bg-black/45 p-3.5">
           <div class="space-y-1">
@@ -1856,7 +2299,7 @@
           </div>
           <div class="text-left">
             <div class="text-xs font-black text-sky-300">${statusTextMap[targetOrder.status] || targetOrder.status}</div>
-            <div class="mt-0.5 text-[11px] text-gray-400">الإجمالي: ${Number(targetOrder.total).toFixed(2)} ج.م • ${targetOrder.createdAt}</div>
+            <div class="mt-0.5 text-[11px] text-gray-400">المطلوب: ${Number(targetOrder.total).toFixed(2)} ج.م${freeLine} • ${targetOrder.createdAt}</div>
           </div>
         </div>
       `;
@@ -1948,6 +2391,8 @@
       renderOrdersFeed();
       renderCustomerLiveTracker();
       renderCollectedCustomerOrdersBox();
+      renderCardBalanceSummary();
+      renderGMSubscribersPanel();
     }
 
     function sendOrderToPrinter(orderId) {
@@ -1958,6 +2403,10 @@
       const itemsRows = (order.items || [])
         .map((it) => `<div style="display:flex;justify-content:space-between;margin:3px 0;"><span>${it.name} × ${it.qty}</span><span>${(it.price * it.qty).toFixed(2)} ج.م</span></div>`)
         .join('');
+
+      const freeRow = order.freeCoveredAmount
+        ? `<div style="display:flex;justify-content:space-between;margin:3px 0;"><span>رصيد كارت ${TIER_LABELS[order.customerTier] || order.customerTier}:</span><span>- ${Number(order.freeCoveredAmount || 0).toFixed(2)} ج.م</span></div>`
+        : '';
 
       printArea.innerHTML = `
         <div style="text-align:center;border-bottom:1px dashed #000;padding-bottom:6px;margin-bottom:6px;">
@@ -1972,9 +2421,10 @@
         <div><strong>الوقت:</strong> ${order.createdAt}</div>
         <hr style="border:none;border-top:1px dashed #000;margin:6px 0;" />
         ${itemsRows}
+        ${freeRow}
         <hr style="border:none;border-top:1px dashed #000;margin:6px 0;" />
         <div style="display:flex;justify-content:space-between;font-weight:bold;">
-          <span>الإجمالي:</span>
+          <span>المطلوب:</span>
           <span>${Number(order.total).toFixed(2)} ج.م</span>
         </div>
         <div style="text-align:center;margin-top:8px;">هتشرب وتفول ياباشا</div>
@@ -1988,6 +2438,7 @@
         const sec = document.getElementById('owner-hidden-content');
         sec.classList.toggle('hidden');
         if (!sec.classList.contains('hidden')) {
+          renderGMSubscribersPanel();
           setTimeout(() => {
             initOwnerRouteMap();
             if (currentGPS) drawRoadRouteOnMaps(currentGPS.lat, currentGPS.lng);
@@ -2024,6 +2475,7 @@
       updateActiveStaffBadge();
 
       closeOwnerModal();
+      renderGMSubscribersPanel();
       renderOrdersFeed();
       renderAdminMenuManager();
 
@@ -2114,6 +2566,10 @@
         openStaffRoleModal('barista2', 'barista2');
         return;
       }
+      if (tab === 'subscribers') {
+        openStaffRoleModal('gm', 'subscribers');
+        return;
+      }
       if (tab === 'admin_control' || tab === 'settings') {
         openStaffRoleModal('gm', tab);
         return;
@@ -2132,10 +2588,12 @@
         activeBtn.className = 'owner-tab rounded-xl bg-gold px-3.5 py-2 text-xs font-extrabold text-black';
       }
 
+      document.getElementById('gm-subscribers-panel').classList.toggle('hidden', tab !== 'all' && tab !== 'subscribers');
       document.getElementById('admin-control-panel').classList.toggle('hidden', tab !== 'admin_control');
       document.getElementById('owner-settings-panel').classList.toggle('hidden', tab !== 'settings');
-      document.getElementById('orders-feed').classList.toggle('hidden', tab === 'admin_control' || tab === 'settings');
+      document.getElementById('orders-feed').classList.toggle('hidden', tab === 'admin_control' || tab === 'settings' || tab === 'subscribers');
 
+      renderGMSubscribersPanel();
       if (tab === 'admin_control') renderAdminMenuManager();
       renderOrdersFeed();
     }
@@ -2190,6 +2648,7 @@
             ? `https://www.google.com/maps/dir/?api=1&origin=${o.gps.lat},${o.gps.lng}&destination=${CAFE_COORDS.lat},${CAFE_COORDS.lng}&travelmode=driving`
             : '';
           const isBaristaStage = ['approved_barista1', 'approved_barista2', 'preparing', 'ready_for_car'].includes(o.status);
+          const freeInfo = o.freeCoveredAmount ? ` (مجاني بالكارت: -${Number(o.freeCoveredAmount || 0).toFixed(2)} ج.م)` : '';
 
           return `
             <div class="space-y-3 rounded-2xl border border-white/10 bg-black/45 p-4">
@@ -2210,7 +2669,7 @@
               <ul class="list-disc space-y-1 pr-5 text-xs text-gray-200">${itemsHtml}</ul>
 
               <div class="flex items-center justify-between border-t border-white/10 pt-2 text-xs font-extrabold">
-                <span class="text-gray-400">الإجمالي:</span>
+                <span class="text-gray-400">المطلوب${freeInfo}:</span>
                 <span class="text-gold">${Number(o.total).toFixed(2)} ج.م</span>
               </div>
 
@@ -2299,6 +2758,7 @@
       saveCustomMenu();
       renderMenuCategories();
       renderDrinksGrid();
+      renderCardFullMenu();
       renderAdminMenuManager();
       document.getElementById('new-item-name').value = '';
       document.getElementById('new-item-price').value = '';
@@ -2310,6 +2770,7 @@
       customMenu = customMenu.map((m) => (m.id === id ? { ...m, price } : m));
       saveCustomMenu();
       renderDrinksGrid();
+      renderCardFullMenu();
     }
 
     function adminDeleteMenuItem(id) {
@@ -2317,6 +2778,7 @@
       saveCustomMenu();
       renderMenuCategories();
       renderDrinksGrid();
+      renderCardFullMenu();
       renderAdminMenuManager();
     }
 
@@ -2325,6 +2787,7 @@
       saveCustomMenu();
       renderMenuCategories();
       renderDrinksGrid();
+      renderCardFullMenu();
       renderAdminMenuManager();
     }
 
@@ -2389,12 +2852,16 @@
       }
     }
 
+    renderCardBalanceSummary();
+    renderCardMenuCategories();
+    renderCardFullMenu();
     renderMenuCategories();
     renderDrinksGrid();
     renderCart();
     renderOrdersFeed();
     renderCustomerLiveTracker();
     renderCollectedCustomerOrdersBox();
+    renderGMSubscribersPanel();
     syncFromCloudNow();
 
     if (cloudPollTimer) clearInterval(cloudPollTimer);
